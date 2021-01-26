@@ -1,0 +1,194 @@
+\documentclass[../draft.tex]{subfiles}
+
+% false tpitive
+\newcommand{\fp}{\textcolor{white}{\textcircled{\textcolor{red}{$\star$}}}}
+% false negative
+\newcommand{\fn}{\textcolor{red}{\textcircled{ }}}
+% true tpitive
+\newcommand{\tp}[0]{\textcircled{$\star$}}
+% table subheading
+\newcommand{\tsub}[1]{\multicolumn{3}{c}{#1}\\\hline}
+
+\begin{document}
+    \chapter{Validation}
+
+    \section{DroidBench}
+    \subsection{Results}
+    \begin{longtable}{l | l | l}
+        \textbf{App Name} & \textbf{Forwards} & \textbf{Backwards}\\
+        \hline\hline
+        \endhead
+        \tsub{Aliasing}
+        FlowSensitivity1 & & \fp\\
+        Merge1 & \fp & \fp\\
+        SimpleAliasing1 & \tp & \tp\\
+        StrongUpdate1 & &\\
+        \hline
+        \tsub{Arrays and Lists}
+        ArrayAccess1 & \fp & \fp\\
+        ArrayAccess2 & \fp & \fp\\
+        ArrayAccess3 & \tp & \tp\\
+        ArrayAccess4 &  & \\
+        ArrayAccess5 &  & \fp\\
+        ArrayCopy1 & \tp & \fn\\
+        ArrayToString1 & \tp & \tp\\
+        HashMapAccess1 & \fp & \fp\\
+        ListAccess1 & \fp & \fp \\
+        MultidimensionalArray1 & \tp & \tp\\
+        \hline
+        \tsub{Callbacks}
+        AnonymousClass1 & \tp & \tp \fp\\
+        Button1 & \tp & \tp \\
+        Button2 & \tp \tp \tp \fp & \tp \fn \fn \\
+        Button3 & \tp \tp & \tp \tp\\
+        Button4 & \tp & \tp\\
+        Button5 & \tp & \tp\\
+        LocationLeak1 & \tp \tp & \tp \tp\\
+        LocationLeak2 & \tp \tp & \tp \tp\\
+        LocationLeak3 & \tp & \tp \fp\\
+        MethodOverride1 & \tp & \tp\\
+        MultiHandlers1 & & \\
+        Ordering1 & & \\
+        RegisterGlobal1 & \tp & \tp\\
+        RegisterGlobal2 & \tp & \tp\\
+        Unregister1 & \fp & \fp\\
+        \hline
+        \tsub{Emulator Detection}
+        Battery1 & \tp & \tp\\
+        Bluetooth1 & \tp & \tp\\
+        Build1 & \tp & \tp\\
+        Contacts1 & \tp & \tp \fp\\
+        ContentProvider1 & \tp \tp & \tp \fn\\
+        DeviceId1 & \tp & \tp\\
+        File1 & \tp & \tp\\
+        IMEI1 & \tp \tp & \fn \fn\\
+        IP1 & \tp & \tp\\
+        PI1 & \tp & \tp\\
+        PlayStore1 & \tp \tp & \tp\\
+        PlayStore2 & \tp & \tp\\
+        Sensors1 & \tp & \tp\\
+        SubscriberId1 & \tp & \tp \fp\\
+        VoiceMail1 & \tp & \tp\\
+        \hline
+        \tsub{Field and Object Sensitivity}
+        FieldSensitivity1 & & \\
+        FieldSensitivity2 & & \\
+        FieldSensitivity3 & \tp & \tp\\
+        FieldSensitivity4 & & \\
+        InheritedObjects1 & \tp & \tp\\
+        ObjectSensitivity1 & & \fp\\
+        ObjectSensitivity2 & & \\
+        \hline
+        \tsub{Inter-Component Communication}
+        ActivityCommunication1 & \tp & \tp\\
+        ActivityCommunication2 & \tp \fp & \fn\\
+        ActivityCommunication3 & \tp \fp & \fn\\
+        ActivityCommunication4 & \tp \fp & \fn\\
+        ActivityCommunication5 & \tp \fp & \fn\\
+        ActivityCommunication6 & \tp \fp & \fn\\
+        ActivityCommunication7 & \tp \fp & \fn\\
+        ActivityCommunication8 & \tp & \\
+        BroadcastTaintAndLeak1 & \tp & \tp\\
+        ComponentNotInManifest1 & \fp & \\
+        EventOrdering1 & \fn \fp & \fn \fp\\
+        IntentSink1 & \tp & \fn\\
+        IntentSink2 & \tp & \fn\\
+        IntentSource1 & \tp \tp & \fn \fn\\ 
+        ServiceCommunication1 & \tp & \fn\\
+        SharedPreferences1 & \fn & \tp\\
+        Singletons1 & \fn & \tp\\
+        UnresolvableIntent1 & \tp \tp & \fn \fn\\
+        \hline
+        \tsub{Lifecycle}
+        ActivityEventSequence1 & \tp & \tp\\
+        ActivityEventSequence2 & \tp & \fn\\
+        ActivityEventSequence3 & \tp & \fn\\
+        ActivityLifecycle1 & \tp & \tp\\
+        ActivityLifecycle2 & \tp & \tp\\
+        ActivityLifecycle3 & \tp & \tp\\
+        ActivityLifecycle4 & \tp & \tp\\
+        ActivitySavedState1 & \tp & \tp\\
+        ApplicationLifecycle1 & \tp & \tp\\
+        ApplicationLifecycle2 & \tp & \tp\\
+        ApplicationLifecycle3 & \tp & \tp\\
+        AsynchronousEventOrdering1 & \tp & \tp\\
+        BroadcastReceiverLifecycle1 & \tp & \tp\\
+        BroadcastReceiverLifecycle2 & \fn & \tp\\
+        BroadcastReceiverLifecycle3 & \tp & \tp\\
+        EventOrdering1 & \tp & \tp\\
+        FragmentLifecycle1 & \fn & \fn\\
+        FragmentLifecycle2 & \fn & \fn\\
+        ServiceEventSequence1 & \fn & \fn\\
+        ServiceEventSequence2 & \fn & \fn\\
+        ServiceEventSequence3 & \tp & \tp\\
+        ServiceLifecycle1 & \tp & \tp\\
+        ServiceLifecycle2 & \tp & \tp\\
+        SharedPreferenceChanged1 & \tp & \tp\\
+        \hline
+        \tsub{General Java}
+        Clone1 & \tp & \tp\\
+        Exceptions1 & \tp & \tp \\
+        Exceptions2 & \tp & \tp\\
+        Exceptions3 & \fp & \fp \\
+        Exceptions4 & \tp & \tp \\
+        Exceptions5 & \tp & \tp \\
+        Exceptions6 & \tp & \tp\\
+        Exceptions7 & &\\
+        FactoryMethods1 & \tp \tp & \tp \tp \fp\\
+        Loop1 & \tp & \tp\\
+        Loop2 & \tp & \tp\\
+        Serialization1 & \fn & \fn\\
+        SourceCodeSpecific1 & \tp & \tp\\
+        StartProcessWithSecret1 & \tp & \tp\\
+        StaticInitialization1 & \fn & \tp\\
+        StaticInitialization2 & \tp & \fn\\
+        StaticInitialization3 & \fn & \fn\\
+        StringFormatter1 & \fn & \tp\\
+        StringPatternMatching1 & \tp & \tp\\
+        StringToCharArray1 & \tp & \fn\\
+        StringToOutputStream1 & \tp & \tp\\
+        UnreachableCode & &\\
+        VirtualDispatch1 & \tp \fp & \tp\\
+        VirtualDispatch2 & \tp \fp & \tp\\
+        VirtualDispatch3 & \fp & \fp\\
+        VirtualDispatch4 & &\\
+        \hline
+        \tsub{Miscellaneous Android-Specific}
+        ApplicationModeling1 & \tp & \tp\\
+        DirectLeak1 & \tp & \tp\\
+        InactiveActivity &  & \\
+        Library2 & \tp & \tp\\
+        LogNoLeak & & \\
+        Obfuscation1 & \tp & \tp\\
+        Parcel1 & \tp & \fn\\
+        PrivateDataLeak1 & \tp & \fn\\
+        PrivateDataLeak2 & \tp & \tp\\
+        PrivateDataLeak3 & \fn & \fn\\
+        PublicAPIField1 & \tp & \tp\\
+        PublicAPIField2 & \tp & \tp\\
+        View1 & \tp & \tp\\
+        \hline
+        \tsub{Reflection}
+        Reflection1 & \tp & \tp\\
+        Reflection2 & \tp & \tp\\
+        Reflection3 & \tp & \tp\\
+        Reflection4 & \tp & \tp\\
+        Reflection5 & \tp & \tp\\
+        Reflection6 & \tp & \tp\\
+        Reflection7 & \fn & \tp\\
+        Reflection8 & \tp & \tp\\
+        Reflection9 & \tp & \tp\\
+        \hline
+        \tsub{Threading}
+        AsyncTask1 & \tp & \tp\\
+        Executor1 & \tp & \tp\\
+        JavaThread1 & \tp & \tp\\
+        JavaThread2 & \tp & \tp\\
+        Looper1 & \tp & \tp\\
+        TimerTask1 & \tp & \tp\\
+    \end{longtable}
+
+    \subsection{Discussion}
+    \subsubsection{Button2}
+    Found 4 paths like in forwards but built into one.
+\end{document}

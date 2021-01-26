@@ -1,0 +1,49 @@
+\documentclass[../draft.tex]{subfiles}
+
+\begin{document}
+    \chapter{Theory}
+    \section{Complexity of Data Flow Analysis}
+    Explain where the run-time comes from.
+    Depends the number of edge propagations
+    \begin{itemize}
+        \item "Branching factor" might be different for forwards/backwards, with some simple examples?
+            \begin{itemize}
+                \item  tainted = a + b. BW we don't know which was responsible for the tainted c $\rightarrow$ 2 new taints
+                \item Simple assigments in a strict r-to-l order: a = b. FW {a, b} while BW we can kill a and just go with {b}
+            \end{itemize}
+        \item Lifetime of taints 
+        \begin{itemize}
+            \item Static taints are valid everywhere
+            \item Best practise "sanitize just before displaying" might favor backwards
+        
+        \end{itemize}
+        \item Number of taints
+        \begin{itemize}
+            \item There seems to be no correlation between source count and analysis time
+            \item Probably also holds for sinks?
+            \item There might be indicator for a single app whether it is better to start at sources or sinks
+        \end{itemize}
+
+
+    \end{itemize}
+    \section{Flow Functions}
+    \subsection{Normal Flow}
+
+    In the following, we consider an assignment of the structure $x.f^n=y.g^m$ with $n,m \in \{0,1\}$.
+    
+    First, we take a look at the left hand side. If the incoming taint $t = x.f^n$
+    
+    \begin{itemize}
+        \item If T=\{a\} and a = b, T'=\{b\}
+        \item If T=\{b\} and a = b, T=\{b\} and alias triggered 
+        \item ...
+    \end{itemize}
+
+
+    \subsection{Call Flow}
+
+    \subsection{Return Flow}
+
+    \subsection{CallToReturn Flow}
+
+\end{document}

@@ -1,0 +1,64 @@
+\documentclass[../draft.tex]{subfiles}
+
+\begin{document}
+    \chapter{Implementation}
+
+    \section{Integration}
+    Document changes needed in non problems/ to fit backwards.
+    \begin{itemize}
+        \item BackwardsSourceSinkManager
+        \item BackwardsInfoflowResults
+    \end{itemize}
+    \section{InfoflowProblem}
+    \section{Rules}
+    \subsection{Backwards Source Propagation Rule}\label{s:sourcerule}
+    \subsection{Backwards Clinit Rule}
+    \code{clinit}
+    \begin{figure}
+        \centering
+        \begin{lstlisting}[gobble=12]
+            public class ConstantTestCode {
+                static final String tainted = TelephonyManager.getDeviceId();
+    
+                public void easyConstantFieldTest(){
+                    ConnectionManager cm = new ConnectionManager();
+                    cm.publish(tainted);
+                }
+            }
+        \end{lstlisting}
+        \caption{ConstantTestCode excerpt}
+        \label{lst:ConstantTestCode}
+    \end{figure}
+
+    Soot creates CG edges also at AssignStmts given there is a static variable involved. 
+    These AssignStmts are not considered as CallStmts by FlowDroid. Manual injection...
+
+    \section{Code Optimizer}
+    Before starting the analysis, FlowDroid applies code optimization to the interprocedural call graph. By default, dead code elimination and within constant value propagation is performed. Those are also applied before backwards analysis but we needed another code optimizer to handle an edge case in backwards analysis.
+
+    \subsection{AddNOPStmts}
+    First, take a look at StatictTestCode\#static2Test in \autoref{lst:static2TestJava}. The method and entry point static2Test is static and does not has any parameters. Same is true for the source method TelephonyManager\#getDeviceId. Due to these conditions, static2Test in Jimple has neither identity statements nor assign statements before the source statement and therefore the source statement is the first statement in the graph. 
+    Next, a detail of FlowDroid's IFDS solver is important. The Return and CallToReturn flow function is only applied if a return site is available. When searching backwards, the source statement is the last statement and thus has no return sites. Now recall \autoref{s:sourcerule}, taints flowing into sources are registered in the CallToReturn flow function. Altogether, leaks can not be found if the source statement is the first statement.
+
+    Moving the detection of incoming taints flows into sources from the CallToReturn to the Call flow function was not an option because by default source methods are not visited. 
+    Our solution is to just add a NOP statement in such cases. This saves us from introducing new edge cases inside the flow functions which are already complex enough. Due to the entry points being known beforehand, the overhead is negligible.
+
+    \begin{figure}
+        \centering
+        \begin{lstlisting}[gobble=16]
+            public static void static2Test() {
+                String tainted = TelephonyManager.getDeviceId();
+                ClassWithStatic static1 = new ClassWithStatic();
+                static1.setTitle(tainted);
+                ClassWithStatic static2 = new ClassWithStatic();
+                String alsoTainted = static2.getTitle();
+                
+                ConnectionManager cm = new ConnectionManager();
+                cm.publish(alsoTainted);
+            }
+        \end{lstlisting}
+        \caption{static2Test Java Code}
+        \label{lst:static2TestJava}
+    \end{figure}
+
+\end{document}

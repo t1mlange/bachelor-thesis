@@ -1,0 +1,105 @@
+\documentclass[
+	english,
+	ruledheaders=section,%Ebene bis zu der die Überschriften mit Linien abgetrennt werden, vgl. DEMO-TUDaPub
+	class=report,% Basisdokumentenklasse. Wählt die Korrespondierende KOMA-Script Klasse
+	thesis={type=bachelor},% Dokumententyp Thesis, für Dissertationen siehe die Demo-Datei DEMO-TUDaPhd
+	accentcolor=9c,% Auswahl der Akzentfarbe
+	custommargins=true,% Ränder werden mithilfe von typearea automatisch berechnet
+	marginpar=false,% Kopfzeile und Fußzeile erstrecken sich nicht über die Randnotizspalte
+	%BCOR=5mm,%Bindekorrektur, falls notwendig
+	parskip=half-,%Absatzkennzeichnung durch Abstand vgl. KOMA-Sript
+	fontsize=11pt,%Basisschriftgröße laut Corporate Design ist mit 9pt häufig zu klein
+	IMRAD=false
+	%	logofile=example-image, %Falls die Logo Dateien nicht vorliegen
+]{tudapub}
+
+%%%%%%%%%%%%%%%%%%%
+%Sprachanpassung & Verbesserte Trennregeln
+%%%%%%%%%%%%%%%%%%%
+\usepackage[ngerman, main=english]{babel}
+\usepackage[autostyle]{csquotes}% Anführungszeichen vereinfacht
+
+% Falls mit pdflatex kompiliert wird, wird microtype automatisch geladen, in diesem Fall muss diese Zeile entfernt werden, und falls weiter Optionen hinzugefügt werden sollen, muss dies über
+% \PassOptionsToPackage{Optionen}{microtype}
+% vor \documentclass hinzugefügt werden.
+\usepackage{microtype}
+
+\usepackage{subfiles}
+
+%%%%%%%%%%%%%%%%%%%
+%Literaturverzeichnis
+%%%%%%%%%%%%%%%%%%%
+\usepackage{biblatex}   % Literaturverzeichnis
+\bibliography{DEMO-TUDaBibliography}
+
+
+%%%%%%%%%%%%%%%%%%%
+%Paketvorschläge Tabellen
+%%%%%%%%%%%%%%%%%%%
+%\usepackage{array}     % Basispaket für Tabellenkonfiguration, wird von den folgenden automatisch geladen
+\usepackage{tabularx}   % Tabellen, die sich automatisch der Breite anpassen
+\usepackage{longtable} % Mehrseitige Tabellen
+\usepackage{xltabular} % Mehrseitige Tabellen mit anpassarer Breite
+\usepackage{booktabs}   % Verbesserte Möglichkeiten für Tabellenlayout über horizontale Linien
+
+%%%%%%%%%%%%%%%%%%%
+%Paketvorschläge Mathematik
+%%%%%%%%%%%%%%%%%%%
+\usepackage{mathtools} % erweiterte Fassung von amsmath
+\usepackage{amssymb}   % erweiterter Zeichensatz
+%\usepackage{siunitx}   % Einheiten
+
+\usepackage{listings}
+\lstset{language=Java,
+  showspaces=false,
+  showtabs=false,
+  breaklines=true,
+  showstringspaces=false,
+  breakatwhitespace=true,
+  commentstyle=\color{green},
+  keywordstyle=\color{blue},
+  stringstyle=\color{red},
+  basicstyle=\ttfamily,
+  numbers=left,
+  gobble=8
+}
+
+%Formatierungen für Beispiele in diesem Dokument. Im Allgemeinen nicht notwendig!
+\let\file\texttt
+\let\code\texttt
+\let\tbs\textbackslash
+
+\Metadata{
+	title=Implementation of a Static Backwards Data Flow Analysis in FlowDroid,
+	author=Tim Lange
+}
+
+\title{Implementation and Evaluation of a Static Backwards Data Flow Analysis in FlowDroid}
+\subtitle{Implementierung und Evaluation einer statischen rückwärtsgerichteten Datenflussanalyse in FlowDroid}
+\author[T. Lange]{Tim Lange}%optionales Argument ist die Signatur,
+\reviewer{Dr. Steven Arzt \and Prof. Dr. Michael Waidner
+}%Gutachter
+
+\addTitleBox{\includegraphics[width=4.325cm]{sit-logo.png}}
+
+\department{inf} % Das Kürzel wird automatisch ersetzt und als Studienfach gewählt, siehe Liste der Kürzel im Dokument.
+\institute{Institut}
+\group{Arbeitsgruppe}
+
+\submissiondate{\today}
+\examdate{\today}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+
+\subfile{chapters/01introduction.tex}
+\subfile{chapters/02background.tex}
+\subfile{chapters/03theory.tex}
+\subfile{chapters/04implementation.tex}
+\subfile{chapters/05validation.tex}
+\subfile{chapters/06evaluation.tex}
+\subfile{chapters/07conclusion.tex}
+
+\end{document}
