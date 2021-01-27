@@ -26,6 +26,8 @@
 
 \usepackage{subfiles}
 
+\usepackage{subcaption}
+
 %%%%%%%%%%%%%%%%%%%
 %Literaturverzeichnis
 %%%%%%%%%%%%%%%%%%%
@@ -49,19 +51,29 @@
 \usepackage{amssymb}   % erweiterter Zeichensatz
 %\usepackage{siunitx}   % Einheiten
 
+
 \usepackage{listings}
-\lstset{language=Java,
-  showspaces=false,
-  showtabs=false,
-  breaklines=true,
-  showstringspaces=false,
-  breakatwhitespace=true,
-  commentstyle=\color{green},
-  keywordstyle=\color{blue},
-  stringstyle=\color{red},
-  basicstyle=\ttfamily,
-  numbers=left,
-  gobble=8
+\lstset{
+	language=Java,
+	showspaces=false,
+	showtabs=false,
+	breaklines=true,
+	showstringspaces=false,
+	breakatwhitespace=true,
+	commentstyle=\color{green},
+	keywordstyle=\color{blue},
+	stringstyle=\color{red},
+	basicstyle=\ttfamily\footnotesize,
+	numbers=left,
+	gobble=12
+}
+
+\lstdefinestyle{Jimple} {
+	morekeywords={abstract,annotation,boolean,break,breakpoint,byte,case,catch,char,class,cls,cmp,cmpg,cmpl,default,double,dynamicinvoke,entermonitor,enum,exitmonitor,extends,false,final,float,from,goto,if,implements,instanceof,int,interface,interfaceinvoke,lengthof,long,lookupswitch,native,neg,new,newarray,newmultiarray,nop,null,null_type,private,protected,public,ret,return,short,specialinvoke,static,staticinvoke,strictfp,synchronized,tableswitch,throw,throws,to,transient,true,unknown,virtualinvoke,void,volatile,with},
+	sensitive=false,
+	morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]"
 }
 
 %Formatierungen für Beispiele in diesem Dokument. Im Allgemeinen nicht notwendig!
