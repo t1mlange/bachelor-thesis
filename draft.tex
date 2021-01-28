@@ -32,8 +32,7 @@
 %Literaturverzeichnis
 %%%%%%%%%%%%%%%%%%%
 \usepackage{biblatex}   % Literaturverzeichnis
-\bibliography{DEMO-TUDaBibliography}
-
+\addbibresource{bib.bib}
 
 %%%%%%%%%%%%%%%%%%%
 %Paketvorschläge Tabellen
@@ -68,8 +67,8 @@
 	gobble=12
 }
 
-\lstdefinestyle{Jimple} {
-	morekeywords={abstract,annotation,boolean,break,breakpoint,byte,case,catch,char,class,cls,cmp,cmpg,cmpl,default,double,dynamicinvoke,entermonitor,enum,exitmonitor,extends,false,final,float,from,goto,if,implements,instanceof,int,interface,interfaceinvoke,lengthof,long,lookupswitch,native,neg,new,newarray,newmultiarray,nop,null,null_type,private,protected,public,ret,return,short,specialinvoke,static,staticinvoke,strictfp,synchronized,tableswitch,throw,throws,to,transient,true,unknown,virtualinvoke,void,volatile,with},
+\lstdefinelanguage{Jimple} {
+	keywords={abstract,annotation,boolean,break,breakpoint,byte,case,catch,char,class,cls,cmp,cmpg,cmpl,default,double,dynamicinvoke,entermonitor,enum,exitmonitor,extends,false,final,float,from,goto,if,implements,instanceof,int,interface,interfaceinvoke,lengthof,long,lookupswitch,native,neg,new,newarray,newmultiarray,nop,null,null_type,private,protected,public,ret,return,short,specialinvoke,static,staticinvoke,strictfp,synchronized,tableswitch,throw,throws,to,transient,true,unknown,virtualinvoke,void,volatile,with},
 	sensitive=false,
 	morecomment=[l]{//},
     morecomment=[s]{/*}{*/},
@@ -95,8 +94,8 @@
 \addTitleBox{\includegraphics[width=4.325cm]{sit-logo.png}}
 
 \department{inf} % Das Kürzel wird automatisch ersetzt und als Studienfach gewählt, siehe Liste der Kürzel im Dokument.
-\institute{Institut}
-\group{Arbeitsgruppe}
+\institute{Fraunhofer SIT}
+\group{Secure Software Engineering}
 
 \submissiondate{\today}
 \examdate{\today}
@@ -112,6 +111,9 @@
 \subfile{chapters/04implementation.tex}
 \subfile{chapters/05validation.tex}
 \subfile{chapters/06evaluation.tex}
-\subfile{chapters/07conclusion.tex}
+\subfile{chapters/07relatedwork.tex}
+\subfile{chapters/08conclusion.tex}
+
+\printbibliography
 
 \end{document}
