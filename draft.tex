@@ -19,6 +19,8 @@
 \usepackage[ngerman, main=english]{babel}
 \usepackage[autostyle]{csquotes}% Anführungszeichen vereinfacht
 
+\usepackage[scaled=.8]{beramono} % fixed to big \code
+
 % Falls mit pdflatex kompiliert wird, wird microtype automatisch geladen, in diesem Fall muss diese Zeile entfernt werden, und falls weiter Optionen hinzugefügt werden sollen, muss dies über
 % \PassOptionsToPackage{Optionen}{microtype}
 % vor \documentclass hinzugefügt werden.
@@ -40,8 +42,8 @@
 %\usepackage{array}     % Basispaket für Tabellenkonfiguration, wird von den folgenden automatisch geladen
 \usepackage{tabularx}   % Tabellen, die sich automatisch der Breite anpassen
 \usepackage{longtable} % Mehrseitige Tabellen
-\usepackage{xltabular} % Mehrseitige Tabellen mit anpassarer Breite
-\usepackage{booktabs}   % Verbesserte Möglichkeiten für Tabellenlayout über horizontale Linien
+% \usepackage{xltabular} % Mehrseitige Tabellen mit anpassarer Breite
+% \usepackage{booktabs}   % Verbesserte Möglichkeiten für Tabellenlayout über horizontale Linien
 
 %%%%%%%%%%%%%%%%%%%
 %Paketvorschläge Mathematik
@@ -77,7 +79,8 @@
 
 %Formatierungen für Beispiele in diesem Dokument. Im Allgemeinen nicht notwendig!
 \let\file\texttt
-\let\code\texttt
+% \let\code\lstinline[basicstyle=\ttfamily]
+\newcommand{\code}[1]{\lstinline[basicstyle=\ttfamily, breaklines=true]{#1}}
 \let\tbs\textbackslash
 
 \Metadata{

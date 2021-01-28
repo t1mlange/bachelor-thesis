@@ -7,7 +7,13 @@
     FlowDroid is built to be extensible from to ground up. We wanted to reuse as much components of FlowDroid as possible. For the backwards analysis, we introduce unconditional taints at sinks and check for the matching access paths at sources. Facts are propagated through a reversed interprocedural control flow graph.
 
     The methods for retrieving sources and sinks from a SourceSinkManager have different signatures because only at one end the access paths must match and at the other the taints are unconditional. 
-    We added the interface IReversibleSourceSinkManager extending the ISourceSinkManager. It enforces two additional methods, getInverseSinkInfo for introducing unconditional taints at sinks and getInverseSourceInfo for matching access paths at sources. DefaultSourceSinkManager for modelling Java, AccessPathBasedSourceSinkManager for modelling Android and SummarySourceSinkManager for summaries all now implement IReversibleSourceSinkManager.
+    We added the interface IReversibleSourceSinkManager extending the ISourceSinkManager. It enforces two additional methods:
+    \begin{itemize}
+        \item \code{SourceInfo getInverseSinkInfo(Stmt sCallSite, InfoflowManager manager)}
+        \item \code{SinkInfo getInverseSourceInfo(Stmt sCallSite, InfoflowManager manager, AccessPath ap)}
+    \end{itemize}
+    \code{getInverseSinkInfo} returns the necessary information for introducing unconditional taints at sinks while \code{getInverseSourceInfo} also matches the access paths at sources.
+    All three source sink managers DefaultSourceSinkManager for modelling Java, AccessPathBasedSourceSinkManager for modelling Android and SummarySourceSinkManager for summaries now implement the IReversibleSourceSinkManager interface.
 
     Due to the flow-sensitive aliasing of FlowDroid using IFDS, FlowDroid already provides an implementation of a reversed interprocedural control flow graph called BackwardsInfoflowCFG.
     For the core - the flow functions - we created two new components implementing IInfoflowProblem: the backwards infoflow problem and an alias problem. 
@@ -19,9 +25,10 @@
     \section{Rules}
     Flow functions can get quite large, complicated to understand and hard to maintain \cite{Lerch2015}. To counteract this, FlowDroid outsources certain features into rules. These rules also provide the four flow functions and are applied in the corresponding flow function.
 
-    \subsection{Backwards Source Propagation Rule}\label{s:sourcerule}
-
     \subsection{Backwards Sink Propagation Rule}
+
+
+    \subsection{Backwards Source Propagation Rule}\label{s:sourcerule}
 
     \subsection{Backwards Array Propagation Rule}
 
