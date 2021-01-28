@@ -1,5 +1,21 @@
 % Encoding: UTF-8
 
+@PhdThesis{Arzt2017PhD,
+  author    = {Arzt, Steven},
+  school    = {Technische Universität},
+  title     = {Static {Data} {Flow} {Analysis} for {Android} {Applications}},
+  year      = {2017},
+  address   = {Darmstadt},
+  abstract  = {Mobile phones have become important daily companions for millions of people which help to organize both their private and their professional lives. Having access to data such as the calendar or the address book anywhere, anytime, has become commonplace. Sensor data such as the phone's GPS location and accelerometer help users navigate through the physical world. Users can furthermore extend the functionality of their phone using small programs called apps from various developers and vendors in an open ecosystem. Undoubtedly, having all this data merged on a device that is always-on and always-connected and that can easily be extended with new software greatly improves user convenience. On the other hand, it also poses new questions with regard to privacy and security. Apps may misuse the data stored on the phone or obtained from the sensors to infringe upon the user's privacy. In fact, companies already now use location data and app usage statistics to build user profiles for the purpose of targeted advertisement. The user is oftentimes unaware of these data leaks originating from his phone and has little means for analyzing the actual behavior of a given app with regard to privacy.
+
+Static data flow analysis has been proposed as a means for automatically enumerating the data flows inside a program. Still, either do not support Android's platform-specific semantics or fall short on precision, recall, or scalability. In this thesis, we therefore propose techniques for efficiently and precisely performing static data flow analysis on real-world binary-only Android apps with large code sizes. We present the FlowDroid tool and show that it can detect data leaks in popular apps such as Facebook, Paypal, and LinkedIn. The FlowDroid reports improve the user's digital sovereignty by allowing his to asses the behavior of the app before installing it on his device and thereby entrusting it with his personal data. We allow the user to verify which of his data leaves the device and how. On the DroidBench micro-benchmark suite, we show that FlowDroid achieves a precision of more than 87\% and a recall of over 84\%, thereby outperforming state-of-the-art tools from academia and industry. Additionally, FlowDroid has already been used as a building-block for many other works in the field.},
+  copyright = {lediglich die vom Gesetz vorgesehenen Nutzungsrechte gemäß UrhG},
+  file      = {Full Text PDF:https\://tuprints.ulb.tu-darmstadt.de/5937/7/Thesis.pdf:application/pdf},
+  language  = {en},
+  url       = {https://tuprints.ulb.tu-darmstadt.de/5937/},
+  urldate   = {2021-01-28},
+}
+
 @InProceedings{Lerch2015,
   author    = {Johannes Lerch and Ben Hermann},
   booktitle = {Proceedings of the 4th {ACM} {SIGPLAN} International Workshop on State Of the Art in Program Analysis},
@@ -27,6 +43,19 @@
   year      = {2010},
   pages     = {124--144},
   doi       = {10.1007/978-3-642-11970-5_8},
+}
+
+@Article{Arzt2014,
+  author    = {Steven Arzt and Siegfried Rasthofer and Christian Fritz and Eric Bodden and Alexandre Bartel and Jacques Klein and Yves Le Traon and Damien Octeau and Patrick McDaniel},
+  journal   = {{ACM} {SIGPLAN} Notices},
+  title     = {{FlowDroid}},
+  year      = {2014},
+  month     = {jun},
+  number    = {6},
+  pages     = {259--269},
+  volume    = {49},
+  doi       = {10.1145/2666356.2594299},
+  publisher = {Association for Computing Machinery ({ACM})},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

@@ -11,8 +11,25 @@
 
 \begin{document}
     \chapter{Validation}
+    \section{Unit Tests}
+    \textsc{FlowDroid} already contains 519 unit tests for the core infoflow component. We also validate the backwards analysis with these tests.
+
+    Forwards and backwards analysis are not exactly the same. In some cases the results might differ because of limitations or differences in the implementation. In the following paragraphs, we provide rationale for these differences.
+
+    \paragraph{EasyTaintWrapperTests} \code{equalsTest} and \code{hashCodeTest} are expected to return one leak but the backwards analysis does report no leaks. This difference related to the \code{EasyTaintWrapper} implementation. The implementation marks \code{equals()} and \code{hashCode()} as exclusive. This means we can skip this method because we already have a rule for it. The check for exclusiveness is part of the Call and CallToReturn flow function. In both tests, the source is inside the \code{equals()} or \code{hashCode()} method. The IFDS solver behaves as already observed in \autoref{s:clinitrule} and when searching forwards it creates a return edge returning from the method while backwards we do not propagate into the method because it is exclusive.
+    We created two equivalent backwards-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method.
+    
+    \paragraph{SourceSinkTests} These tests ensure the source sink manager can be swapped out. This is not relevant for the correctness of the backwards search and therefore are ignored.
+
+    
 
     \section{DroidBench}
+    \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 120 test cases are included in version 2\footnote{\url{https://github.com/secure-software-engineering/DroidBench}}.
+    We do not use it to evaluate our tool against others but to compare it against the forwards analysis of \textsc{FlowDroid}. We aim to achieve similiar results but they may subtle differences.
+    
+    \subsection{Configuration}
+    Only using the soot-android-infoflow component, everything else default.
+
     \subsection{Results}
     \begin{longtable}{l | l | l}
         \textbf{App Name} & \textbf{Forwards} & \textbf{Backwards}\\
