@@ -31,7 +31,6 @@
     \subsection{Normal Flow}
     Normal flow functions handle every statement that does not contain an \code{InvokeExpr}. The only case where a new taint can be produced is at an \code{AssignStmt}. It is straight-forward that this is true for statements like \code{IfStmt} if we recall \autoref{s:jimple}. The conditition is either an \code{UnopExpr} or \code{BinopExpr} of which both have no effect on the taint set. But we also skip over \code{IdentityStmt} even though they define a value. This is because we wait for the return site to map all parameters back into the callee.
 
-
     Now, lets consider the current statement is an \code{AssignStmt}. It consists of a variable, either a reference or a local, on the left side and an expression on the right side. Jimple ensures we just see one field reference at a time but to reduce the semi-formal rules, we take a shortcut here. So our assigment has the structure $x.f^n \leftarrow y.g^m$ with $n,m \in \{0,1\}$ modelling a possible field reference. Note that the taints can have an access path of an arbitrary length $k$ which is denoted as $h^k$.
 
     First, we look at the case when the access path matches exactly. Either we have a local ($n=0$) or a field reference ($n=1$) on the left. In the first case, the base of our taint needs to match and in the latter, the first field must also match. If the field references another heap object, we might encounter a non-empty access path $h^k$. This access path needs to be added to the newly created taint. We conclude:
@@ -53,8 +52,30 @@
     Whenever the taint neither matches on the left nor on the right side, we propagate it further untouched.
 
     \subsection{Call Flow}
-    
+    For call statements, we have statements of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument and $p_i$ denotes the $i$-th parameter.
 
+    If we encounter a tainted argument in the caller, the taint need to go through the callee. Due to the backwards direction this is only true for heap objects because only they have references. For primitives or strings we already know the tainted value is not visible in the callee.
+    \begin{itemize}
+        \item[] \textbf{Rule 1:} An incoming taint $t = a_i.h^k$ with $k \geq 0 \land 0 \leq i \leq n \land \text{typeof}(a_i) \in \mathit{HeapTypes}$ produces the outflowing taint set $T = \{p_i.h^k\}$.
+    \end{itemize}
+
+    If the object the method is called on is tainted, the tainted path is visible inside the callee. The callee must be not static.
+    \begin{itemize}
+        \item[] \textbf{Rule 2:} An incoming taint $t = o.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{\mathit{this}.h^k\}$. 
+    \end{itemize}
+    
+    Tainted static fields are propagated untouched and unconditionally in the callee as they are always visible.
+    \begin{itemize}
+        \item[] \textbf{Rule 3:} An incoming taint $t = S.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{t\}$. 
+    \end{itemize}
+
+    Next, if the call statement is also an assign statement and the left side is tainted we also need to taint the return value. Methods can have multiple return statements and as we traverse the reversed interprocedural control flow graph, we need to taint all possible return values. The structure of the statement is in this case $x \leftarrow o.m(a_0,...,a_n)$. $r_i$ denotes a return value. $n$ is the number of return statements in the callee. 
+    \begin{itemize}
+        \item[] \textbf{Rule 4:} An incoming taint $t = x.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \left\{r_i.h^k \mid 0 \leq i \leq n \right\}$. 
+    \end{itemize}
+
+
+    The taint is killed if it is not matched inside a rule. Instead, it is propagated over the call statement in the CallToReturn flow function.
     \subsection{Return Flow}
 
     \subsection{CallToReturn Flow}
