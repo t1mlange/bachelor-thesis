@@ -2,31 +2,8 @@
 
 \begin{document}
     \chapter{Theory}
-    \section{Complexity of Data Flow Analysis}
-    Explain where the run-time comes from.
-    Depends the number of edge propagations
-    \begin{itemize}
-        \item "Branching factor" might be different for forwards/backwards, with some simple examples?
-            \begin{itemize}
-                \item  tainted = a + b. BW we don't know which was responsible for the tainted c $\rightarrow$ 2 new taints
-                \item Simple assigments in a strict r-to-l order: a = b. FW {a, b} while BW we can kill a and just go with {b}
-            \end{itemize}
-        \item Lifetime of taints 
-        \begin{itemize}
-            \item Static taints are valid everywhere
-            \item Best practise "sanitize just before displaying" might favor backwards
-        \end{itemize}
-        \item Number of taints
-        \begin{itemize}
-            \item There seems to be no correlation between source count and analysis time
-            \item Probably also holds for sinks?
-            \item There might be indicator for a single app whether it is better to start at sources or sinks
-        \end{itemize}
-
-
-    \end{itemize}
     \section{Flow Functions}
-    In this section, we describe the behavior of the flow functions based on the Jimple language.
+    In this section, we describe the behavior of the flow functions based on the Jimple language and define semi-formal rules.
 
     \subsection{Normal Flow}
     Normal flow functions handle every statement that does not contain an \code{InvokeExpr}. The only case where a new taint can be produced is at an \code{AssignStmt}. It is straight-forward that this is true for statements like \code{IfStmt} if we recall \autoref{s:jimple}. The conditition is either an \code{UnopExpr} or \code{BinopExpr} of which both have no effect on the taint set. But we also skip over \code{IdentityStmt} even though they define a value. This is because we wait for the return site to map all parameters back into the callee.
@@ -51,8 +28,10 @@
 
     Whenever the taint neither matches on the left nor on the right side, we propagate it further untouched.
 
+    Rule 1 and Rule 3 also work with $*$ appended.
+
     \subsection{Call Flow}
-    For call statements, we have statements of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument and $p_i$ denotes the $i$-th parameter.
+    For call statements, we have statements of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument, $p_i$ the $i$-th parameter and $c$ the class the method is defined in.
 
     If we encounter a tainted argument in the caller, the taint need to go through the callee. Due to the backwards direction this is only true for heap objects because only they have references. For primitives or strings we already know the tainted value is not visible in the callee.
     \begin{itemize}
@@ -61,7 +40,7 @@
 
     If the object the method is called on is tainted, the tainted path is visible inside the callee. The callee must be not static.
     \begin{itemize}
-        \item[] \textbf{Rule 2:} An incoming taint $t = o.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{\mathit{this}.h^k\}$. 
+        \item[] \textbf{Rule 2:} An incoming taint $t = o.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{\mathit{this}_c.h^k\}$. 
     \end{itemize}
     
     Tainted static fields are propagated untouched and unconditionally in the callee as they are always visible.
@@ -71,13 +50,66 @@
 
     Next, if the call statement is also an assign statement and the left side is tainted we also need to taint the return value. Methods can have multiple return statements and as we traverse the reversed interprocedural control flow graph, we need to taint all possible return values. The structure of the statement is in this case $x \leftarrow o.m(a_0,...,a_n)$. $r_i$ denotes a return value. $n$ is the number of return statements in the callee. 
     \begin{itemize}
-        \item[] \textbf{Rule 4:} An incoming taint $t = x.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \left\{r_i.h^k \mid 0 \leq i \leq n \right\}$. 
+        \item[] \textbf{Rule 4:} An incoming taint $t = x.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \left\{r_i.h^k \mid 0 \leq i < n \right\}$. 
     \end{itemize}
-
 
     The taint is killed if it is not matched inside a rule. Instead, it is propagated over the call statement in the CallToReturn flow function.
     \subsection{Return Flow}
+    All taints reaching the end of a callee need to be mapped back into the caller. The statement is of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument, $p_i$ the $i$-th parameter and $c$ the class the method is defined in.
 
+    First, we match rule 1 of call flow and map all parameters back into the caller. This time even primitives are mapped back because if we find a tainted value at the start of the method it had to be passed as an argument into the method.
+    \begin{itemize}
+        \item[] \textbf{Rule 1:} An incoming taint $t = p_i.h^k$ with $k \geq 0 \land 0 \leq i \leq n$ produces the outflowing taint set $T = \{a_i.h^k\}$.
+    \end{itemize}
+
+    The $\mathit{this}$ reference is visible in the caller. This is the reverse of rule 2 in call flow.
+    \begin{itemize}
+        \item[] \textbf{Rule 2:} An incoming taint $t = \mathit{this}_c.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{o.h^k\}$. 
+    \end{itemize}
+    
+    Tainted static fields are also mapped back untouched and unconditionally. 
+    \begin{itemize}
+        \item[] \textbf{Rule 3:} An incoming taint $t = S.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{t\}$. 
+    \end{itemize}
+
+    The taint is killed if it is not matched in a rule.
     \subsection{CallToReturn Flow}
+    As already seen in call flow, not every taint is visible inside a callee. 
+    Again, the statement structure is $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument.
+
+    If the taint neither matches an argument nor the object the method is called on, it is not visible in the callee. Static fields are always visible and thus can not propagated over a statement.
+    \begin{itemize}
+        \item[] \textbf{Rule 1:} An incoming taint $t = x.h^k$ with $k \geq 0 \land (\forall a \in \mathit{Arguments}: a \neq x) \land x \neq o \land x \notin \mathit{Static}$ produces the outflowing taint set $T = \{t\}$. 
+    \end{itemize}
+
+    If a taint is limited to its base, so no fields are tainted, the taint is also propagated over the statement as the reference is passed by copy-by-value and writing the reference overwrites the reference in the callee but has no effect on the reference in the caller.
+    \begin{itemize}
+        \item[] \textbf{Rule 2:} An incoming taint $t = a_i$ with $0 \leq i \leq n$ produces the outflowing taint set $T = \{t\}$. 
+    \end{itemize}
+        
+
+    \section{Complexity of Data Flow Analysis}
+    Explain where the run-time comes from.
+    Depends the number of edge propagations
+    \begin{itemize}
+        \item "Branching factor" might be different for forwards/backwards, with some simple examples?
+            \begin{itemize}
+                \item  tainted = a + b. BW we don't know which was responsible for the tainted c $\rightarrow$ 2 new taints
+                \item Simple assigments in a strict r-to-l order: a = b. FW {a, b} while BW we can kill a and just go with {b}
+            \end{itemize}
+        \item Lifetime of taints 
+        \begin{itemize}
+            \item Static taints are valid everywhere
+            \item Best practise "sanitize just before displaying" might favor backwards
+        \end{itemize}
+        \item Number of taints
+        \begin{itemize}
+            \item There seems to be no correlation between source count and analysis time
+            \item Probably also holds for sinks?
+            \item There might be indicator for a single app whether it is better to start at sources or sinks
+        \end{itemize}
+
+
+    \end{itemize}
 
 \end{document}

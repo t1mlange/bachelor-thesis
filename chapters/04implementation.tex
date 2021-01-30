@@ -14,6 +14,7 @@
     \end{itemize}
     \code{getInverseSinkInfo} returns the necessary information for introducing unconditional taints at sinks while \code{getInverseSourceInfo} also matches the access paths at sources.
     All three source sink managers \code{DefaultSourceSinkManager} for modelling Java, \code{AccessPathBasedSourceSinkManager} for modelling Android and \code{SummarySourceSinkManager} for summaries now implement the \code{IReversibleSourceSinkManager} interface.
+    Reversible source sink manager currently do not support the one-source-at-a-time mode.
 
     Due to the flow-sensitive aliasing of \textsc{FlowDroid} using IFDS, \textsc{FlowDroid} already provides an implementation of a reversed interprocedural control flow graph called \code{BackwardsInfoflowCFG}.
     For the core - the flow functions - we created two new components implementing \code{IInfoflowProblem}: the backwards infoflow problem and an alias problem. More on that in \autoref{s:problems}.
@@ -23,6 +24,23 @@
     The modularity of \textsc{FlowDroid} allowed us to easily use the newly created components. We created another implementation of \code{IInfoflow} responsible for initialization of those closely to the already existing default implementation \code{Infoflow}.
 
     \section{Problems}\label{s:problems}
+
+    \paragraph{TurnUnit} We added another field to the \code{Abstraction} class called \code{turnUnit}. This is the equivalent to the \code{activationUnit} in forwards analysis. The \code{turnUnit} references the last statement for which the taint is relevant for the infoflow search. At start, it is the sink it originated from. Later on, it is set whenever we visit an assigment with a primitive or string on the left side. An example can be found in \autoref{lst:turnunit}. Line 5 introduces the taint, line 3 taints $b.str$ and sets the turnUnit to this statement. In line 2, \code{a} is found to be an alias of \code{b} and causes a handover to the alias problem. The \code{turnUnit} now stops the alias search at line 3 and prevents a false positive.
+
+    \begin{figure}[ht]
+        \centering
+        \begin{lstlisting}
+            void turnNeeded() {
+                A a = b;
+                String str = b.str;
+                a.str = source();
+                sink(str);
+            }
+        \end{lstlisting}
+        \caption{Aliasing example}
+        \label{lst:turnunit}
+    \end{figure}
+
 
     Explain TurnUnit, SkipUnit
     What the core problem tackles
@@ -76,7 +94,7 @@
             \caption{static block}
             \label{lst:clinit_examples_b}
         \end{subfigure}
-        \caption{Examples of statements being in \code{<clint>}}
+        \caption{Examples of statements being in \code{<clinit>}}
         \label{lst:clinit_examples}
     \end{figure}
 
