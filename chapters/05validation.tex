@@ -14,12 +14,12 @@
     \section{Unit Tests}
     \textsc{FlowDroid} already contains 519 unit tests for the core infoflow component. We also validate the backwards analysis with these tests.
 
-    Forwards and backwards analysis are not exactly the same. In some cases the results might differ because of limitations or differences in the implementation. In the following paragraphs, we provide rationale for these differences.
+    Forwards and backwards analysis are not exactly the same. In some cases the results might differ because of limitations or differences in the implementation. In the following textbfs, we provide rationale for these differences.
 
-    \paragraph{EasyTaintWrapperTests} \code{equalsTest} and \code{hashCodeTest} are expected to return one leak but the backwards analysis does report no leaks. This difference is related to the \code{EasyTaintWrapper} implementation. The implementation marks \code{equals()} and \code{hashCode()} as exclusive. This means we can skip this method because we already have a rule for it. The check for exclusiveness is part of the Call and CallToReturn flow function. In both tests, the source is inside the \code{equals()} or \code{hashCode()} method. The IFDS solver behaves as already observed in \autoref{s:clinitrule} and when searching forwards it creates a return edge returning from the method while going backwards we do not propagate into the method because it is exclusive.
+    \textbf{EasyTaintWrapperTests} \code{equalsTest} and \code{hashCodeTest} are expected to return one leak but the backwards analysis does report no leaks. This difference is related to the \code{EasyTaintWrapper} implementation. The implementation marks \code{equals()} and \code{hashCode()} as exclusive. This means we can skip this method because we already have a rule for it. The check for exclusiveness is part of the Call and CallToReturn flow function. In both tests, the source is inside the \code{equals()} or \code{hashCode()} method. The IFDS solver behaves as already observed in \autoref{s:clinitrule} and when searching forwards it creates a return edge returning from the method while going backwards we do not propagate into the method because it is exclusive.
     We marked those two tests forwards-specific and created two equivalent backwards-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method with one expected leak.
     
-    \paragraph{SourceSinkTests} These tests ensure the source sink manager can be swapped out. This is not relevant for the correctness of the backwards analysis and therefore are ignored.
+    \textbf{SourceSinkTests} These tests ensure the source sink manager can be swapped out. This is not relevant for the correctness of the backwards analysis and therefore are ignored.
 
     
 
@@ -31,12 +31,14 @@
     Only using the soot-android-infoflow component, everything else default.
 
     \subsection{Results}
-    \begin{longtable}{l | l | l}
+    \todo{ICC is buggy atm}
+
+    \begin{longtable}{l | l | l}% begin droidbench
         \textbf{App Name} & \textbf{Forwards} & \textbf{Backwards}\\
         \hline\hline
         \endhead
         \tsub{Aliasing}
-        FlowSensitivity1 & & \fp\\
+        FlowSensitivity1 & &\\
         Merge1 & \fp & \fp\\
         SimpleAliasing1 & \tp & \tp\\
         StrongUpdate1 & &\\
@@ -50,19 +52,19 @@
         ArrayCopy1 & \tp & \fn\\
         ArrayToString1 & \tp & \tp\\
         HashMapAccess1 & \fp & \fp\\
-        ListAccess1 & \fp & \fp \\
+        ListAccess1 & \fp & \\
         MultidimensionalArray1 & \tp & \tp\\
         \hline
         \tsub{Callbacks}
-        AnonymousClass1 & \tp & \tp \fp\\
+        AnonymousClass1 & \tp & \tp\\
         Button1 & \tp & \tp \\
-        Button2 & \tp \tp \tp \fp & \tp \fn \fn \\
+        Button2 & \tp \tp \tp \fp & \tp \tp \tp \fp\\
         Button3 & \tp \tp & \tp \tp\\
         Button4 & \tp & \tp\\
         Button5 & \tp & \tp\\
         LocationLeak1 & \tp \tp & \tp \tp\\
         LocationLeak2 & \tp \tp & \tp \tp\\
-        LocationLeak3 & \tp & \tp \fp\\
+        LocationLeak3 & \tp & \tp\\
         MethodOverride1 & \tp & \tp\\
         MultiHandlers1 & & \\
         Ordering1 & & \\
@@ -75,10 +77,10 @@
         Bluetooth1 & \tp & \tp\\
         Build1 & \tp & \tp\\
         Contacts1 & \tp & \tp \fp\\
-        ContentProvider1 & \tp \tp & \tp \fn\\
+        ContentProvider1 & \tp \tp & \tp \tp\\
         DeviceId1 & \tp & \tp\\
         File1 & \tp & \tp\\
-        IMEI1 & \tp \tp & \fn \fn\\
+        IMEI1 & \tp \tp & \tp \tp\\
         IP1 & \tp & \tp\\
         PI1 & \tp & \tp\\
         PlayStore1 & \tp \tp & \tp\\
@@ -93,29 +95,29 @@
         FieldSensitivity3 & \tp & \tp\\
         FieldSensitivity4 & & \\
         InheritedObjects1 & \tp & \tp\\
-        ObjectSensitivity1 & & \fp\\
+        ObjectSensitivity1 & & \\
         ObjectSensitivity2 & & \\
         \hline
-        \tsub{Inter-Component Communication}
-        ActivityCommunication1 & \tp & \tp\\
-        ActivityCommunication2 & \tp \fp & \fn\\
-        ActivityCommunication3 & \tp \fp & \fn\\
-        ActivityCommunication4 & \tp \fp & \fn\\
-        ActivityCommunication5 & \tp \fp & \fn\\
-        ActivityCommunication6 & \tp \fp & \fn\\
-        ActivityCommunication7 & \tp \fp & \fn\\
-        ActivityCommunication8 & \tp & \\
-        BroadcastTaintAndLeak1 & \tp & \tp\\
-        ComponentNotInManifest1 & \fp & \\
-        EventOrdering1 & \fn \fp & \fn \fp\\
-        IntentSink1 & \tp & \fn\\
-        IntentSink2 & \tp & \fn\\
-        IntentSource1 & \tp \tp & \fn \fn\\ 
-        ServiceCommunication1 & \tp & \fn\\
-        SharedPreferences1 & \fn & \tp\\
-        Singletons1 & \fn & \tp\\
-        UnresolvableIntent1 & \tp \tp & \fn \fn\\
-        \hline
+        % \tsub{Inter-Component Communication}
+        % ActivityCommunication1 & \tp & \tp\\
+        % ActivityCommunication2 & \tp \fp & \fn\\
+        % ActivityCommunication3 & \tp \fp & \fn\\
+        % ActivityCommunication4 & \tp \fp & \fn\\
+        % ActivityCommunication5 & \tp \fp & \fn\\
+        % ActivityCommunication6 & \tp \fp & \fn\\
+        % ActivityCommunication7 & \tp \fp & \fn\\
+        % ActivityCommunication8 & \tp & \\
+        % BroadcastTaintAndLeak1 & \tp & \tp\\
+        % ComponentNotInManifest1 & \fp & \\
+        % EventOrdering1 & \fn \fp & \fn \fp\\
+        % IntentSink1 & \tp & \fn\\
+        % IntentSink2 & \tp & \fn\\
+        % IntentSource1 & \tp \tp & \fn \fn\\ 
+        % ServiceCommunication1 & \tp & \fn\\
+        % SharedPreferences1 & \fn & \tp\\
+        % Singletons1 & \fn & \tp\\
+        % UnresolvableIntent1 & \tp \tp & \fn \fn\\
+        % \hline
         \tsub{Lifecycle}
         ActivityEventSequence1 & \tp & \tp\\
         ActivityEventSequence2 & \tp & \fn\\
@@ -130,14 +132,14 @@
         ApplicationLifecycle3 & \tp & \tp\\
         AsynchronousEventOrdering1 & \tp & \tp\\
         BroadcastReceiverLifecycle1 & \tp & \tp\\
-        BroadcastReceiverLifecycle2 & \fn & \tp\\
-        BroadcastReceiverLifecycle3 & \tp & \tp\\
+        BroadcastReceiverLifecycle2 & \tp \fp & \tp \fp\\
+        BroadcastReceiverLifecycle3 & \tp \fp & \tp\\
         EventOrdering1 & \tp & \tp\\
-        FragmentLifecycle1 & \fn & \fn\\
+        FragmentLifecycle1 & \tp & \tp\\
         FragmentLifecycle2 & \fn & \fn\\
         ServiceEventSequence1 & \fn & \fn\\
         ServiceEventSequence2 & \fn & \fn\\
-        ServiceEventSequence3 & \tp & \tp\\
+        ServiceEventSequence3 & \tp & \fn\\
         ServiceLifecycle1 & \tp & \tp\\
         ServiceLifecycle2 & \tp & \tp\\
         SharedPreferenceChanged1 & \tp & \tp\\
@@ -151,7 +153,7 @@
         Exceptions5 & \tp & \tp \\
         Exceptions6 & \tp & \tp\\
         Exceptions7 & &\\
-        FactoryMethods1 & \tp \tp & \tp \tp \fp\\
+        FactoryMethods1 & \tp \tp & \tp \tp\\
         Loop1 & \tp & \tp\\
         Loop2 & \tp & \tp\\
         Serialization1 & \fn & \fn\\
@@ -163,10 +165,10 @@
         StringFormatter1 & \fn & \tp\\
         StringPatternMatching1 & \tp & \tp\\
         StringToCharArray1 & \tp & \fn\\
-        StringToOutputStream1 & \tp & \tp\\
+        StringToOutputStream1 & \tp \fp & \tp \fp\\
         UnreachableCode & &\\
-        VirtualDispatch1 & \tp \fp & \tp\\
-        VirtualDispatch2 & \tp \fp & \tp\\
+        VirtualDispatch1 & \tp \fp & \tp \fp\\
+        VirtualDispatch2 & \tp \fp & \tp \fp\\
         VirtualDispatch3 & \fp & \fp\\
         VirtualDispatch4 & &\\
         \hline
@@ -177,12 +179,12 @@
         Library2 & \tp & \tp\\
         LogNoLeak & & \\
         Obfuscation1 & \tp & \tp\\
-        Parcel1 & \tp & \fn\\
-        PrivateDataLeak1 & \tp & \fn\\
+        Parcel1 & \tp & \tp\\
+        PrivateDataLeak1 & \tp & \tp\\
         PrivateDataLeak2 & \tp & \tp\\
-        PrivateDataLeak3 & \fn & \fn\\
+        PrivateDataLeak3 & \tp \fn & \tp \fn\\
         PublicAPIField1 & \tp & \tp\\
-        PublicAPIField2 & \tp & \tp\\
+        PublicAPIField2 & \tp & \tp \fp\\
         View1 & \tp & \tp\\
         \hline
         \tsub{Reflection}
@@ -203,9 +205,54 @@
         JavaThread2 & \tp & \tp\\
         Looper1 & \tp & \tp\\
         TimerTask1 & \tp & \tp\\
-    \end{longtable}
+        \hline\hline
+        \tp &$ 106 $&$ 102 $\\
+        \fp &$ 14 $&$ 16 $\\
+        \fn &$ 9 $&$ 12 $\\
+        Precision & $ 88.33 \%$ & $ 86.44 \%$\\
+        Recall & $ 92.17 \% $ & $ 89.47 \%$\\
+        F1 measure & $ 0.9 $ & $ 0.88 $\\
+    \end{longtable} % end droidbench
 
     \subsection{Discussion}
-    \subsubsection{Button2}
-    Found 4 paths like in forwards but built into one.
+    In this part, we discuss the differences between the forwards and backwards analysis.
+    
+    \subsubsection{Arrays and Lists}
+    \textbf{ArrayAccess5}
+
+    \textbf{ArrayCopy1}
+
+    \textbf{ListAccess1}
+
+    \subsubsection{Callbacks}
+    \textbf{Button2}
+
+    \subsubsection{Emulator Detection}
+    \textbf{Contacts1}
+
+    \subsubsection{Lifecycle}
+    \textbf{ActivityEventSequence2}
+
+    \textbf{ActivityEventSequence3}
+
+    \textbf{BroadcastReceiverLifecycle3}
+
+    \subsubsection{General Java}
+    \textbf{StaticInitialization1}
+
+    \textbf{StaticInitialization2}
+
+    \textbf{StaticInitialization3}
+
+    \textbf{StringFormatter1}
+
+    \textbf{StringToCharArray1}
+
+    \subsubsection{Miscellaneous Android-Specific}
+    \textbf{Parcel1}
+    \textbf{PrivateDataLeak1}
+    \textbf{PublicAPIField2}
+
+    \subsubsection{Reflection}
+    \textbf{Reflection7}
 \end{document}

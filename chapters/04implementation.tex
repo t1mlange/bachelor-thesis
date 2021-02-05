@@ -25,19 +25,60 @@
 
     \section{Problems}\label{s:problems}
 
-    \paragraph{TurnUnit} We added another field to the \code{Abstraction} class called \code{turnUnit}. This is the equivalent to the \code{activationUnit} in forwards analysis. The \code{turnUnit} references the last statement for which the taint is relevant for the infoflow search. At start, it is the sink it originated from. Later on, it is set whenever we visit an assigment with a primitive or string on the left side. An example can be found in \autoref{lst:turnunit}. Line 5 introduces the taint, line 3 taints $b.str$ and sets the turnUnit to this statement. In line 2, \code{a} is found to be an alias of \code{b} and causes a handover to the alias problem. The \code{turnUnit} now stops the alias search at line 3 and prevents a false positive.
+    \subsection{Flow-Sensitive Alias Analysis}
+    \textsc{FlowDroid} offers multiple aliasing strategies.
+    In this work, we focus on the flow-sensitive alias analysis which is implemented as another IFDS problem called \code{BackwardsAliasProblem}. Basically, this is a forwards IFDS search with flow functions using aliasing rules. 
+
+    \paragraph{Handover to Alias Analysis}
+    Whenever we visit a statement and notice a taint could have an alias, the taint is handed over to the alias analysis. 
+    Normal flow rule 3 is such a case. The taint is on the right side and we notice that the left side also refers to the same value in memory due to being stored in the heap. The left side gets tainted and propagated forwards to find out if we missed a write to the alias.
+    In normal flow rule 1 and 2, we also turn around. \autoref{lst:aliasex} shows two cases where the turnaround is necessary.
+
+    \begin{figure}[ht]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{lstlisting}[gobble=16]
+                void aliasRule1() {
+                    A a = b;
+                    b.str = source();
+                    sink(a.str);
+                }
+            \end{lstlisting}
+            \caption{Example for alias analysis initiated by rule 1}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{lstlisting}[gobble=16]
+                void aliasRule3() {
+                    A a = b;
+                    a.str = source();
+                    sink(b.str);
+                }
+            \end{lstlisting}
+            \caption{Example for alias analysis initiated by rule 3}
+        \end{subfigure}
+        \caption{Aliasing examples}
+        \label{lst:aliasex}
+    \end{figure}
+
+    \paragraph{Handing back to Infoflow}
+
+    \paragraph{TurnUnit} 
+    We added another field to the \code{Abstraction} class called \code{turnUnit}. This is the equivalent to the \code{activationUnit} in forwards analysis. The \code{turnUnit} references the last statement for which the taint is relevant for the infoflow search. At start, it is the sink it originated from. Later on, it is set whenever we visit an assigment with a primitive or string on the left side. An example can be found in \autoref{lst:turnunit}. Line 5 introduces the taint, line 3 taints $b.str$ and sets the turnUnit to this statement. In line 2, \code{a} is found to be an alias of \code{b} and causes a handover to the alias problem. The \code{turnUnit} now stops the alias search at line 3 and prevents a false positive.
 
     \begin{figure}[ht]
         \centering
         \begin{lstlisting}
-            void turnNeeded() {
+            void turnStmtNeeded() {
                 A a = b;
                 String str = b.str;
                 a.str = source();
                 sink(str);
             }
         \end{lstlisting}
-        \caption{Aliasing example}
+        \caption{Aliasing example with turn unit}
         \label{lst:turnunit}
     \end{figure}
 

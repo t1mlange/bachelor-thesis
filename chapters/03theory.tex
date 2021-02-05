@@ -67,7 +67,7 @@
         \item[] \textbf{Rule 2:} An incoming taint $t = \mathit{this}_c.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{o.h^k\}$. 
     \end{itemize}
     
-    Tainted static fields are also mapped back untouched and unconditionally. 
+    Tainted static fields are also mapped back untouched and unconditionally equivalent to rule 3 in call flow.
     \begin{itemize}
         \item[] \textbf{Rule 3:} An incoming taint $t = S.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{t\}$. 
     \end{itemize}
@@ -82,7 +82,7 @@
         \item[] \textbf{Rule 1:} An incoming taint $t = x.h^k$ with $k \geq 0 \land (\forall a \in \mathit{Arguments}: a \neq x) \land x \neq o \land x \notin \mathit{Static}$ produces the outflowing taint set $T = \{t\}$. 
     \end{itemize}
 
-    If a taint is limited to its base, so no fields are tainted, the taint is also propagated over the statement as the reference is passed by copy-by-value and writing the reference overwrites the reference in the callee but has no effect on the reference in the caller.
+    If a taint is limited to its base, so no fields are tainted, the taint is also propagated over the statement as the reference is passed by copy-by-value and assigments to the parameter overwrites the reference in the callee but has no effect on the reference in the caller.
     \begin{itemize}
         \item[] \textbf{Rule 2:} An incoming taint $t = a_i$ with $0 \leq i \leq n$ produces the outflowing taint set $T = \{t\}$. 
     \end{itemize}
