@@ -1,9 +1,6 @@
 with open("/home/tim/Projects/bachelor-thesis/chapters/05validation.tex") as f:
     lines = f.read().splitlines()
 
-    # forwards = 1, backwards = 2
-    index =2
-
     tp = [0, 0] # true positives
     fn = [0, 0] # false negatives
     fp = [0, 0] # false positives
@@ -15,7 +12,7 @@ with open("/home/tim/Projects/bachelor-thesis/chapters/05validation.tex") as f:
     found = False
     for index in [0,1]:
         for line in lines:
-            if "% begin droidbench" in line:
+            if "begin{longtable}{l | l | l}% begin droidbench" in line:
                 found = True
                 continue
             if "% end droidbench" in line:
@@ -36,7 +33,7 @@ with open("/home/tim/Projects/bachelor-thesis/chapters/05validation.tex") as f:
         p[index] = tp[index] / (tp[index] + fp[index])
         r[index] = tp[index] / (tp[index] + fn[index])
         f1[index] = 2*p[index]*r[index] / (p[index] + r[index])
- 
+
     print("\\tp &$", tp[0], "$&$", tp[1], "$\\\\")
     print("\\fp &$", fp[0], "$&$", fp[1], "$\\\\")
     print("\\fn &$", fn[0], "$&$", fn[1], "$\\\\")
