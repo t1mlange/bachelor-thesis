@@ -2,20 +2,120 @@
 
 \begin{document}
     \chapter{Background}
-    \section{Data Flow Analysis}
-    Explain key terms such as taint, source, sink, leak
+    \section{Static Data Flow Analysis}
+    Explain key terms such as static, fact, taint, source, sink, leak, sensitivity.
     
-    \section{IFDS \& Practical Extensions}
-    
-    
-    \section{Intermediate Representations}\label{s:jimple}
-    Explain what jimple and why it is useful to operate on an IR
+    \section{IFDS}
+    \subsection{Original Definition}
+    Interprocedural finite distributive subset (IFDS) problems are a special class of a data-flow analysis problem. All problems adhering to IFDS can be transformed into a graph-reachability problem and thus the solution is computable in polynomial time. It is context-sensitive and flow-sensitive by default.
+
+    % graph
+    IFDS operates on a so-called exploded supergraph. Every node in the exploded supergraph is a tuple $\langle s, d \rangle$ of the statement $s$ in the interprocedural control-flow graph and a dataflow fact $d$. The domain is typically the set of variables in the program. Edges between two nodes $\langle s, d \rangle$ and $\langle s', d' \rangle$ exist if $d$ propagated over $s$ yields $d'$ and $s'$ is a successor of $s$. This already ensures flow-sensitivity.
+
+    % flow functions
+    To propagate facts over statements, flow functions need to be defined. There are four types of flows:
     \begin{itemize}
-        \item Like 25 possible statements instead of way too many instructions
-        \item Everything is explicit. No implicit writes whatsoever
+        \item Call Flow: Edges from call statement into a method. Flow function maps the facts visible in the callee into it. 
+        \item Return Flow: Edges returning from a method. Flow function maps the facts visible in the caller out of the method.
+        \item Call To Return: Edges over a call statement. Flow function maps the facts not visible in the callee over the call statement.
+        \item Normal Flow: Edges over every other statement. Often, this flow functions only handles assign statements.
     \end{itemize}
+    All outgoing facts are merged using the merge operator $\sqcap$. The incoming set of facts are all predecessors outgoing facts merged together: $in(s) := \bigsqcap_{p \in Preds(s)} out(p)$.
+    % introduce taints
+    The domain also contains a zero fact and all nodes with $d=\textbf{0}$ are always reachable, thus the zero fact holds at every statement. As an example, in taint analysis the flow functions map zero facts at sources to a tainted variable. 
+
+    % Context-Sensitive
+    To ensure context-sensitivity, IFDS only visits valid paths. For this, a context-sensitive grammar is constructed which acts like a call stack to make sure there is no mismatch and the path is a valid execution path.
+    The proposed tabulation algorithm to solve the reachable realizable path problem is a dynamic programming algorithm. Whenever a method was fully visited, a summary is saved and later on applied if the same input fact is observed. 
+
+    For all this to work, the problems which can be formulated in IFDS have to abide to restrictions which are also eponymous:
+
+    \textbf{Distributive:} The flow function must be distributive over the merge operator. Formally, $f(x \sqcap y) = f(x) \sqcap f(y)$ must hold at any time. Informally speaking, it does not matter whether facts get merged before or after applying the flow functions.
+
+    \textbf{Finite:} Another restriction is that the set of dataflow facts has to be finite. Let's go by a counterexample of what IFDS is not capable of: Answering "Which value is stored in variable x at statement s?".
+    Now the dataflow fact is a tuple of the variable together with the stored value $\langle x, v \rangle$. Assume $x$ is an integer of infinite precision for the domain to be infinite.
+    $x$ is initialized to zero and passed into the method \code{foo()} multiple times. Recall the subset problem, then look at the summaries in \autoref{lst:ifdsfinite}. Clearly the purpose of creating summaries is lost because we never get to use the summary and also, there is no fixpoint for the ever growing subset to stop. Thus, the domain has to be finite and in practice, also small as the domain is cubic in the time-complexity $O(|E| \cdot |D|^3)$.
+    \begin{figure}[ht]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \begin{lstlisting}[gobble=16]
+                RealInteger foo(RealInteger x) {
+                    return x + 42;
+                }
+            \end{lstlisting}
+            \caption{Code}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.45\textwidth}
+            $$
+                \begin{aligned}
+                    \langle x, \phantom{0}0 \rangle &\rightarrow \langle x, \phantom{1}42 \rangle\\
+                    \langle x, 42 \rangle &\rightarrow \langle x, \phantom{1}84 \rangle\\
+                    \langle x, 84 \rangle &\rightarrow \langle x, 126 \rangle\\
+                    &\dots
+                \end{aligned}
+            $$
+            \caption{Summaries}
+        \end{subfigure}
+        \caption{Finitness example}
+        \label{lst:ifdsfinite}
+    \end{figure}
+
+    \textbf{Subset:} Last, the lattice ordering must be a subset. Following, the merge operator is either set union or set intersection.
+  
+    \subsection{Practical Extensions}
+    The original definition is inefficient in practice. Among others, Naeem et al proposed practical extensions to the IFDS framework to perform better in practice \cite{Naeem2010}.
+
+    Starting at the exploded supergraph, the original algorithm demands a fully built graph. Even in moderate programs the domain can get quite large and as the nodes in the exploded supergraph are the cross product of the domain and interprocedural call-graph nodes, it is infeasible to generate the full graph beforehand. Because there is no way to know before which part of the supergraph is actually needed, it is generated ad-hoc. This also removes the restriction on a small domain, now IFDS is also feasible if the encoutered subset of the domain is small enough \cite{Naeem2010}.
+    The restrictions on the domain set can be loosened even more. Bodden suggests in-practice the domain can be infinite and only the observed facts must adhere to the ascending-chain condition over the flow functions when using the on-demand supergraph \cite{Bodden2012}.
     
+    Also, it also ignores the type structure of the programming language. It can be used to kill facts due to impossible casts. Also, facts with the same variable but different types can be merged to one fact with the superclass as a type \cite{Naeem2010}.
+
+
+    \section{Intermediate Representations}\label{s:jimple}
+    Most compiler these days use intermediate representations (IRs). IRs are an equivalent representation of the source code but are much simpler and more regular and are typically not architecture dependent. They are often in an interchangeable format and can be saved as text to be able to use them by a variety of tools \cite{Thain2019}.
+    This allows compilers to apply machine-independent optimizations to the code with neither worrying about complex expressions in the source code nor reimplementing the optimization for each architecture. 
+
+    The Java Virtual Machine (JVM) also operates on an IR called Java bytecode. The JVM is mostly stack-based and so is the Java bytecode. In \autoref{lst:jvmstack} is an example of a simple code snippet translated to Java bytecode. Simple expressions such as \code{c = a + b} are translated into multiple statements and there is no fixed length of an expression in the bytecode. The analysis would also have to reconstruct the expressions ad-hoc. On top, the Java bytecode has over 200 possible instructions\footnote{\url{https://docs.oracle.com/javase/specs/jvms/se8/html/}} which need to be taken into account. Concluding, stack-based IRs are suitable for just-in-time interpretation but inconvenient for data flow analysis \cite{Valleerai2004}.
+
+    \begin{figure}[ht]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{lstlisting}[gobble=16]
+                int a = 21;
+                int b = 21;
+                int c = a + b;
+            \end{lstlisting}
+            \caption{Java code}
+            \label{lst:jvmstack_a}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{lstlisting}[gobble=16]
+                bipush 21 // push 21
+                istore_1  // store in register 1    
+                bipush 21 // push 21
+                istore_2 // store in register 2
+                iload_1 // push a
+                iload_2 // push b
+                iadd // pop a & b and push a + b
+                istore_3 // store in register 3
+            \end{lstlisting}
+            \caption{Java bytecode}
+            \label{lst:jvmstack_b}
+        \end{subfigure}
+        \caption{Java bytecode example}
+        \label{lst:jvmstack}
+    \end{figure}
+
+    A more convenient representation for static analysis are three-address codes. Each statement consists of up to three operands and is either an assigment or a control-flow statement. Such a representation is closer to the original source code while reducing the number of the possible combinations to a managable amount \cite{Aho1986}.
+
+    Jimple is a three-address intermediate representation and can be constructed from the Java and Dalvik bytecode, the IR used for Android apps. It is a high-level representation and its syntax is close to Java. Complex expressions are split up into multiple statements, for example, there can be only one field reference per statement and arguments are always local variables \cite{Valleerai2004}. This greatly reduces the possible cases the data flow analysis needs consider and therefore is the IR of choice for FlowDroid \cite{Arzt2017PhD}. 
+    The conversion to Jimple is provided by the underlying framework Soot. 
+
     \section{Soot}
+    Soot is a 
     just short, but probably needs to be introduced before FlowDroid and especially before clinit rule
     \section{FlowDroid}    
 \end{document}

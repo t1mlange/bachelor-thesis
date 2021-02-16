@@ -29,6 +29,8 @@
 \usepackage{subfiles}
 
 \usepackage{subcaption}
+\captionsetup{justification=centering}
+\captionsetup[subfigure]{justification=centering}
 
 %%%%%%%%%%%%%%%%%%%
 %Literaturverzeichnis
@@ -51,6 +53,16 @@
 \usepackage{mathtools} % erweiterte Fassung von amsmath
 \usepackage{amssymb}   % erweiterter Zeichensatz
 %\usepackage{siunitx}   % Einheiten
+\makeatletter
+\providecommand{\bigsqcap}{%
+  \mathop{%
+    \mathpalette\@updown\bigsqcup
+  }%
+}
+\newcommand*{\@updown}[2]{%
+  \rotatebox[origin=c]{180}{$\m@th#1#2$}%
+}
+\makeatother
 
 \usepackage{todonotes}
 

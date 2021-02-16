@@ -1,10 +1,10 @@
 \documentclass[../draft.tex]{subfiles}
 
-% false tpitive
+% false positive
 \newcommand{\fp}{\textcolor{white}{\textcircled{\textcolor{red}{$\star$}}}}
 % false negative
 \newcommand{\fn}{\textcolor{red}{\textcircled{ }}}
-% true tpitive
+% true positive
 \newcommand{\tp}[0]{\textcircled{$\star$}}
 % table subheading
 \newcommand{\tsub}[1]{\multicolumn{3}{c}{#1}\\\hline}
@@ -14,14 +14,18 @@
     \section{Unit Tests}
     \textsc{FlowDroid} already contains 519 unit tests for the core infoflow component. We also validate the backwards analysis with these tests.
 
-    Forwards and backwards analysis are not exactly the same. In some cases the results might differ because of limitations or differences in the implementation. In the following textbfs, we provide rationale for these differences.
+    Forwards and backwards analysis are not exactly the same. In some cases the results might differ because of limitations or differences in the implementation. In the following, we provide rationale for these differences.
 
     \textbf{EasyTaintWrapperTests} \code{equalsTest} and \code{hashCodeTest} are expected to return one leak but the backwards analysis does report no leaks. This difference is related to the \code{EasyTaintWrapper} implementation. The implementation marks \code{equals()} and \code{hashCode()} as exclusive. This means we can skip this method because we already have a rule for it. The check for exclusiveness is part of the Call and CallToReturn flow function. In both tests, the source is inside the \code{equals()} or \code{hashCode()} method. The IFDS solver behaves as already observed in \autoref{s:clinitrule} and when searching forwards it creates a return edge returning from the method while going backwards we do not propagate into the method because it is exclusive.
     We marked those two tests forwards-specific and created two equivalent backwards-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method with one expected leak.
     
     \textbf{SourceSinkTests} These tests ensure the source sink manager can be swapped out. This is not relevant for the correctness of the backwards analysis and therefore are ignored.
 
+    \textbf{HeapTestPtsAliasing} We focused in this work on flow-sensitive aliasing. Points-To-Aliasing is left for future work.
     
+    \textbf{ImplicitFlowTests} \todo{implement later if enough time}
+
+    \textbf{SetTests} \code{containsTest} needs implicit flows to find the leak. It is supposed to fail.
 
     \section{DroidBench}
     \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 120 test cases are included in version 2\footnote{\url{https://github.com/secure-software-engineering/DroidBench}}.
@@ -29,6 +33,8 @@
     
     \subsection{Configuration}
     Only using the soot-android-infoflow component, everything else default.
+
+    Left out ICC, ReflectionICC, IAC (all 3 Buggy), Dynamic Code Loading (Not supported), native code (no android nc handler), Self-Modification (not supported), UnreachableCode (not supported)
 
     \subsection{Results}
     \todo{ICC is buggy atm}
@@ -48,11 +54,11 @@
         ArrayAccess2 & \fp & \fp\\
         ArrayAccess3 & \tp & \tp\\
         ArrayAccess4 &  & \\
-        ArrayAccess5 &  & \fp\\
-        ArrayCopy1 & \tp & \fn\\
+        ArrayAccess5 &  & \\
+        ArrayCopy1 & \tp & \tp\\
         ArrayToString1 & \tp & \tp\\
         HashMapAccess1 & \fp & \fp\\
-        ListAccess1 & \fp & \\
+        ListAccess1 & \fp & \fp\\
         MultidimensionalArray1 & \tp & \tp\\
         \hline
         \tsub{Callbacks}
@@ -76,17 +82,17 @@
         Battery1 & \tp & \tp\\
         Bluetooth1 & \tp & \tp\\
         Build1 & \tp & \tp\\
-        Contacts1 & \tp & \tp \fp\\
+        Contacts1 & \tp & \tp\\
         ContentProvider1 & \tp \tp & \tp \tp\\
         DeviceId1 & \tp & \tp\\
         File1 & \tp & \tp\\
-        IMEI1 & \tp \tp & \tp \tp\\
+        IMEI1 & \tp \tp & \fn \fn\\
         IP1 & \tp & \tp\\
         PI1 & \tp & \tp\\
-        PlayStore1 & \tp \tp & \tp\\
+        PlayStore1 & \tp \tp & \tp \tp\\
         PlayStore2 & \tp & \tp\\
         Sensors1 & \tp & \tp\\
-        SubscriberId1 & \tp & \tp \fp\\
+        SubscriberId1 & \tp & \tp\\
         VoiceMail1 & \tp & \tp\\
         \hline
         \tsub{Field and Object Sensitivity}
@@ -120,8 +126,8 @@
         % \hline
         \tsub{Lifecycle}
         ActivityEventSequence1 & \tp & \tp\\
-        ActivityEventSequence2 & \tp & \fn\\
-        ActivityEventSequence3 & \tp & \fn\\
+        ActivityEventSequence2 & \fn & \fn\\
+        ActivityEventSequence3 & \fn & \fn\\
         ActivityLifecycle1 & \tp & \tp\\
         ActivityLifecycle2 & \tp & \tp\\
         ActivityLifecycle3 & \tp & \tp\\
@@ -133,13 +139,13 @@
         AsynchronousEventOrdering1 & \tp & \tp\\
         BroadcastReceiverLifecycle1 & \tp & \tp\\
         BroadcastReceiverLifecycle2 & \tp \fp & \tp \fp\\
-        BroadcastReceiverLifecycle3 & \tp \fp & \tp\\
+        BroadcastReceiverLifecycle3 & \tp & \tp\\
         EventOrdering1 & \tp & \tp\\
         FragmentLifecycle1 & \tp & \tp\\
         FragmentLifecycle2 & \fn & \fn\\
         ServiceEventSequence1 & \fn & \fn\\
         ServiceEventSequence2 & \fn & \fn\\
-        ServiceEventSequence3 & \tp & \fn\\
+        ServiceEventSequence3 & \fn & \fn\\
         ServiceLifecycle1 & \tp & \tp\\
         ServiceLifecycle2 & \tp & \tp\\
         SharedPreferenceChanged1 & \tp & \tp\\
@@ -160,11 +166,11 @@
         SourceCodeSpecific1 & \tp & \tp\\
         StartProcessWithSecret1 & \tp & \tp\\
         StaticInitialization1 & \fn & \tp\\
-        StaticInitialization2 & \tp & \fn\\
+        StaticInitialization2 & \tp & \tp\\
         StaticInitialization3 & \fn & \fn\\
-        StringFormatter1 & \fn & \tp\\
+        StringFormatter1 & \fn & \fn\\
         StringPatternMatching1 & \tp & \tp\\
-        StringToCharArray1 & \tp & \fn\\
+        StringToCharArray1 & \tp & \tp\\
         StringToOutputStream1 & \tp \fp & \tp \fp\\
         UnreachableCode & &\\
         VirtualDispatch1 & \tp \fp & \tp \fp\\
@@ -184,7 +190,7 @@
         PrivateDataLeak2 & \tp & \tp\\
         PrivateDataLeak3 & \tp \fn & \tp \fn\\
         PublicAPIField1 & \tp & \tp\\
-        PublicAPIField2 & \tp & \tp \fp\\
+        PublicAPIField2 & \tp & \tp\\
         View1 & \tp & \tp\\
         \hline
         \tsub{Reflection}
@@ -194,7 +200,7 @@
         Reflection4 & \tp & \tp\\
         Reflection5 & \tp & \tp\\
         Reflection6 & \tp & \tp\\
-        Reflection7 & \fn & \tp\\
+        Reflection7 & \fn & \fn\\
         Reflection8 & \tp & \tp\\
         Reflection9 & \tp & \tp\\
         \hline
@@ -205,54 +211,85 @@
         JavaThread2 & \tp & \tp\\
         Looper1 & \tp & \tp\\
         TimerTask1 & \tp & \tp\\
-        \hline\hline
-        \tp &$ 106 $&$ 102 $\\
-        \fp &$ 14 $&$ 16 $\\
-        \fn &$ 9 $&$ 12 $\\
-        Precision & $ 88.33 \%$ & $ 86.44 \%$\\
-        Recall & $ 92.17 \% $ & $ 89.47 \%$\\
-        F1 measure & $ 0.9 $ & $ 0.88 $\\
-    \end{longtable} % end droidbench
+        \hline\hline  % end droidbench
+        \tp &$ 103 $&$ 102 $\\
+        \fp &$ 13 $&$ 13 $\\
+        \fn &$ 12 $&$ 13 $\\
+        Precision & $ 88.79 \%$ & $ 88.7 \%$\\
+        Recall & $ 89.57 \% $ & $ 88.7 \%$\\
+        F1 measure & $ 0.89 $ & $ 0.89 $\\
+    \end{longtable}
 
     \subsection{Discussion}
     In this part, we discuss the differences between the forwards and backwards analysis.
-    
-    \subsubsection{Arrays and Lists}
-    \textbf{ArrayAccess5}
-
-    \textbf{ArrayCopy1}
-
-    \textbf{ListAccess1}
-
-    \subsubsection{Callbacks}
-    \textbf{Button2}
 
     \subsubsection{Emulator Detection}
-    \textbf{Contacts1}
+    \begin{figure}
+        \begin{lstlisting}
+            String imei = telephonyManager.getDeviceId(); // source
+            String suffix = "000000000000000"; // T={}
+            String prefix = "secret"; // T={}
+            String msg = prefix + suffix; // T={prefix, suffix}
 
-    \subsubsection{Lifecycle}
-    \textbf{ActivityEventSequence2}
+            int zeroPos = 0; // zeroPos dies here
+            while (zeroPos < imei.length()) {
+                if (imei.charAt(zeroPos) == '0') // implicit flow needed
+                    zeroPos++;
+                else {
+                    zeroPos = 0;
+                    break;
+                }
+            }
+            
+            String newImei = msg.substring(zeroPos, zeroPos + Math.min(prefix.length(), msg.length() - 1)); // T={msg, zeroPos}
+            Log.d("DROIDBENCH", newImei); // T={newImei}
+    
+            SmsManager sm = SmsManager.getDefault();
+            sm.sendTextMessage("+49 123", null, newImei, null, null); // T={newImei}
+        \end{lstlisting}
+        \caption{IMEI1 excerpt}
+        \label{lst:testimei}
+    \end{figure}
 
-    \textbf{ActivityEventSequence3}
-
-    \textbf{BroadcastReceiverLifecycle3}
+    \textbf{IMEI1} needs implicit flows to find both leaks. The source is only used inside the condition of an if statement. See \autoref{lst:testimei}, we are unable to taint imei without an implicit taint created in line 8. \todo{could be fixed in the future}
 
     \subsubsection{General Java}
-    \textbf{StaticInitialization1}
+    \textbf{StaticInitialization1} differs in forwards and backwards analysis. Backwards it reports one leak due to the explicit modelling of \code{<clinit>} edges instead of relying on SPARK. Recall \autoref{s:clinitrule}, leaks inside static blocks are missed in forward analysis. This test case is quite similiar to \autoref{lst:clinit_examples_b} and therefore the leak is only reported in backwards analysis at the moment.
+    
+    \textbf{StaticInitialization2} yields the same result but because of different reasons. The test assigns a tainted value to a static field in the static initializer. Again, recall \autoref{s:clinitrule}. Backwards, the clinit rule takes care of visiting the \code{<clinit>} edge while forwards the followReturnsPastSeeds option of the IFDS solver is responsible. 
 
-    \textbf{StaticInitialization2}
+    \textbf{StaticInitialization3}'s leak is missed despite the explicit modelling of clinit. The code is provided in \autoref{lst:staticinit3}. \code{MainActivity} is using the singleton pattern and thus has a static field \code{v} refering to its instance. The source statement is inside the static block of the \code{Test} class using the singleton to access the instance field \code{s}.
+    The taint is now introduced at the sink and refers to the field through the \code{this} instance. When we visit line 13, the \code{<clinit>} edge is not taken due to the taint being an instance field. Line 12 kills the only taint and stops the analysis as there is no taint to propagate anymore. We never get to see the statement where the static field \code{v} aliases \code{this}. 
+    We miss the leak because the test violates our assumption of the clinit rule that only static taints can leak inside static blocks. To catch this leak, an inactive taint could be propagated upwards after line 12 to later turn around and let the aliasing visit the clinit edge with the downside that we can not kill any overwrite of an instance field until the end of the callgraph. We decided to deliberately miss those kind of leaks in favor of much less edges to be propagated.
+    
+    \begin{figure}
+        \begin{lstlisting}
+            public class MainActivity extends Activity {
+                public static MainActivity v;
+                public String s;
 
-    \textbf{StaticInitialization3}
+                @Override
+                protected void onCreate(Bundle savedInstanceState) {
+                    v = this;
+                
+                    super.onCreate(savedInstanceState);
+                    setContentView(R.layout.activity_main);
+                
+                    s = ""; // T={}
+                    Test t = new Test(); // T={this.s}
+                    Log.i("DroidBench", s); // T={this.s}
+                }
+            }
 
-    \textbf{StringFormatter1}
+            class Test {
+                static {
+                    TelephonyManager mgr = (TelephonyManager) MainActivity.v.getSystemService(Activity.TELEPHONY_SERVICE);
+                    MainActivity.v.s = mgr.getDeviceId(); // source
+                }    
+            }
+        \end{lstlisting}
+        \caption{StaticInitialization3 code}
+        \label{lst:staticinit3}
+    \end{figure}
 
-    \textbf{StringToCharArray1}
-
-    \subsubsection{Miscellaneous Android-Specific}
-    \textbf{Parcel1}
-    \textbf{PrivateDataLeak1}
-    \textbf{PublicAPIField2}
-
-    \subsubsection{Reflection}
-    \textbf{Reflection7}
 \end{document}
