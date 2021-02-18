@@ -12,9 +12,7 @@
 \begin{document}
     \chapter{Validation}
     \section{Unit Tests}
-    \textsc{FlowDroid} already contains 519 unit tests for the core infoflow component. We also validate the backwards analysis with these tests.
-
-    Forwards and backwards analysis are not exactly the same. In some cases the results might differ because of limitations or differences in the implementation. In the following, we provide rationale for these differences.
+    \textsc{FlowDroid} already contains 519 unit tests for the core infoflow component. We also validated the backwards analysis with these tests with positive results. Because we focused on the context-sensitive analysis, not all analysis-related tests were applicable. In the following, we briefly explain why tests were left out or did not return the same results.
 
     \textbf{EasyTaintWrapperTests} \code{equalsTest} and \code{hashCodeTest} are expected to return one leak but the backwards analysis does report no leaks. This difference is related to the \code{EasyTaintWrapper} implementation. The implementation marks \code{equals()} and \code{hashCode()} as exclusive. This means we can skip this method because we already have a rule for it. The check for exclusiveness is part of the Call and CallToReturn flow function. In both tests, the source is inside the \code{equals()} or \code{hashCode()} method. The IFDS solver behaves as already observed in \autoref{s:clinitrule} and when searching forwards it creates a return edge returning from the method while going backwards we do not propagate into the method because it is exclusive.
     We marked those two tests forwards-specific and created two equivalent backwards-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method with one expected leak.
@@ -32,9 +30,11 @@
     We do not use it to evaluate our tool against others but to compare it against the forwards analysis of \textsc{FlowDroid}. We aim to achieve similiar results but they may subtle differences.
     
     \subsection{Configuration}
-    Only using the soot-android-infoflow component, everything else default.
+    The validation was run with the default configuration of the Android module of FlowDroid. We used EasyTaintWrapper as the taint wrapper.
 
-    Left out ICC, ReflectionICC, IAC (all 3 Buggy), Dynamic Code Loading (Not supported), native code (no android nc handler), Self-Modification (not supported), UnreachableCode (not supported)
+    We only used a subset of \textsc{DroidBench} tests to validate our results. Dynamic Code Loading, Self Modification, Unreachable Code and Native Code are all not supported by \textsc{FlowDroid}. The first three are all callgraph related and the latter is not supported because FlowDroid has no Android native call handler for now.
+    Also Inter Component Communication, Reflection Inter Component Communication and Inter App Communication were left out. The Inter Component Communication module was - at the time of this work - not maintained anymore. 
+    As all left out tests do not depend on the flow functions, if \textsc{FlowDroid} gets support for those in the future they should also work in backwards analysis.
 
     \subsection{Results}
     \todo{ICC is buggy atm}
@@ -221,7 +221,9 @@
     \end{longtable}
 
     \subsection{Discussion}
-    In this part, we discuss the differences between the forwards and backwards analysis.
+    The validation shows nearly identical results for backwards and forwards analysis. The differences are explained below. 
+    
+    We conclude the backwards analysis is working as expected.
 
     \subsubsection{Emulator Detection}
     \begin{figure}
@@ -260,7 +262,7 @@
 
     \textbf{StaticInitialization3}'s leak is missed despite the explicit modelling of clinit. The code is provided in \autoref{lst:staticinit3}. \code{MainActivity} is using the singleton pattern and thus has a static field \code{v} refering to its instance. The source statement is inside the static block of the \code{Test} class using the singleton to access the instance field \code{s}.
     The taint is now introduced at the sink and refers to the field through the \code{this} instance. When we visit line 13, the \code{<clinit>} edge is not taken due to the taint being an instance field. Line 12 kills the only taint and stops the analysis as there is no taint to propagate anymore. We never get to see the statement where the static field \code{v} aliases \code{this}. 
-    We miss the leak because the test violates our assumption of the clinit rule that only static taints can leak inside static blocks. To catch this leak, an inactive taint could be propagated upwards after line 12 to later turn around and let the aliasing visit the clinit edge with the downside that we can not kill any overwrite of an instance field until the end of the callgraph. We decided to deliberately miss those kind of leaks in favor of much less edges to be propagated.
+    We miss the leak because the test violates our assumption of the clinit rule that only static taints can leak inside static blocks. To catch this leak, an inactive taint could be propagated upwards after line 12 to later turn around and let the aliasing visit the clinit edge with the downside that we can not kill any overwrite of an instance field until the end of the callgraph. We decided to deliberately miss those kind of leaks in favor of much less edges to be propagated. This is one limitiation of the alias analysis where only encountered aliases are tracked. Tracking all alias is too inefficient for the analysis to be applicable \cite{Bodden2012}.  
     
     \begin{figure}
         \begin{lstlisting}

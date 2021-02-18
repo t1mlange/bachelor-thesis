@@ -5,7 +5,7 @@
     \section{Flow Functions}
     In this section, we describe the behavior of the flow functions based on the Jimple language and define semi-formal rules.
 
-    \subsection{Normal Flow}
+    \subsection{Normal Flow}\label{s:normalflow}
     Normal flow functions handle every statement that does not contain an \code{InvokeExpr}. The only case where a new taint can be produced is at an \code{AssignStmt}. It is straight-forward that this is true for statements like \code{IfStmt} if we recall \autoref{s:jimple}. The conditition is either an \code{UnopExpr} or \code{BinopExpr} of which both have no effect on the taint set. But we also skip over \code{IdentityStmt} even though they define a value. This is because we wait for the return site to map all parameters back into the callee.
 
     Now, lets consider the current statement is an \code{AssignStmt}. It consists of a variable, either a reference or a local, on the left side and an expression on the right side. Jimple ensures we just see one field reference at a time but to reduce the semi-formal rules, we take a shortcut here. So our assigment has the structure $x.f^n \leftarrow y.g^m$ with $n,m \in \{0,1\}$ modelling a possible field reference. Note that the taints can have an access path of an arbitrary length $k$ which is denoted as $h^k$.
@@ -15,12 +15,12 @@
         \item[] \textbf{Rule 1:} An incoming taint $t = x.f^n.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{y.g^m.h^k\}$.
     \end{itemize} 
 
-    Next, we might have a whole object tainted. In this case, just the base needs to match:
+    Next, we might encounter a whole object tainted. In this case, just the base needs to match but the left side is also kept alive because other fields also might be tainted if the object has more than one field.
     \begin{itemize}
-        \item[] \textbf{Rule 2:} An incoming taint $t = x.*$ with $k \geq 0$ produces the outflowing taint set $T = \{y.g^m.*\}$.
+        \item[] \textbf{Rule 2:} An incoming taint $t = x.*$ with $k \geq 0$ produces the outflowing taint set $T = \{y.g^m.*, t\}$.
     \end{itemize} 
 
-    Lastly, the right side could also be tainted:
+    Lastly, the right side could also be tainted. This rule is equivalent to the default behaivor but is important later when we consider aliasing in \autoref{s:aliasing}.
     \begin{itemize}
         \item[] \textbf{Rule 3:} An incoming taint $t = y.g^m.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{t\}$.
     \end{itemize}
