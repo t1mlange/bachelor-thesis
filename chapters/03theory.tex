@@ -89,6 +89,40 @@
         
 
     \section{Complexity of Data Flow Analysis}
+    IFDS has a time-complexity of $O(E \cdot D^3)$. The edges in the control-flow graph are set by the to-be-analyzed app. The domain depends on the tainted variables observed by the IFDS search. Arzt et al evaluation of \textsc{FlowDroid} shows no correlation between a-priori known parameters and the runtime \cite{Arzt2017PhD}. So, we are left with the number of taint propagations as the only parameter correlated to the runtime but they are only known afterwards. 
+
+    The number of taint propagations depends on two factors: the lifetime of taints and the number of taints. Both factors highly depend on the search direction which we will explain in the following paragraphs.
+
+    Starting with the number of taints, we
+
+    \begin{tikzpicture}[auto, 
+        s/.style={draw, rounded corners},
+        v/.style={draw, fill=black, circle, inner sep=0pt, minimum size=5pt},
+        every node/.style={align=center},
+        every matrix/.style={ampersand replacement=\&,column sep=0.25cm,row sep=.25cm}]
+        \matrix {
+            \& \node[v, label={0}] (zero1) {}; \& \node[v, label={a}] (a1) {}; \& \node[v, label={b}] (b1) {}; \& \node[v, label={c}] (c1) {};\\
+            \node[s] (s1) {int a = source();}; \& \& \& \&\\
+            % \& \node[v] (zero2) {}; \& \node[v] (a2) {}; \& \node[v] (b2) {}; \& \node[v] (c2) {};\\
+            % \node[s] (s2) {int b = a;}; \& \& \& \&\\
+            % \& \node[v] (zero3) {}; \& \node[v] (a3) {}; \& \node[v] (b3) {}; \& \node[v] (c3) {};\\
+            % \node[s] (s3) {int c = b;}; \& \& \& \&\\
+            % \& \node[v] (zero4) {}; \& \node[v] (a4) {}; \& \node[v] (b4) {}; \& \node[v] (c4) {};\\
+            % \node[s] (s4) {leak(c);} \& \& \& \&\\
+            % \& \node[v] (zero5) {}; \& \node[v] (a5) {}; \& \node[v] (b5) {}; \& \node[v] (c5) {};\\
+        };
+
+        % \draw[sto] (s1) -- (s2);
+        % \draw[sto] (s2) -- (s3);
+        % \draw[sto] (s3) -- (s4);
+
+        % \draw[vto] (zero1) -- (zero2);
+        % \draw[vto] (zero2) -- (zero3);
+        % \draw[vto] (zero3) -- (zero4);
+    \end{tikzpicture}
+
+    
+
     Explain where the run-time comes from.
     Depends the number of edge propagations
     \begin{itemize}

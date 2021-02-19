@@ -75,9 +75,9 @@
     
     Also, it also ignores the type structure of the programming language. It can be used to kill facts due to impossible casts. Also, facts with the same variable but different types can be merged to one fact with the superclass as a type \cite{Naeem2010}.
 
-    The original definition starts the IFDS algorithm at the entry point of the interprocedural call-graph. As described, whenever needed a fact is derived from the zero fact. If the methods where initial facts will be introduced are known a priori, the supergraph can be traversed without applying flow functions until such a method is found on the path \cite{Arzt2017PhD}.  
+    The original definition starts the IFDS algorithm at the entry point of the interprocedural call-graph. As described, whenever needed a fact is derived from the zero fact. If the methods where initial facts will be introduced are known a priori, the supergraph can be traversed without applying flow functions until such a method is found on the path. This optimization introduces unbalanced problems where a method return is found but no corresponding call site which can be solved by a small extension to the tabulation algorithm. This was first described by Lerch \cite{Lerch2015} and is also present in \textsc{FlowDroid} \cite{Arzt2017PhD}.     
 
-    Because the merge operator is always set union, there is no need to wait for other predecessors to finish as a $A \subseteq A \cup B$ is always true. This allows the IFDS solver to skip the $in$-set construction and immediately propagate the outcoming facts, which is beneficial in a parallelized solver \cite{Arzt2017PhD}.
+    Because the merge operator is always set union, there is no need to wait for other predecessors to finish as a $A \subseteq A \cup B$ is always true. This allows the IFDS solver to skip the $in$-set construction and immediately propagate the outcoming facts, which is beneficial in a parallelized solver \cite{Arzt2017PhD} \todo{is this actually written anywhere?}.
 
 
     \section{Intermediate Representations}\label{s:jimple}

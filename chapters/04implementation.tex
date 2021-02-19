@@ -89,19 +89,31 @@
     \section{Rules}
     Flow functions can get quite large, complicated to understand and hard to maintain \cite{Lerch2015}. To counteract this, \textsc{FlowDroid} outsources certain features into rules. These rules also provide the four flow functions and are applied in the corresponding flow function.
 
-    \subsection{Backwards Sink Propagation Rule}
+    \subsection{Source \& Sink Propagation Rule}\label{s:sourcerule}
+    In backwards analysis, sources act like sinks and vice versa. Thus, the Source Propagation Rule records taints flowing into sources and the Sink Propagation Rule unconditionally introduces taints at sinks.
 
-
-    \subsection{Backwards Source Propagation Rule}\label{s:sourcerule}
+    Notably, the \code{DefaultSourceSinkManager} assumes the return value to be tainted and only if the return value is ignored or the method has no return value the base object is assumed to be tainted unless specified otherwise \cite{Arzt2017PhD}. Backwards starting at sinks, the base object and the parameters get tainted resulting in more taints per statement than in forwards analysis. In case of an \code{AccessPathBasedSourceSinkManager}, this is not a problem anymore.
+    
+    % \subsection{Backwards Sink Propagation Rule}
 
     \subsection{Backwards Array Propagation Rule}
+    The Array Propagation Rule handles \code{ArrayNewExpr}, \code{LengthExpr} and \code{ArrayRef} on the right hand side. Further, we describe the three cases of this rule.
+
+    \begin{itemize}
+        \item \textbf{Array Rule 1}: If the length of the left side is tainted and the right side is an \code{ArrayNewExpr}, the outcoming taint is the size local of the \code{ArrayNewExpr}.
+        \item  \textbf{Array Rule 2}: If the left side is tainted and the right side is a \code{LengthExpr}, the outcoming taint is the operator of the \code{LengthExpr} with only its length tainted.
+        \item \textbf{Array Rule 3:} If the left side is tainted and the right side is an \code{ArrayRef}, the outcoming taint includes the array base with only its content tainted. Unless the left side is also an \code{ArrayRef}, the source taint is killed.
+    \end{itemize}
 
     \subsection{Backwards Exception Propagation Rule}
+
 
     \subsection{Backwards Wrapper Propagation Rule}
     \textsc{FlowDroid} already provided a \code{IReversibleTaintWrapper} interface. Implementing taint wrappers support \code{getInverseTaints()} which takes the outcoming taint as an input and computes the incoming taints.
 
     This rule is similiar to its forward equivalent but enforces a reversible taint wrapper. Consequently, tainted return values are also passed into the taint wrapper.
+
+    Inverse taint wrappers do have one limitation. Often tainted parameters result in a tainted base object. \code{EasyTaintWrapper} uses this pattern to provide a fast and simple taint wrapper \cite{Arzt2017PhD}. But backwards, only a tainted base object is observed. Similiar to binary operators in assignments, we can not do anything but to taint every parameter.
 
     % \subsection{Backwards Implicit Propagation Rule}
     % Not implemented.
