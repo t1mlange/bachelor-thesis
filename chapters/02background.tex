@@ -22,7 +22,8 @@
         \item Call To Return: Edges over a call statement. Flow function maps the facts not visible in the callee over the call statement.
         \item Normal Flow: Edges over every other statement. Often, this flow functions only handles assign statements.
     \end{itemize}
-    The incoming set of facts is all predecessors' outgoing facts merged together using a merge operator $\sqcap$: $in(s) := \bigsqcap_{p \in Preds(s)} out(p)$.
+    The incoming set of facts is all predecessors' outgoing facts merged together using a merge operator $\sqcap$: 
+    $$in(s) := \bigsqcap_{p \in Preds(s)} out(p)$$
     % introduce taints
     The domain also contains a zero fact and all nodes with $d=\textbf{0}$ are always reachable, thus the zero fact holds at every statement. As an example, in taint analysis the flow functions map zero facts at sources to a tainted variable. 
 
@@ -31,7 +32,7 @@
     The proposed tabulation algorithm to solve the reachable realizable path problem is a dynamic programming algorithm. Whenever a method was fully visited, a summary is saved and later on applied if the same input fact is observed. 
 
     % Fix point
-    Eventually, there is no fact to propagate anymore and the analysis will stop. This is either because the facts were killed by the flow functions or already have been seen at the nodes and reach a fixpoint.
+    Eventually, there is no fact to propagate anymore and the analysis will stop. This is either because the facts were killed by the flow functions or already have been seen at the nodes and so reached a fixpoint.
 
     For all this to work, the problems which can be formulated in IFDS have to abide to restrictions which are also eponymous:
 

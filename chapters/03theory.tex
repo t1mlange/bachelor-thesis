@@ -89,61 +89,120 @@
         
 
     \section{Complexity of Data Flow Analysis}
-    IFDS has a time-complexity of $O(E \cdot D^3)$. The edges in the control-flow graph are set by the to-be-analyzed app. The domain depends on the tainted variables observed by the IFDS search. Arzt et al evaluation of \textsc{FlowDroid} shows no correlation between a-priori known parameters and the runtime \cite{Arzt2017PhD}. So, we are left with the number of taint propagations as the only parameter correlated to the runtime but they are only known afterwards. 
+    IFDS has a time-complexity of $O(E \cdot D^3)$. The edges in the control-flow graph are set by the to-be-analyzed app. The domain depends on the tainted variables observed by the IFDS analysis. Arzt et al evaluation of \textsc{FlowDroid} shows no correlation between a-priori known parameters and the runtime of the analysis \cite{Arzt2017PhD}. So, we are left with the number of taint propagations as the only parameter correlated to the runtime but they are only known afterwards. 
 
     The number of taint propagations depends on two factors: the lifetime of taints and the number of taints. Both factors highly depend on the search direction which we will explain in the following paragraphs.
 
-    Starting with the number of taints, we
+    \begin{figure}[ht]
+        \begin{lstlisting}
+            String returnParam(int i, String s1, String s2, String s3) {
+                if (i == 1)
+                    return s1;
+                else if (i == 2)
+                    return s2;
+                else if (i == 3)
+                    return s3;
+                else
+                    return "default";
+            }
+        \end{lstlisting}
+        \caption{Branching Factor Example}
+        \label{lst:branching}
+    \end{figure}
 
-    \begin{tikzpicture}[auto, 
-        s/.style={draw, rounded corners},
-        v/.style={draw, fill=black, circle, inner sep=0pt, minimum size=5pt},
-        every node/.style={align=center},
-        every matrix/.style={ampersand replacement=\&,column sep=0.25cm,row sep=.25cm}]
-        \matrix {
-            \& \node[v, label={0}] (zero1) {}; \& \node[v, label={a}] (a1) {}; \& \node[v, label={b}] (b1) {}; \& \node[v, label={c}] (c1) {};\\
-            \node[s] (s1) {int a = source();}; \& \& \& \&\\
-            % \& \node[v] (zero2) {}; \& \node[v] (a2) {}; \& \node[v] (b2) {}; \& \node[v] (c2) {};\\
-            % \node[s] (s2) {int b = a;}; \& \& \& \&\\
-            % \& \node[v] (zero3) {}; \& \node[v] (a3) {}; \& \node[v] (b3) {}; \& \node[v] (c3) {};\\
-            % \node[s] (s3) {int c = b;}; \& \& \& \&\\
-            % \& \node[v] (zero4) {}; \& \node[v] (a4) {}; \& \node[v] (b4) {}; \& \node[v] (c4) {};\\
-            % \node[s] (s4) {leak(c);} \& \& \& \&\\
-            % \& \node[v] (zero5) {}; \& \node[v] (a5) {}; \& \node[v] (b5) {}; \& \node[v] (c5) {};\\
-        };
+    First, we take a look at the is the branching factor. The branching factor describes the number outgoing edges from a node. A smaller branching factor is favorable.   
+    Think of binary operator expression such as \code{int c = a + b;}, backwards we can not argue which operand is responsible for the tainted output and thus proceed with both operands tainted. The same restriction is present in rule 4 of Call Flow which describes how the returned value is mapped back into the callee. This time the branching factor can be even larger. As an example, in \autoref{lst:branching} is a method which conditionally returns one of its parameters and is part of the leak path. Lets assume the returned value of a call to \code{returnParam()} is tainted. Backwards, every returned operand is tainted and later on mapped according to Return Flow rule 2 back into the caller. Thus, the IFDS algorithm ends up with a summary $\mathit{retVal} \rightarrow \{s1, s2, s3\}$. Forwards, a tainted parameter is mapped into the callee and later on returned to the caller resulting in a summary $sX \rightarrow \mathit\{\mathit{retVal}, sX\}$ with $X \in \{1,2,3\}$. Such a case favors forwards analysis.
 
-        % \draw[sto] (s1) -- (s2);
-        % \draw[sto] (s2) -- (s3);
-        % \draw[sto] (s3) -- (s4);
-
-        % \draw[vto] (zero1) -- (zero2);
-        % \draw[vto] (zero2) -- (zero3);
-        % \draw[vto] (zero3) -- (zero4);
-    \end{tikzpicture}
-
+    In contrast, a strict right-to-left flow favors backwards analysis as backwards taints are killed more often due to a stronger overwrite rule meaning a shorter lifetime per taint. In \autoref{tikz:rtol} is such a right-to-flow flow displayed. Forwards, the right hand side is always kept alive because it still holds the tainted value below the statement and could be leaked. Starting at the sinks this fact can be confidently ignored because the fact is known to be not on a leak path.
     
+    \begin{figure}[ht]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{tikzpicture}[auto, 
+                s/.style={draw, rounded corners},
+                v/.style={draw, fill=black, circle, inner sep=0pt, minimum size=5pt},
+                every node/.style={align=center},
+                every matrix/.style={ampersand replacement=\&,column sep=0.25cm,row sep=.25cm},
+                vto/.style={->, >=stealth, thick}]
+                \matrix {
+                    \& \node[v, label={0}] (zero1) {}; \& \node[v, label={a}] (a1) {}; \& \node[v, label={b}] (b1) {}; \& \node[v, label={c}] (c1) {};\\
+                    \node[s] (s1) {\smallcode{int a = source();}}; \& \& \& \&\\
+                    \& \node[v] (zero2) {}; \& \node[v] (a2) {}; \& \node[v] (b2) {}; \& \node[v] (c2) {};\\
+                    \node[s] (s2) {\smallcode{int b = a;}}; \& \& \& \&\\
+                    \& \node[v] (zero3) {}; \& \node[v] (a3) {}; \& \node[v] (b3) {}; \& \node[v] (c3) {};\\
+                    \node[s] (s3) {\smallcode{int c = b;}}; \& \& \& \&\\
+                    \& \node[v] (zero4) {}; \& \node[v] (a4) {}; \& \node[v] (b4) {}; \& \node[v] (c4) {};\\
+                    \node[s] (s4) {\smallcode{leak(c);}}; \& \& \& \&\\
+                    \& \node[v] (zero5) {}; \& \node[v] (a5) {}; \& \node[v] (b5) {}; \& \node[v] (c5) {};\\
+                };
+                
+                \draw[vto] (zero1) -- (zero2);
+                \draw[vto] (zero2) -- (zero3);
+                \draw[vto] (zero3) -- (zero4);
+                \draw[vto] (zero4) -- (zero5);
+        
+                \draw[vto] (zero1) -- (a2);
+                \draw[vto] (a2) -- (a3);
+                \draw[vto] (a3) -- (a4);
+                \draw[vto] (a4) -- (a5);
+                \draw[vto] (a2) -- (b3);
+                \draw[vto] (b3) -- (b4);
+                \draw[vto] (b4) -- (b5);
+                \draw[vto] (b3) -- (c4);
+                \draw[vto] (c4) -- (c5);
+            \end{tikzpicture}
+            \caption{Forwards}
+            \label{tikz:rtol_a}
+        \end{subfigure}
+        \qquad
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{tikzpicture}[auto, 
+                s/.style={draw, rounded corners},
+                v/.style={draw, fill=black, circle, inner sep=0pt, minimum size=5pt},
+                every node/.style={align=center},
+                every matrix/.style={ampersand replacement=\&,column sep=0.25cm,row sep=.25cm},
+                vto/.style={->, >=stealth, thick}]
+                \matrix {
+                    \& \node[v, label={0}] (zero1) {}; \& \node[v, label={a}] (a1) {}; \& \node[v, label={b}] (b1) {}; \& \node[v, label={c}] (c1) {};\\
+                    \node[s] (s1) {\smallcode{int a = source();}}; \& \& \& \&\\
+                    \& \node[v] (zero2) {}; \& \node[v] (a2) {}; \& \node[v] (b2) {}; \& \node[v] (c2) {};\\
+                    \node[s] (s2) {\smallcode{int b = a;}}; \& \& \& \&\\
+                    \& \node[v] (zero3) {}; \& \node[v] (a3) {}; \& \node[v] (b3) {}; \& \node[v] (c3) {};\\
+                    \node[s] (s3) {\smallcode{int c = b;}}; \& \& \& \&\\
+                    \& \node[v] (zero4) {}; \& \node[v] (a4) {}; \& \node[v] (b4) {}; \& \node[v] (c4) {};\\
+                    \node[s] (s4) {\smallcode{leak(c);}}; \& \& \& \&\\
+                    \& \node[v] (zero5) {}; \& \node[v] (a5) {}; \& \node[v] (b5) {}; \& \node[v] (c5) {};\\
+                };
+        
+                \draw[vto] (zero5) -- (zero4);
+                \draw[vto] (zero4) -- (zero3);
+                \draw[vto] (zero3) -- (zero2);
+                \draw[vto] (zero2) -- (zero1);
+        
+                \draw[vto] (zero5) -- (c4);
+                \draw[vto] (c4) -- (b3);
+                \draw[vto] (b3) -- (a2);
+            \end{tikzpicture}      
+            \caption{Backwards}
+            \label{tikz:rtol_b}  
+        \end{subfigure}
+        \caption{Right-to-Left Order}
+        \label{tikz:rtol}
+    \end{figure}
 
-    Explain where the run-time comes from.
-    Depends the number of edge propagations
+    Static field taints are a special case and an issue in both directions. Their scope is global, so a static field can be accessed anywhere in the code. Thus such a taint needs to be propagated into every method and can only be killed on overwrite.
+
+    In classical web-oriented applications, the direction of the dataflow analysis might be more important. Typical vulnerabilities such as cross-site-scripting and SQL injection occur because untrusted user input was not validated. Normally the content is escaped right before output or sanitized before execution of the command, respectively. In this special case of application, the sanitization method is assumed to be close to a sink. Being able to kill taints ealier is advantageous and therefore backwards analysis should be the better choice.
+
     \begin{itemize}
-        \item "Branching factor" might be different for forwards/backwards, with some simple examples?
-            \begin{itemize}
-                \item  tainted = a + b. BW we don't know which was responsible for the tainted c $\rightarrow$ 2 new taints
-                \item Simple assigments in a strict r-to-l order: a = b. FW {a, b} while BW we can kill a and just go with {b}
-            \end{itemize}
-        \item Lifetime of taints 
-        \begin{itemize}
-            \item Static taints are valid everywhere
-            \item Best practise "sanitize just before displaying" might favor backwards
-        \end{itemize}
         \item Number of taints
         \begin{itemize}
             \item There seems to be no correlation between source count and analysis time
             \item Probably also holds for sinks?
             \item There might be indicator for a single app whether it is better to start at sources or sinks
         \end{itemize}
-
-
     \end{itemize}
 
 \end{document}

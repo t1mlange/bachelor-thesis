@@ -80,7 +80,8 @@
 	stringstyle=\color{red},
 	basicstyle=\ttfamily,
 	numbers=left,
-	gobble=12
+	gobble=12,
+	morekeywords={String}
 }
 
 \lstdefinelanguage{Jimple} {
@@ -95,6 +96,8 @@
 \let\file\texttt
 % \let\code\lstinline[basicstyle=\ttfamily]
 \newcommand{\code}[1]{\lstinline[basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true]{#1}}
+\newcommand{\smallcode}[1]{\lstinline[breaklines=true]{#1}}
+\newcommand{\jimple}[1]{\lstinline[language=Jimple,basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true]{#1}}
 \let\tbs\textbackslash
 
 \Metadata{
