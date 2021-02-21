@@ -87,12 +87,12 @@
     What the core problem tackles
 
     \section{Rules}
-    Flow functions can get quite large, complicated to understand and hard to maintain \cite{Lerch2015}. To counteract this, \textsc{FlowDroid} outsources certain features into rules. These rules also provide the four flow functions and are applied in the corresponding flow function.
+    Flow functions can get quite large, complicated to understand and hard to maintain \cite{Lerch2015}. To counteract this, \textsc{FlowDroid} outsources certain features into rules. These rules also implement the four flow functions and are applied in the corresponding flow function.
 
     \subsection{Source \& Sink Propagation Rule}\label{s:sourcerule}
     In backwards analysis, sources act like sinks and vice versa. Thus, the Source Propagation Rule records taints flowing into sources and the Sink Propagation Rule unconditionally introduces taints at sinks.
 
-    Notably, the \code{DefaultSourceSinkManager} assumes the return value to be tainted and only if the return value is ignored or the method has no return value the base object is assumed to be tainted unless specified otherwise \cite{Arzt2017PhD}. Backwards starting at sinks, the base object and the parameters get tainted resulting in more taints per statement than in forwards analysis. In case of an \code{AccessPathBasedSourceSinkManager}, this is not a problem anymore.
+    Notably, the \code{DefaultSourceSinkManager} assumes the return value to be tainted and only if the return value is ignored or the method has no return value the base object is assumed to be tainted unless specified otherwise while at sinks base object and parameters are leaked \cite{Arzt2017PhD}. Thus, starting at sinks results in more taints per start statement than in forwards analysis. As written in \autoref{s:complexity}, Arzt's evaluation has shown that the initial source count does not correlate with the runtime which implies that this should be is insignificant.
     
     % \subsection{Backwards Sink Propagation Rule}
 
@@ -101,12 +101,14 @@
 
     \begin{itemize}
         \item \textbf{Array Rule 1}: If the length of the left side is tainted and the right side is an \code{ArrayNewExpr}, the outcoming taint is the size local of the \code{ArrayNewExpr}.
-        \item  \textbf{Array Rule 2}: If the left side is tainted and the right side is a \code{LengthExpr}, the outcoming taint is the operator of the \code{LengthExpr} with only its length tainted.
-        \item \textbf{Array Rule 3:} If the left side is tainted and the right side is an \code{ArrayRef}, the outcoming taint includes the array base with only its content tainted. Unless the left side is also an \code{ArrayRef}, the source taint is killed.
+        \item  \textbf{Array Rule 2}: If the left side is tainted and the right side is a \code{LengthExpr}, the outcoming taint is the operand of the \code{LengthExpr} with only its length tainted.
+        \item \textbf{Array Rule 3:} If the left side is tainted and the right side is an \code{ArrayRef}, the outcoming taint is the array base with only its content tainted.
     \end{itemize}
 
-    \subsection{Backwards Exception Propagation Rule}
+    By default, the whole array is tainted and indices are not tracked. Following, all three rules kill the incoming taint unless the left side is an \code{ArrayRef}. 
 
+    \subsection{Backwards Exception Propagation Rule}
+    The Backwards Exception Propagation Rule handling is
 
     \subsection{Backwards Wrapper Propagation Rule}
     \textsc{FlowDroid} already provided a \code{IReversibleTaintWrapper} interface. Implementing taint wrappers support \code{getInverseTaints()} which takes the outcoming taint as an input and computes the incoming taints.
@@ -119,16 +121,112 @@
     % Not implemented.
 
     \subsection{Backwards Strong Update Rule}
+
+    \begin{figure}[ht]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{tikzpicture}[auto,
+                s/.style={draw, rounded corners},
+                v/.style={draw, fill=black, circle, inner sep=0pt, minimum size=5pt},
+                every node/.style={align=center},
+                every matrix/.style={ampersand replacement=\&,column sep=0.25cm,row sep=.25cm},
+                vto/.style={->, >=stealth, thick},
+                ato/.style={->, >=stealth, thick, dotted}]
+                \matrix {
+                    \& \node[v, label={0}] (zero1) {}; \& \node[v, label={i.v}] (i1) {}; \& \node[v, label={k.v}] (j1) {};\\
+                    \node[s] (s1) {\smallcode{IR i = new IR();}}; \& \& \&\\
+                    \& \node[v] (zero2) {}; \& \node[v] (i2) {}; \& \node[v] (j2) {};\\
+                    \node[s] (s2) {\smallcode{IR k = i;}}; \& \& \&\\
+                    \& \node[v] (zero3) {}; \& \node[v] (i3) {}; \& \node[v] (j3) {};\\
+                    \node[s] (s3) {\smallcode{k.v = source();}}; \& \& \&\\
+                    \& \node[v] (zero4) {}; \& \node[v] (i4) {}; \& \node[v] (j4) {};\\
+                    \node[s] (s4) {\smallcode{i.v = 42;}}; \& \& \&\\
+                    \& \node[v] (zero5) {}; \& \node[v] (i5) {}; \& \node[v] (j5) {};\\
+                    \node[s] (s5) {\smallcode{i.v = source();}}; \& \& \& \&\\
+                    \& \node[v] (zero6) {}; \& \node[v] (i6) {}; \& \node[v] (j6) {};\\
+                    \node[s] (s6) {\smallcode{leak(k.v);}}; \& \& \& \&\\
+                    \& \node[v] (zero7) {}; \& \node[v] (i7) {}; \& \node[v] (j7) {};\\
+                };
+        
+                \draw[vto] (zero1) -- (zero2);
+                \draw[vto] (zero2) -- (zero3);
+                \draw[vto] (zero3) -- (zero4);
+                \draw[vto] (zero4) -- (zero5);
+                \draw[vto] (zero5) -- (zero6);
+                \draw[vto] (zero6) -- (zero7);
+        
+                \draw[vto] (zero3) -- (j4);
+                \draw[ato] (j4) -- (j3);
+                \draw[ato] (j3) -- (i2);
+                \draw[ato] (i2) -- (i1);
+                \draw[vto] (i2) -- (i3);
+                \draw[vto] (i3) -- (i4);
+                \draw[vto] (zero5) -- (i6);
+                \draw[vto] (i6) -- (i7);
+                \draw[ato] (i6) -- (i5);
+                \draw[ato] (i5) -- (i4);
+                \draw[ato] (i4)[out=30, in=-30] to (i3);
+                \draw[ato] (i3) -- (j2);
+                \draw[ato] (j2) -- (j1);
+                \draw[vto] (j2) -- (j3);
+            \end{tikzpicture}
+            \caption{Forwards}
+            \label{tikz:strongupdate_a}
+        \end{subfigure}
+        \qquad
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{tikzpicture}[auto, 
+                s/.style={draw, rounded corners},
+                v/.style={draw, fill=black, circle, inner sep=0pt, minimum size=5pt},
+                every node/.style={align=center},
+                every matrix/.style={ampersand replacement=\&,column sep=0.25cm,row sep=.25cm},
+                vto/.style={->, >=stealth, thick}]
+                \matrix {
+                    \& \node[v, label={0}] (zero1) {}; \& \node[v, label={i.v}] (i1) {}; \& \node[v, label={k.v}] (j1) {};\\
+                    \node[s] (s1) {\smallcode{IR i = new IR();}}; \& \& \&\\
+                    \& \node[v] (zero2) {}; \& \node[v] (i2) {}; \& \node[v] (j2) {};\\
+                    \node[s] (s2) {\smallcode{IR k = i;}}; \& \& \&\\
+                    \& \node[v] (zero3) {}; \& \node[v] (i3) {}; \& \node[v] (j3) {};\\
+                    \node[s] (s3) {\smallcode{k.v = source();}}; \& \& \&\\
+                    \& \node[v] (zero4) {}; \& \node[v] (i4) {}; \& \node[v] (j4) {};\\
+                    \node[s] (s4) {\smallcode{i.v = 42;}}; \& \& \&\\
+                    \& \node[v] (zero5) {}; \& \node[v] (i5) {}; \& \node[v] (j5) {};\\
+                    \node[s] (s5) {\smallcode{i.v = source();}}; \& \& \& \&\\
+                    \& \node[v] (zero6) {}; \& \node[v] (i6) {}; \& \node[v] (j6) {};\\
+                    \node[s] (s6) {\smallcode{leak(k.v);}}; \& \& \& \&\\
+                    \& \node[v] (zero7) {}; \& \node[v] (i7) {}; \& \node[v] (j7) {};\\
+                };
+        
+                \draw[vto] (zero7) -- (zero6);
+                \draw[vto] (zero6) -- (zero5);
+                \draw[vto] (zero5) -- (zero4);
+                \draw[vto] (zero4) -- (zero3);
+                \draw[vto] (zero3) -- (zero2);
+                \draw[vto] (zero2) -- (zero1);
+        
+                \draw[vto] (zero7) -- (j6);
+                \draw[dashed] (j6) -- (i6);
+            \end{tikzpicture}
+            \caption{Backwards}
+            \label{tikz:strongupdate_b}  
+        \end{subfigure}
+        \caption{Strong Update Example}
+        \label{tikz:strongupdate}
+    \end{figure}
+
     Strong updates are assignments where the content of a variable gets overwritten. In our normal flow rules, this is modelled in rule 1. When a statement is observed with its left side tainted, we know it got its tainted content at this statement. Thus we kill the taint because the content above this statement is of no interest and taint the right hand side. So we performed a strong update on the left side. 
 
-    But with aliasing this gets quite more complicated. Now, we can observe a taint not matching the left side and propagate it over the statement by default but this taint is an alias of the left side and should have been killed. Linking aliasing taints to support such strong updates would lose the distributive property of the flow functions and is not an option. 
+    But with aliasing this gets quite more complicated. Now, we can observe a taint not matching the left side and propagate it over the statement according to the default rule of normal flow but the taint is an alias of the left side and should have been killed. Linking aliasing taints to support such strong updates would lose the distributiveness property of the flow functions. 
     
-    In this case, \textsc{FlowDroid} fallbacks to Soot's must-aliasing analysis. However, this analysis is an approximation because it is only intraprocedural and relies on SPARK which is flow-insensitive.
+    In this case, \textsc{FlowDroid} falls back to Soot's must-aliasing analysis. However, the built-in must-aliasing is only intraprocedural. Thus, the strong update rule can not detect strong updates split over methods.
 
     \begin{itemize}
         \item \textbf{Strong Update Rule}: If the incoming taint must-aliases the left side then apply the normal flow rules just as if the left side was tainted. 
     \end{itemize}
 
+    Searching backwards also removes one limitation of strong updates. Consider the example in \autoref{tikz:strongupdate}. \code{IR} is a wrapper around an integer to provide integers by reference. The main idea behind this example is a strong update on an alias of a tainted variable and later retaint the alias. In \ref{tikz:strongupdate_a}, taints are created at both source statements. The critical point is \code{i.v = 42;} where the forwards strong update rule kills \code{k.v} because it must aliases \code{i.v} and the taint \code{i.v}, later found through aliasing, is killed according to normal flow. Both kills are appropriate because it is unknown whether there will be another strong update. This is not the case in backwards analysis. Here the last write before the sink to the leaked variable or one of its aliases is found first. So after one propagation the taint already reaches a source statement.
 
     \subsection{Backwards Clinit Rule}\label{s:clinitrule}
     \code{<clinit>} is a special method in the JVM and stands for class loader init. The function is generated by the compiler and can not be called explicitly. Examples of statements which get compiled into clinit can be seen in \autoref{lst:clinit_examples}. The invokation is implicit at the initialization phase of the class and is executed at most once for each class \footnote{\url{https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html\#jvms-2.9}}. 
@@ -164,7 +262,7 @@
     \end{figure}
 
 
-    The need for this rule is rooted in the IFDS solver of \textsc{FlowDroid}. The solver decides whether to use normal flow or call flow by calling \code{isCallStmt(Unit u)} on the interprocedural control flow graph generated by Soot. Internally, this method calls \code{containsInvokeExpr()} on the \code{Unit} object. \code{containsInvokeExpr()} for \code{AssignStmt} only returns true if the right hand side is an instance of \code{InvokeExpr}. Resulting, we miss the call to \code{<clinit>} for AssignStmts with NewExpr or StaticFieldRef on the right side.
+    The need for this rule is rooted in the IFDS solver of \textsc{FlowDroid}. The solver decides whether to use normal flow or call flow by calling \code{isCallStmt(Unit u)} on the interprocedural control-flow graph generated by Soot. Internally, this method calls \code{containsInvokeExpr()} on the \code{Unit} object. \code{containsInvokeExpr()} for \code{AssignStmt} only returns true if the right hand side is an instance of \code{InvokeExpr}. Consequently, the calls to \code{<clinit>} from \code{AssignStmt}s with \code{NewExpr} or \code{StaticFieldRef} on the right side are missed.
 
     The Backwards Clinit Rule manually injects an edge to the \code{<clinit>} method in the infoflow solver when appropriate during the analysis. Also, it lessens the overapproximation of SPARK by carefully choosing whether to inject the edge. The rule works as follows:
     \begin{itemize}
@@ -174,14 +272,12 @@
     \end{itemize}
     This is still an overapproximation of course. A precise solution would require bookkeeping of the first occurence in the code of every class. 
 
-    This rule has no equivalent in forwards analysis because in fowards analysis the problem is not as severe. As taints are introducted at sources, if the source statement is a static initialization as shown in \autoref{lst:clinit_examples_a}, the propagation starts inside the \code{<clinit>} method. The solver has a \code{followReturnsPastSeeds} option which propagates return flows for unbalanced problems, for example when the taint was introducted inside a method and therefore there was no incoming flow. This allows the forwards analysis to detect leaks originated from static variable initializations but misses leaks inside static blocks as shown in \autoref{lst:clinit_examples_b}.
+    In fowards analysis, the issue is not as severe. As taints are introducted at sources, if the source statement is a static initialization as shown in \autoref{lst:clinit_examples_a}, the propagation starts inside the \code{<clinit>} method. The solver has a \code{followReturnsPastSeeds} option which propagates return flows for unbalanced problems, for example when the taint was introducted inside a method and therefore there was no incoming flow. This allows the forwards analysis to detect leaks originated from static variable initializations but misses leaks inside static blocks as shown in \autoref{lst:clinit_examples_b}.
 
     \subsection{Other Rules}
     Skip System Class Rule and Stop After First K Flows Rule are not direction-dependent. Both are shared with the forwards search and therefore use the existing implementation in \textsc{FlowDroid}.
     
-    Typing Propagation Rule has no backwards equivalent. We decided to implement type checking in the infoflow problem instead.
-
-
+    % Typing Propagation Rule has no backwards equivalent. We decided to implement type checking in the infoflow problem instead.
 
     \section{Code Optimizer}
     Before starting the analysis, \textsc{FlowDroid} applies code optimization to the interprocedural call graph. By default, dead code elimination and within constant value propagation is performed. Those are also applied before backwards analysis but we needed another code optimizer to handle an edge case in backwards analysis.

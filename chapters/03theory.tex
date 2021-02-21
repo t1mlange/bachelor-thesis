@@ -88,7 +88,7 @@
     \end{itemize}
         
 
-    \section{Complexity of Data Flow Analysis}
+    \section{Complexity of Data Flow Analysis}\label{s:complexity}
     IFDS has a time-complexity of $O(E \cdot D^3)$. The edges in the control-flow graph are set by the to-be-analyzed app. The domain depends on the tainted variables observed by the IFDS analysis. Arzt et al evaluation of \textsc{FlowDroid} shows no correlation between a-priori known parameters and the runtime of the analysis \cite{Arzt2017PhD}. So, we are left with the number of taint propagations as the only parameter correlated to the runtime but they are only known afterwards. 
 
     The number of taint propagations depends on two factors: the lifetime of taints and the number of taints. Both factors highly depend on the search direction which we will explain in the following paragraphs.
@@ -194,7 +194,9 @@
 
     Static field taints are a special case and an issue in both directions. Their scope is global, so a static field can be accessed anywhere in the code. Thus such a taint needs to be propagated into every method and can only be killed on overwrite.
 
-    In classical web-oriented applications, the direction of the dataflow analysis might be more important. Typical vulnerabilities such as cross-site-scripting and SQL injection occur because untrusted user input was not validated. Normally the content is escaped right before output or sanitized before execution of the command, respectively. In this special case of application, the sanitization method is assumed to be close to a sink. Being able to kill taints ealier is advantageous and therefore backwards analysis should be the better choice.
+    In special cases of application, the direction of the dtaflow analysis might be more important. We bring in classical web-oriented applications as an example. Typical vulnerabilities such as cross-site-scripting and SQL injection occur because untrusted user input was not validated. Normally the content is escaped right before output or sanitized before execution of the command, respectively. So the sanitization method is expected to be close to the sink. Being able to kill taints ealier is advantageous and therefore backwards analysis should be the better choice.
+
+    We discussed cases where one direction is better than the other but it still highly depends on the analyzed app.  
 
     \begin{itemize}
         \item Number of taints
@@ -204,5 +206,7 @@
             \item There might be indicator for a single app whether it is better to start at sources or sinks
         \end{itemize}
     \end{itemize}
+
+
 
 \end{document}

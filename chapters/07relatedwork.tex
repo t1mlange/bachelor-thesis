@@ -5,7 +5,7 @@
     Yan et al \cite{Yan2017} proposed a vulnerability detection tool for PHP with a focus on web applications. They aim to detect typical web application vulnerabilities such as cross-site-scripting and SQL injections using backwards taint analysis. 
     Instead of relying on reducing the problem to proven frameworks such as IFDS or IDE, they seemingly define their own dataflow algorithm. The proposed algorithm traverses the basic blocks backwards and copies taints left after traversing the basic block to its predecessors. Unlike in our work and in general in dataflow analysis, they do not try to reach a fixpoint, instead they just do not follow circular paths in the control-flow graph. 
     They also emphasize their concept of "cleans": a predefined list of sanitization methods which kill the incoming taints. 
-    \textsc{FlowDroid}'s taint wrappers can do the same and both shipped implementations support such a concept.
+    In \textsc{FlowDroid} the same is possible using taint wrappers and both shipped implementations support such a concept.
     A rationale for searching backwards, which is why we included it as related work, is not provided.
 
     FlowTwist? He starts in the middle and searches fowards and backwards.
