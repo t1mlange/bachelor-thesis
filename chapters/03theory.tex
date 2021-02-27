@@ -113,7 +113,7 @@
     First, we take a look at the is the branching factor. The branching factor describes the number outgoing edges from a node. A smaller branching factor is favorable.   
     Think of binary operator expression such as \code{int c = a + b;}, backwards we can not argue which operand is responsible for the tainted output and thus proceed with both operands tainted. The same restriction is present in rule 4 of Call Flow which describes how the returned value is mapped back into the callee. This time the branching factor can be even larger. As an example, in \autoref{lst:branching} is a method which conditionally returns one of its parameters and is part of the leak path. Lets assume the returned value of a call to \code{returnParam()} is tainted. Backwards, every returned operand is tainted and later on mapped according to Return Flow rule 2 back into the caller. Thus, the IFDS algorithm ends up with a summary $\mathit{retVal} \rightarrow \{s1, s2, s3\}$. Forwards, a tainted parameter is mapped into the callee and later on returned to the caller resulting in a summary $sX \rightarrow \mathit\{\mathit{retVal}, sX\}$ with $X \in \{1,2,3\}$. Such a case favors forwards analysis.
 
-    In contrast, a strict right-to-left flow favors backwards analysis as backwards taints are killed more often due to a stronger overwrite rule meaning a shorter lifetime per taint. In \autoref{tikz:rtol} is such a right-to-flow flow displayed. Forwards, the right hand side is always kept alive because it still holds the tainted value below the statement and could be leaked. Starting at the sinks this fact can be confidently ignored because the fact is known to be not on a leak path.
+    In contrast, a strict right-to-left flow favors backwards analysis as backwards taints are killed more often due to a stronger overwrite rule meaning a shorter lifetime per taint. In \autoref{tikz:rtol} is such a right-to-left flow displayed. Forwards, the right hand side is always kept alive because it still holds the tainted value below the statement and could be leaked. Starting at the sinks this fact can be confidently ignored because the fact is known to be not on a leak path.
     
     \begin{figure}[ht]
         \centering
@@ -196,7 +196,7 @@
 
     In special cases of application, the direction of the dtaflow analysis might be more important. We bring in classical web-oriented applications as an example. Typical vulnerabilities such as cross-site-scripting and SQL injection occur because untrusted user input was not validated. Normally the content is escaped right before output or sanitized before execution of the command, respectively. So the sanitization method is expected to be close to the sink. Being able to kill taints ealier is advantageous and therefore backwards analysis should be the better choice.
 
-    We discussed cases where one direction is better than the other but it still highly depends on the analyzed app.  
+    We discussed cases where one direction is better than the other but it still highly depends on the analyzed app. 
 
     \begin{itemize}
         \item Number of taints

@@ -1,7 +1,172 @@
 \documentclass[../draft.tex]{subfiles}
 
 \begin{document}
-    \chapter{Evaluation}
+    \chapter{Performance Evaluation}
+
+    \section{DroidBench}
+    We already introduced \textsc{Droidbench} in \autoref{s:droidbenchvalidation} to validate the soundness of our backwards-directed implementation. In this section, we focus on the performance in comparison to the existing forwards implementation in \textsc{FlowDroid}. 
+
+    All test cases are small enough to be analysed in sub-two seconds on an average four core desktop CPU from 2012. Our test environment is not isolated, so background tasks and the process scheduler can affect the runtime. The short runtime together with the variance of the unisolated testing environment render the runtime unusable as an comparison point. In constrast, edge propagations are deterministic\footnote{This is only true if there are enough resources. \textsc{FlowDroid} tries to terminate gracefully when running low on memory. Also, timeouts result in a non-reproducible number of edge propagations.} and correlate with the runtime. Thus, we only use the number of propagations to compare both implementations.
+
+    \textsc{DroidBench} has the advantage that all apps are specificly crafted for benchmarking taint analysis. So, most tests only contain single-figure number of sources and sinks. Also, the number of sources and sinks are often equal or just differ by one to test whether the tool can differentiate something. These simplify the comparison between both analysis directions as neither has an initial disadvantage.
+
+    \newcommand{\tsubEight}[1]{\multicolumn{8}{c}{#1}\\\hline}
+    \begin{longtable}{l | r | r | r | r | r | r | r}
+        & \multicolumn{2}{c|}{\textbf{Forwards}} & \multicolumn{2}{c|}{\textbf{Backwards}} & \multicolumn{3}{c}{\textbf{Difference}}\\
+        \textbf{App Name} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A}& \textbf{Total}\\
+        \hline\hline
+        \endhead
+        \tsubEight{AliasingTest}
+        FlowSensitivity1 & $175$ & $72$ & $43$ & $101$ & $132$ & $-29$ & $103$\\
+        Merge1 & $94$ & $44$ & $61$ & $29$ & $33$ & $15$ & $48$\\
+        SimpleAliasing1 & $35$ & $13$ & $20$ & $3$ & $15$ & $10$ & $25$\\
+        StrongUpdate1 & $30$ & $13$ & $11$ & $3$ & $19$ & $10$ & $29$\\
+        \hline
+        \tsubEight{AndroidSpecificTest}
+        ApplicationModeling1 & $235$ & $103$ & $851$ & $2370$ & $-616$ & $-2267$ & $-2883$\\
+        DirectLeak1 & $3$ & $0$ & $4$ & $0$ & $-1$ & $0$ & $-1$\\
+        InactiveActivity & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
+        Library2 & $5$ & $0$ & $6$ & $0$ & $-1$ & $0$ & $-1$\\
+        LogNoLeak & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
+        Obfuscation1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
+        Parcel1 & $144$ & $15$ & $66$ & $108$ & $78$ & $-93$ & $-15$\\
+        PrivateDataLeak1 & $410$ & $110$ & $865$ & $1874$ & $-455$ & $-1764$ & $-2219$\\
+        PrivateDataLeak2 & $15$ & $0$ & $5$ & $6$ & $10$ & $-6$ & $4$\\
+        PrivateDataLeak3 & $17$ & $2$ & $469$ & $1596$ & $-452$ & $-1594$ & $-2046$\\
+        runPublicAPIField1 & $89$ & $1$ & $73$ & $51$ & $16$ & $-50$ & $-34$\\
+        runPublicAPIField2 & $5$ & $0$ & $12$ & $7$ & $-7$ & $-7$ & $-14$\\
+        runView1 & $71$ & $50$ & $69$ & $0$ & $2$ & $50$ & $52$\\
+        \hline
+        \tsubEight{ArrayAndListTest}
+        ArrayAccess1 & $77$ & $34$ & $51$ & $100$ & $26$ & $-66$ & $-40$\\
+        ArrayAccess2 & $16$ & $4$ & $12$ & $0$ & $4$ & $4$ & $8$\\
+        ArrayAccess3 & $77$ & $34$ & $51$ & $100$ & $26$ & $-66$ & $-40$\\
+        ArrayAccess4 & $164$ & $84$ & $42$ & $21$ & $122$ & $63$ & $185$\\
+        ArrayAccess5 & $75$ & $5$ & $68$ & $70$ & $7$ & $-65$ & $-58$\\
+        ArrayCopy1 & $18$ & $2$ & $9$ & $5$ & $9$ & $-3$ & $6$\\
+        ArrayToString1 & $10$ & $1$ & $6$ & $1$ & $4$ & $0$ & $4$\\
+        HashMapAccess1 & $22$ & $5$ & $16$ & $16$ & $6$ & $-11$ & $-5$\\
+        ListAccess1 & $85$ & $9$ & $60$ & $163$ & $25$ & $-154$ & $-129$\\
+        MultidimensionalArray1 & $29$ & $3$ & $16$ & $23$ & $13$ & $-20$ & $-7$\\
+        \hline
+        \tsubEight{CallbackTest}
+        AnonymousClass1 & $152$ & $0$ & $209$ & $19$ & $-57$ & $-19$ & $-76$\\
+        Button1 & $58$ & $39$ & $43$ & $0$ & $15$ & $39$ & $54$\\
+        Button2 & $454$ & $66$ & $201$ & $865$ & $253$ & $-799$ & $-546$\\
+        Button3 & $355$ & $89$ & $181$ & $1104$ & $174$ & $-1015$ & $-841$\\
+        Button4 & $58$ & $39$ & $43$ & $0$ & $15$ & $39$ & $54$\\
+        Button5 & $80$ & $40$ & $6$ & $6$ & $74$ & $34$ & $108$\\
+        LocationLeak1 & $617$ & $222$ & $2019$ & $3091$ & $-1402$ & $-2869$ & $-4271$\\
+        LocationLeak2 & $212$ & $121$ & $1499$ & $1505$ & $-1287$ & $-1384$ & $-2671$\\
+        LocationLeak3 & $259$ & $73$ & $122$ & $216$ & $137$ & $-143$ & $-6$\\
+        MethodOverride1 & $3$ & $0$ & $2$ & $0$ & $1$ & $0$ & $1$\\
+        MultiHandlers1 & $17$ & $0$ & $190$ & $427$ & $-173$ & $-427$ & $-600$\\
+        Ordering1 & $456$ & $151$ & $82$ & $92$ & $374$ & $59$ & $433$\\
+        RegisterGlobal1 & $207$ & $103$ & $49$ & $0$ & $158$ & $103$ & $261$\\
+        RegisterGlobal2 & $52$ & $37$ & $48$ & $29$ & $4$ & $8$ & $12$\\
+        Unregister1 & $11$ & $0$ & $10$ & $6$ & $1$ & $-6$ & $-5$\\
+        \hline
+        \tsubEight{EmulatorDetectionTest}
+        Battery1 & $7$ & $0$ & $65$ & $60$ & $-58$ & $-60$ & $-118$\\
+        Bluetooth1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
+        Build1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
+        Contacts1 & $52$ & $0$ & $211$ & $54$ & $-159$ & $-54$ & $-213$\\
+        ContentProvider1 & $13$ & $0$ & $8$ & $0$ & $5$ & $0$ & $5$\\
+        DeviceId1 & $15$ & $0$ & $6$ & $0$ & $9$ & $0$ & $9$\\
+        File1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
+        IMEI1 & $129$ & $0$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
+        IP1 & $4$ & $0$ & $29$ & $1$ & $-25$ & $-1$ & $-26$\\
+        PI1 & $6$ & $0$ & $4$ & $0$ & $2$ & $0$ & $2$\\
+        PlayStore1 & $158$ & $0$ & $8$ & $0$ & $150$ & $0$ & $150$\\
+        PlayStore2 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
+        Sensors1 & $5$ & $0$ & $4$ & $0$ & $1$ & $0$ & $1$\\
+        SubscriberId1 & $29$ & $0$ & $4$ & $0$ & $25$ & $0$ & $25$\\
+        VoiceMail1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
+        \hline
+        \tsubEight{FieldAndObjectSensitivityTest}
+        FieldSensitivity1 & $98$ & $50$ & $25$ & $3$ & $73$ & $47$ & $120$\\
+        FieldSensitivity2 & $35$ & $15$ & $19$ & $0$ & $16$ & $15$ & $31$\\
+        FieldSensitivity3 & $38$ & $15$ & $16$ & $0$ & $22$ & $15$ & $37$\\
+        FieldSensitivity4 & $14$ & $6$ & $8$ & $0$ & $6$ & $6$ & $12$\\
+        InheritedObjects1 & $4$ & $0$ & $6$ & $0$ & $-2$ & $0$ & $-2$\\
+        ObjectSensitivity1 & $19$ & $7$ & $15$ & $12$ & $4$ & $-5$ & $-1$\\
+        ObjectSensitivity2 & $15$ & $8$ & $10$ & $2$ & $5$ & $6$ & $11$\\
+        \hline
+        \tsubEight{GeneralJavaTest}
+        Clone1 & $23$ & $2$ & $13$ & $9$ & $10$ & $-7$ & $3$\\
+        Exceptions1 & $16$ & $0$ & $13$ & $0$ & $3$ & $0$ & $3$\\
+        Exceptions2 & $22$ & $0$ & $13$ & $0$ & $9$ & $0$ & $9$\\
+        Exceptions3 & $18$ & $0$ & $11$ & $0$ & $7$ & $0$ & $7$\\
+        Exceptions4 & $20$ & $1$ & $25$ & $20$ & $-5$ & $-19$ & $-24$\\
+        Exceptions5 & $13$ & $1$ & $16$ & $2$ & $-3$ & $-1$ & $-4$\\
+        Exceptions6 & $77$ & $12$ & $31$ & $19$ & $46$ & $-7$ & $39$\\
+        Exceptions7 & $71$ & $12$ & $6$ & $0$ & $65$ & $12$ & $77$\\
+        FactoryMethods1 & $40$ & $0$ & $16$ & $14$ & $24$ & $-14$ & $10$\\
+        Loop1 & $93$ & $2$ & $47$ & $34$ & $46$ & $-32$ & $14$\\
+        Loop2 & $123$ & $2$ & $75$ & $62$ & $48$ & $-60$ & $-12$\\
+        Serialization1 & $50$ & $4$ & $22$ & $44$ & $28$ & $-40$ & $-12$\\
+        SourceCodeSpecific1 & $16$ & $0$ & $75$ & $153$ & $-59$ & $-153$ & $-212$\\
+        StartProcessWithSecret1 & $29$ & $8$ & $24$ & $13$ & $5$ & $-5$ & $0$\\
+        StaticInitialization1 & $-$ & $-$ & $9$ & $0$ & $-1$ & $-1$ & $-1$\\
+        StaticInitialization2 & $57$ & $29$ & $86$ & $0$ & $-29$ & $29$ & $0$\\
+        StaticInitialization3 & $35$ & $9$ & $5$ & $0$ & $30$ & $9$ & $39$\\
+        StringFormatter1 & $16$ & $1$ & $11$ & $15$ & $5$ & $-14$ & $-9$\\
+        StringPatternMatching1 & $23$ & $1$ & $8$ & $10$ & $15$ & $-9$ & $6$\\
+        StringToCharArray1 & $91$ & $4$ & $43$ & $35$ & $48$ & $-31$ & $17$\\
+        StringToOutputStream1 & $26$ & $3$ & $31$ & $11$ & $-5$ & $-8$ & $-13$\\
+        UnreachableCode & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
+        VirtualDispatch1 & $128$ & $31$ & $88$ & $28$ & $40$ & $3$ & $43$\\
+        VirtualDispatch2 & $7$ & $0$ & $12$ & $0$ & $-5$ & $0$ & $-5$\\
+        VirtualDispatch3 & $8$ & $0$ & $6$ & $0$ & $2$ & $0$ & $2$\\
+        VirtualDispatch4 & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
+        \hline
+        \tsubEight{LifecycleTest}
+        ActivityEventSequence1 & $58$ & $35$ & $107$ & $193$ & $-49$ & $-158$ & $-207$\\
+        ActivityEventSequence2 & $32$ & $24$ & $182$ & $583$ & $-150$ & $-559$ & $-709$\\
+        ActivityEventSequence3 & $233$ & $116$ & $897$ & $1718$ & $-664$ & $-1602$ & $-2266$\\
+        ActivityLifecycle1 & $99$ & $72$ & $157$ & $15$ & $-58$ & $57$ & $-1$\\
+        ActivityLifecycle2 & $47$ & $34$ & $33$ & $0$ & $14$ & $34$ & $48$\\
+        ActivityLifecycle3 & $65$ & $31$ & $38$ & $59$ & $27$ & $-28$ & $-1$\\
+        ActivityLifecycle4 & $49$ & $33$ & $14$ & $0$ & $35$ & $33$ & $68$\\
+        ActivitySavedState1 & $20$ & $0$ & $7$ & $6$ & $13$ & $-6$ & $7$\\
+        ApplicationLifecycle1 & $37$ & $10$ & $82$ & $0$ & $-45$ & $10$ & $-35$\\
+        ApplicationLifecycle2 & $86$ & $17$ & $94$ & $155$ & $-8$ & $-138$ & $-146$\\
+        ApplicationLifecycle3 & $32$ & $12$ & $21$ & $0$ & $11$ & $12$ & $23$\\
+        AsynchronousEventOrdering1 & $51$ & $31$ & $16$ & $0$ & $35$ & $31$ & $66$\\
+        BroadcastReceiverLifecycle1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
+        BroadcastReceiverLifecycle2 & $109$ & $44$ & $254$ & $486$ & $-145$ & $-442$ & $-587$\\
+        BroadcastReceiverLifecycle3 & $3$ & $0$ & $201$ & $385$ & $-198$ & $-385$ & $-583$\\
+        EventOrdering1 & $61$ & $29$ & $33$ & $41$ & $28$ & $-12$ & $16$\\
+        FragmentLifecycle1 & $187$ & $127$ & $89$ & $0$ & $98$ & $127$ & $225$\\
+        FragmentLifecycle2 & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
+        ServiceEventSequence1 & $53$ & $20$ & $209$ & $243$ & $-156$ & $-223$ & $-379$\\
+        ServiceEventSequence2 & $64$ & $21$ & $2088$ & $5209$ & $-2024$ & $-5188$ & $-7212$\\
+        ServiceEventSequence3 & $46$ & $12$ & $709$ & $1835$ & $-663$ & $-1823$ & $-2486$\\
+        ServiceLifecycle1 & $119$ & $44$ & $42$ & $0$ & $77$ & $44$ & $121$\\
+        ServiceLifecycle2 & $68$ & $20$ & $104$ & $81$ & $-36$ & $-61$ & $-97$\\
+        SharedPreferenceChanged1 & $13$ & $0$ & $20$ & $2$ & $-7$ & $-2$ & $-9$\\
+        \hline
+        \tsubEight{ReflectionTest}
+        Reflection1 & $15$ & $5$ & $8$ & $0$ & $7$ & $5$ & $12$\\
+        Reflection2 & $21$ & $5$ & $11$ & $0$ & $10$ & $5$ & $15$\\
+        Reflection3 & $42$ & $9$ & $62$ & $47$ & $-20$ & $-38$ & $-58$\\
+        Reflection4 & $9$ & $0$ & $8$ & $0$ & $1$ & $0$ & $1$\\
+        Reflection5 & $16$ & $1$ & $11$ & $0$ & $5$ & $1$ & $6$\\
+        Reflection6 & $7$ & $0$ & $134$ & $158$ & $-127$ & $-158$ & $-285$\\
+        Reflection7 & $15$ & $5$ & $15$ & $20$ & $0$ & $-15$ & $-15$\\
+        Reflection8 & $35$ & $7$ & $14$ & $0$ & $21$ & $7$ & $28$\\
+        Reflection9 & $42$ & $7$ & $21$ & $0$ & $21$ & $7$ & $28$\\
+        \hline
+        \tsubEight{ThreadingTest}
+        AsyncTask1 & $22$ & $2$ & $11$ & $1$ & $11$ & $1$ & $12$\\
+        Executor1 & $34$ & $7$ & $17$ & $0$ & $17$ & $7$ & $24$\\
+        JavaThread1 & $34$ & $7$ & $17$ & $0$ & $17$ & $7$ & $24$\\
+        JavaThread2 & $62$ & $10$ & $31$ & $41$ & $31$ & $-31$ & $0$\\
+        Looper1 & $49$ & $3$ & $20$ & $16$ & $29$ & $-13$ & $16$\\
+        TimerTask1 & $203$ & $28$ & $32$ & $48$ & $171$ & $-20$ & $151$\\
+        \hline\hline
+        $\varnothing$ Propagations & $71.63$ & $21.58$ & $122.41$ & $221.06$ & $-50.78$ & $-199.48$ & $-250.26$
+    \end{longtable}
 
     \section{Configuration}
     Test setup...

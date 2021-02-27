@@ -25,7 +25,7 @@
 
     \textbf{SetTests} \code{containsTest} needs implicit flows to find the leak. It is supposed to fail.
 
-    \section{DroidBench}
+    \section{DroidBench}\label{s:droidbenchvalidation}
     \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 120 test cases are included in version 2\footnote{\url{https://github.com/secure-software-engineering/DroidBench}}.
     We do not use it to evaluate our tool against others but to compare it against the forwards analysis of \textsc{FlowDroid}. We aim to achieve similiar results but they may subtle differences.
     
@@ -148,7 +148,7 @@
         ServiceEventSequence3 & \fn & \fn\\
         ServiceLifecycle1 & \tp & \tp\\
         ServiceLifecycle2 & \tp & \tp\\
-        SharedPreferenceChanged1 & \tp & \tp\\
+        SharedPreferenceChanged1 & \tp \fp & \tp \fp\\
         \hline
         \tsub{General Java}
         Clone1 & \tp & \tp\\
