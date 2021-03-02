@@ -13,17 +13,18 @@ class TestResult:
         self.aliasFw = int(alias)
         self.infoflowBw = -1
         self.aliasBw = -1
-        self.infoflowDiff = -1
-        self.aliasDiff = -1
-        self.totalDiff = -1
+        self.infoflowDiff = "-"
+        self.aliasDiff = "-"
+        self.totalDiff = "-"
+        self.relativeDiff = "-"
 
     def setEdges(self, infoflow, alias):
         self.infoflowBw = int(infoflow)
         self.aliasBw = int(alias)
 
         if self.infoflowFw != -1 and self.infoflowBw != -1:
-            self.infoflowDiff = self.infoflowFw - self.infoflowBw
-            self.aliasDiff = self.aliasFw - self.aliasBw
+            self.infoflowDiff = self.infoflowBw - self.infoflowFw
+            self.aliasDiff = self.aliasBw - self.aliasFw
             self.totalDiff = self.infoflowDiff + self.aliasDiff 
 
     def toString(self):
@@ -51,13 +52,13 @@ for i, fname in enumerate(filenames):
                 dic[category][name].setEdges(infoflow, alias)
 
 string = ""
-summary = [0,0,0,0,0,0,0]
+summary = [0,0,0,0,0,0,0,0]
 count = 0
 for k, v in dic.items():
     string += "\\hline\n\\tsubEight{%s}\n" % k
     for k2, v2 in sorted(v.items()):
         string += v2.toString()
-        if v2.totalDiff != -1:
+        if v2.totalDiff != "-":
             summary[0] += v2.infoflowFw
             summary[1] += v2.aliasFw
             summary[2] += v2.infoflowBw

@@ -1,0 +1,38 @@
+<android.location.Location: double getLatitude()> -> _SOURCE_
+<android.location.Location: double getLongitude()> -> _SOURCE_
+<android.location.LocationManager: android.location.Location getLastKnownLocation(java.lang.String)> -> _SOURCE_
+<android.telephony.TelephonyManager: java.lang.String getDeviceId()> android.permission.READ_PHONE_STATE -> _SOURCE_
+<android.telephony.TelephonyManager: java.lang.String getSubscriberId()> android.permission.READ_PHONE_STATE -> _SOURCE_
+<android.telephony.TelephonyManager: java.lang.String getSimSerialNumber()> android.permission.READ_PHONE_STATE -> _SOURCE_
+<android.telephony.TelephonyManager: java.lang.String getLine1Number()> android.permission.READ_PHONE_STATE -> _SOURCE_
+<android.telephony.TelephonyManager: java.lang.String getImei()> android.permission.READ_PHONE_STATE -> _SOURCE_
+<android.telephony.TelephonyManager: java.lang.String getMeid()> android.permission.READ_PHONE_STATE -> _SOURCE_
+<android.bluetooth.BluetoothAdapter: java.lang.String getAddress()> -> _SOURCE_
+<android.net.wifi.WifiInfo: java.lang.String getMacAddress()> -> _SOURCE_
+<android.net.wifi.WifiInfo: java.lang.String getSSID()> -> _SOURCE_
+<android.net.wifi.WifiInfo: String getIpAddress()> -> _SOURCE_
+<java.net.InetAddress: String getHostAddress()> -> _SOURCE_
+<android.telephony.gsm.GsmCellLocation: int getCid()> -> _SOURCE_
+<android.telephony.gsm.GsmCellLocation: int getLac()> -> _SOURCE_
+<android.content.pm.PackageManager: java.util.List getInstalledApplications(int)> -> _SOURCE_
+<android.content.pm.PackageManager: java.util.List getInstalledPackages(int)> -> _SOURCE_
+<android.content.pm.PackageManager: java.util.List queryIntentActivities(android.content.Intent,int)> -> _SOURCE_
+<android.content.pm.PackageManager: java.util.List queryIntentServices(android.content.Intent,int)> -> _SOURCE_
+<android.content.pm.PackageManager: java.util.List queryBroadcastReceivers(android.content.Intent,int)> -> _SOURCE_
+<android.content.SharedPreferences: android.content.SharedPreferences getDefaultSharedPreferences(android.content.Context)> -> _SOURCE_
+<android.provider.Browser: android.database.Cursor getAllBookmarks()> -> _SOURCE_
+<android.provider.Browser: android.database.Cursor getAllVisitedUrls()> -> _SOURCE_
+
+<java.net.URL: void set(java.lang.String,java.lang.String,int,java.lang.String,java.lang.String)> -> _SINK_
+<java.net.URL: void set(java.lang.String,java.lang.String,int,java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String)> -> _SINK_
+<java.net.URL: java.net.URLConnection openConnection()> android.permission.INTERNET -> _SINK_
+<java.net.URLConnection: void connect()> -> _SINK_
+<java.net.URLConnection: void setRequestProperty(java.lang.String,java.lang.String)> -> _SINK_
+<android.net.http.HttpsConnection: android.net.http.AndroidHttpClientConnection openConnection(android.net.http.Request)> -> _SINK_
+<android.net.http.Headers: void setEtag(java.lang.String)> -> _SINK_
+<android.net.http.Headers: void setContentType(java.lang.String)> -> _SINK_
+<android.net.http.Headers: void setLastModified(java.lang.String)> -> _SINK_
+<android.net.http.AndroidHttpClientConnection: void sendRequestHeader(org.apache.http.HttpRequest)> -> _SINK_
+<android.net.http.Headers: void setLocation(java.lang.String)> -> _SINK_
+<android.net.http.HttpsConnection: android.net.http.AndroidHttpClientConnection openConnection(android.net.http.Request)> -> _SINK_
+<android.net.http.RequestQueue: void queueRequest(android.net.http.Request,boolean)> -> _SINK_
