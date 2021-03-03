@@ -1,5 +1,9 @@
 import itertools
 
+# filenames = [
+#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/sumfw.txt",
+#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/sumbw.txt",
+#     ]
 filenames = [
     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easyfw.txt",
     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easybw.txt",
@@ -25,10 +29,11 @@ class TestResult:
         if self.infoflowFw != -1 and self.infoflowBw != -1:
             self.infoflowDiff = self.infoflowBw - self.infoflowFw
             self.aliasDiff = self.aliasBw - self.aliasFw
-            self.totalDiff = self.infoflowDiff + self.aliasDiff 
+            self.totalDiff = self.infoflowDiff + self.aliasDiff
+            self.relativeDiff = round(self.totalDiff / abs((self.infoflowFw + self.aliasFw)), 2)
 
     def toString(self):
-        return f"{self.name} & ${self.infoflowFw}$ & ${self.aliasFw}$ & ${self.infoflowBw}$ & ${self.aliasBw}$ & ".replace("-1", "-") + f"${self.infoflowDiff}$ & ${self.aliasDiff}$ & ${self.totalDiff}$\\\\\n"
+        return f"{self.name} & ${self.infoflowFw}$ & ${self.aliasFw}$ & ${self.infoflowBw}$ & ${self.aliasBw}$ & ".replace("-1", "-") + f"${self.infoflowDiff}$ & ${self.aliasDiff}$ & ${self.totalDiff}$ & ${self.relativeDiff}$\\\\\n"
 
     def __lt__(self, other):
          return self.name < other.name
@@ -66,9 +71,10 @@ for k, v in dic.items():
             summary[4] += v2.infoflowDiff
             summary[5] += v2.aliasDiff
             summary[6] += v2.totalDiff
+            summary[7] += v2.relativeDiff
             count += 1
 string += "\\hline\\hline"
 print(string)
 for i in range(0, len(summary)):
     summary[i] = round(summary[i] / count, 2)
-print(f"$\\varnothing$ Propagations & ${summary[0]}$ & ${summary[1]}$ & ${summary[2]}$ & ${summary[3]}$ & ${summary[4]}$ & ${summary[5]}$ & ${summary[6]}$")
+print(f"$\\varnothing$ Propagations & ${summary[0]}$ & ${summary[1]}$ & ${summary[2]}$ & ${summary[3]}$ & ${summary[4]}$ & ${summary[5]}$ & ${summary[6]}$ & ${summary[7]}$\\\\")
