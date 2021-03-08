@@ -5,8 +5,41 @@
     In this chapter we introduce the necessary background.
 
     \section{Static Data Flow Analysis}
+    Muchnick \cite{Muchnick1997} defines data-flow analysis as follows:
+    \begin{quote}
+        Data-flow analysis provides global information about how a procedure (or a larger segment of a program) manipulates its data.
+    \end{quote}
+     
+    In the field of compilers, there is a distinction between static and dynamic. Static generally refers to something that is decided at compile-time while dynamic refers to decisions taken at runtime \cite{Aho1986}. A common example is typing. In Java the type of a variable has to be declared before a value can be assigned to it while in Python the type of a variable is determined by the value assigned at runtime. Same distinction is also present for analyses. Dynamic analysis observes the run behavior of the program while static analysis works on a representation of the code. Both have different tradeoffs. Dynamic it is hard to achieve code coverage and static it is hard to not overapproximate the possible paths. 
+    \begin{figure}[ht]
+        \centering
+        \begin{tikzpicture}
+            \draw[fill=yellow, opacity=0.7, thick] (0,0) ellipse (2cm and 1.25cm);
+            \draw[fill=green, opacity=0.7, thick] (0.25,0.25) ellipse (1.5cm and 0.9cm);
+            \draw[fill=red, opacity=0.7, thick] (0.25, 0.25) ellipse (0.65cm and 0.5cm);
+
+
+            \node (s) at (-1,-1.75) {Static Analysis};
+            \draw (s) to (-0.5, -1);
+            \node (d) at (3.25,1) {Dynamic Analysis};
+            \draw (d) to (0.5, 0.25);
+            \node (t) at (3, -1) {Ground Truth};
+            \draw (t) to (1.25, 0);
+        \end{tikzpicture}
+        \caption{Data-flow Analysis Coverage}
+    \end{figure}
+
+
+    In taint analysis, a taint is a variable which contains interesting data. Sources provide data which is interesting and sinks leak data. A path from a source to a sink is leak.
+
     Explain key terms such as static, fact, taint, source, sink, leak, sensitivity.
     
+    Static analyses are also categorized using sensitivities. These describe whether the analysis considers a certain aspect.
+    First, there is flow-sensitivity. A flow-sensitive analysis can determine if a fact holds at a certain statement. Data-flow analyses are always flow-sensitive.
+    Next up, context-sensitivity describes an interprocedural analysis which can distinguish the context of a called method, e.g. knows the original call site at a return.
+    Object-sensitive analyses also distinguishes a fields between objects.
+    Then there is also path-sensitivity. Basically, if an conditional branch is taken, the condition must hold and this knowledge is used by the analysis.
+
     \section{IFDS}
     \subsection{Original Definition}
     Interprocedural finite distributive subset (IFDS) problems are a special class of a data-flow analysis problem. All problems adhering to IFDS can be transformed into a graph-reachability problem and thus the solution is computable in polynomial time. It is context-sensitive and flow-sensitive by default.

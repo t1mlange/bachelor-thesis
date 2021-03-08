@@ -2,6 +2,7 @@
 
 \begin{document}
     \chapter{Implementation}
+    In this chapter, we describe the details of our backwards-directed implementation and how we integrated it into \textsc{FlowDroid}.
 
     \section{Integration}
     \textsc{FlowDroid} is built to be extensible from to ground up. We wanted to reuse as much components of \textsc{FlowDroid} as possible. For the backwards analysis, we introduce unconditional taints at sinks and check for the matching access paths at sources. Facts are propagated through a reversed interprocedural control flow graph.
@@ -24,16 +25,13 @@
     The modularity of \textsc{FlowDroid} allowed us to easily use the newly created components. We created another implementation of \code{IInfoflow} responsible for initialization of those closely to the already existing default implementation \code{Infoflow}.
 
     \section{Flow Function Implementation}\label{s:problems}
+    \subsection{Infoflow Analysis}
 
     \subsection{Flow-Sensitive Alias Analysis}\label{s:aliasing}
     \textsc{FlowDroid} offers multiple aliasing strategies.
     In this work, we focus on the flow-sensitive alias analysis which is implemented as another IFDS problem called \code{BackwardsAliasProblem}. Basically, this is a forwards IFDS search with flow functions using aliasing rules. 
 
-    \paragraph{Handover to Alias Analysis}
-    Whenever we visit a statement and notice a taint could have an alias, the taint is handed over to the alias analysis. 
-    Normal flow rule 3 is such a case. The taint is on the right side and we notice that the left side also refers to the same value in memory due to being stored in the heap. The left side gets tainted and propagated forwards to find out if we missed a write to the alias.
-    In normal flow rule 1 and 2, we also turn around. \autoref{lst:aliasex} shows two cases where the turnaround is necessary.
-
+    \paragraph{Handover}
     \begin{figure}[ht]
         \centering
         \begin{subfigure}[b]{0.45\textwidth}
@@ -46,6 +44,7 @@
                 }
             \end{lstlisting}
             \caption{Example for alias analysis initiated by rule 1}
+            \label{lst:aliasex_a}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.45\textwidth}
@@ -58,15 +57,20 @@
                 }
             \end{lstlisting}
             \caption{Example for alias analysis initiated by rule 3}
+            \label{lst:aliasex_b}
         \end{subfigure}
-        \caption{Aliasing examples}
+        \caption{Normal flow Aliasing examples}
         \label{lst:aliasex}
     \end{figure}
+    Whenever we visit a statement and notice a taint could have an alias, the taint is handed over to the alias analysis. 
+    Normal flow rule 3 is such a case. The taint is on the right side and we notice that the left side also refers to the same value in memory due to being stored in the heap. The left side gets tainted and propagated forwards to find out if we missed a write to the alias.
+    In normal flow rule 1 and 2, we also turn around. \autoref{lst:aliasex} shows two cases where the turnaround is necessary. In \ref{lst:aliasex_a}, at line 2 \code{b} is assigned to \code{a}. Above this statement, the contents of \code{a} do not matter anymore, thus \code{a} is killed. On the other side, \code{b} is now tainted but as \code{a} and \code{b} aliases, we missed all updates to \code{b} below the statement. Concluding, at line 2 the \code{a.str} taint is killed, a new taint \code{b.str} is created and alias analysis for \code{b.str} is triggered.
+    In \ref{lst:aliasex_b}, we also observe that all writes to the alias were neglected but this time the incoming taint is propagated over the statement and for \code{a.str} the alias analysis is triggered.
 
-    \paragraph{Handing back to Infoflow}
+    A taint is handed back to the infoflow search if the alias analysis encounters an update to the taint, e.g. the taint is on the left side of the assignment. Again consider \autoref{lst:aliasex_a}. At line 3, \code{b.str} is tainted and on the left side of the assignment. At this point, \code{b.str} is handed over to the infoflow analysis with the statement on line 3. The backwards infoflow search then follows the missed path to detect possible leaks, in this case it right away reports a leak.
 
-    \paragraph{TurnUnit} 
-    We added another field to the \code{Abstraction} class called \code{turnUnit}. This is the equivalent to the \code{activationUnit} in forwards analysis. The \code{turnUnit} references the last statement for which the taint is relevant for the infoflow search. At start, it is the sink it originated from. Later on, it is set whenever we visit an assigment with a primitive or string on the left side. An example can be found in \autoref{lst:turnunit}. Line 5 introduces the taint, line 3 taints $b.str$ and sets the turnUnit to this statement. In line 2, \code{a} is found to be an alias of \code{b} and causes a handover to the alias problem. The \code{turnUnit} now stops the alias search at line 3 and prevents a false positive.
+    \paragraph{Turn Unit} 
+    We added another field to the \code{Abstraction} class called \code{turnUnit}. This is the equivalent to the \code{activationUnit} in forwards analysis. The \code{turnUnit} references the last statement for which the taint is relevant in the infoflow search. At start, it is the sink where the taint was introduced. Later on, it is set whenever we visit an assigment with a primitive or string on the left side\footnote{The String object is a special case in Java. It is saved on the heap but immutable and therefore can not alias.}. Consider the code in \autoref{lst:turnunit}. At line 5, the taint is introduced, line 3 taints \code{b.str} and sets the turnUnit to this statement. In line 2, \code{a} is found to be an alias of \code{b} and causes a handover to the alias problem. The \code{turnUnit} now stops the alias search at line 3 and prevents a false positive.
 
     \begin{figure}[ht]
         \centering
@@ -81,10 +85,6 @@
         \caption{Aliasing example with turn unit}
         \label{lst:turnunit}
     \end{figure}
-
-
-    Explain TurnUnit, SkipUnit
-    What the core problem tackles
 
     \section{Rules}
     Flow functions can get quite large, complicated to understand and hard to maintain \cite{Lerch2015}. To counteract this, \textsc{FlowDroid} outsources certain features into rules. These rules also implement the four flow functions and are applied in the corresponding flow function.
@@ -292,20 +292,40 @@
 
     \begin{figure}
         \centering
-        \begin{lstlisting}[gobble=12]
-            public static void static2Test() {
-                String tainted = TelephonyManager.getDeviceId();
-                ClassWithStatic static1 = new ClassWithStatic();
-                static1.setTitle(tainted);
-                ClassWithStatic static2 = new ClassWithStatic();
-                String alsoTainted = static2.getTitle();
-                
-                ConnectionManager cm = new ConnectionManager();
-                cm.publish(alsoTainted);
-            }
-        \end{lstlisting}
-        \caption{static2Test Java Code}
+        \begin{subfigure}[b]{\textwidth}
+            \begin{lstlisting}[gobble=12]
+                public static void static2Test() {
+                    String tainted = TelephonyManager.getDeviceId();
+                    ClassWithStatic static1 = new ClassWithStatic();
+                    static1.setTitle(tainted);
+                    ClassWithStatic static2 = new ClassWithStatic();
+                    String alsoTainted = static2.getTitle();
+                    
+                    ConnectionManager cm = new ConnectionManager();
+                    cm.publish(alsoTainted);
+                }
+            \end{lstlisting}
+            \caption{Java}
+        \end{subfigure}
+        \qquad
+        \begin{subfigure}[b]{\textwidth}
+            \begin{lstlisting}[language=Jimple]
+                public static void static2Test() {
+                    tainted = staticinvoke <soot.jimple.infoflow.test.android.TelephonyManager: java.lang.String getDeviceId()>();
+
+                    // [...]
+            
+                    virtualinvoke cm.<soot.jimple.infoflow.test.android.ConnectionManager: void publish(java.lang.String)>(alsoTainted);
+
+                    return;
+                }
+            \end{lstlisting}
+            \caption{Jimple}
+        \end{subfigure}
+        \caption{static2Test Code}
         \label{lst:static2TestJava}
     \end{figure}
+
+    
 
 \end{document}

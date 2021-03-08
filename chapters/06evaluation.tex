@@ -2,180 +2,404 @@
 
 \begin{document}
     \chapter{Performance Evaluation}
-
+    In the last chapter, we have shown that our implementation has the necessary soundness to be viable and yields the expected results. 
+    We now evaluate our implementation against the existing implementation in \textsc{FlowDroid}.
+    
     \section{DroidBench}
     We already introduced \textsc{Droidbench} in \autoref{s:droidbenchvalidation} to validate the soundness of our backwards-directed implementation. In this section, we focus on the performance in comparison to the existing forwards implementation in \textsc{FlowDroid}. 
 
-    All test cases are small enough to be analysed in sub-two seconds on an average four core desktop CPU from 2012. Our test environment is not isolated, so background tasks and the process scheduler can affect the runtime. The short runtime together with the variance of the unisolated testing environment render the runtime unusable as an comparison point. In constrast, edge propagations are deterministic\footnote{This is only true if there are enough resources. \textsc{FlowDroid} tries to terminate gracefully when running low on memory. Also, timeouts result in a non-reproducible number of edge propagations.} and correlate with the runtime. Thus, we only use the number of propagations to compare both implementations.
+    \textsc{DroidBench} has the advantage that all apps are specificly crafted for benchmarking taint analysis. So, most tests only contain single-figure number of sources and sinks. Also, the number of sources and sinks are often equal or just differ by one to test whether the tool can differentiate something. These simplify the comparison between both analysis directions as neither one has an initial disadvantage.
 
-    \textsc{DroidBench} has the advantage that all apps are specificly crafted for benchmarking taint analysis. So, most tests only contain single-figure number of sources and sinks. Also, the number of sources and sinks are often equal or just differ by one to test whether the tool can differentiate something. These simplify the comparison between both analysis directions as neither has an initial disadvantage.
+    Most test cases are small enough to be analysed in sub-two seconds on an average four core desktop CPU from 2012. Our test environment is not isolated, so background tasks and the process scheduler can affect the runtime. The short runtime together with the variance of the unisolated testing environment render the runtime unusable as an comparison point. In constrast, edge propagations are deterministic\footnote{This is only true if there are enough resources. \textsc{FlowDroid} tries to terminate gracefully when running low on memory. Also, timeouts result in a non-reproducible number of edge propagations.} and correlate with the runtime. Thus, we only use the number of propagations to compare both implementations.
 
-    \newcommand{\tsubEight}[1]{\multicolumn{8}{c}{#1}\\\hline}
-    \begin{longtable}{l | r | r | r | r | r | r | r}
-        & \multicolumn{2}{c|}{\textbf{Forwards}} & \multicolumn{2}{c|}{\textbf{Backwards}} & \multicolumn{3}{c}{\textbf{Difference}}\\
-        \textbf{App Name} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A}& \textbf{Total}\\
+    The configuration is the same as described in \autoref{s:droidbenchconfig}.
+
+    \subsection{Results}
+    We compare all test cases where both implementations yield the same result. Rows containing just hyphens are either test cases where the result differs or the IFDS analysis did not start, e.g. because no sink was found in the reachable code. \#I denotes the number of edge propagations inside the infoflow analysis and \#A the number of edge propagations inside the alias analysis. The absolute difference columns calculate from $\mathit{Result}_{\mathit{B}} - \mathit{Result}_{\mathit{F}}$. The relative difference is calculated as follows: $\frac{\mathit{TotalDifference}}{|\mathit{\#I_\mathit{F} + \#A_\mathit{F}}|}$. Hence, negative values signify the backwards analysis performed better. The full results can be found in \autoref{t:droidbenchevaluation}.
+
+    In general, both implementations have similiar average edge propagation counts. There are not many test cases where both perform identical, instead dependent on the specific test case the relative difference is in between $-1$ and $1$. So, the expected behavior from \autoref{s:complexity} occured: it highly depends on the analyzed app.
+    But what we did not expect is some sort of condition which lets the backwards edge propagations explode up to a factor of $10 000\%$ as seen in \code{LifecycleTest#BroadcastReceiverLifecycle3} and others. In contrast, the existing forwards implementation only at most $100\%$ relative difference.
+
+    \footnotesize
+    \newcommand{\tsubEight}[1]{\multicolumn{9}{c}{#1}\\\hline}
+    \begin{longtable}{l | r | r | r | r | r | r | r | r}
+        \centering
+        & \multicolumn{2}{c|}{\textbf{Forwards}} & \multicolumn{2}{c|}{\textbf{Backwards}} & \multicolumn{4}{c}{\textbf{Difference}}\\
+        \textbf{App Name} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A}& \textbf{Total} & \textbf{Relative}\\
         \hline\hline
         \endhead
+        \hline
         \tsubEight{AliasingTest}
-        FlowSensitivity1 & $175$ & $72$ & $43$ & $101$ & $132$ & $-29$ & $103$\\
-        Merge1 & $94$ & $44$ & $61$ & $29$ & $33$ & $15$ & $48$\\
-        SimpleAliasing1 & $35$ & $13$ & $20$ & $3$ & $15$ & $10$ & $25$\\
-        StrongUpdate1 & $30$ & $13$ & $11$ & $3$ & $19$ & $10$ & $29$\\
+        FlowSensitivity1 & $175$ & $72$ & $39$ & $4$ & $-136$ & $-68$ & $-204$ & $-0.83$\\
+        Merge1 & $94$ & $44$ & $61$ & $9$ & $-33$ & $-35$ & $-68$ & $-0.49$\\
+        SimpleAliasing1 & $35$ & $13$ & $20$ & $3$ & $-15$ & $-10$ & $-25$ & $-0.52$\\
+        StrongUpdate1 & $30$ & $13$ & $11$ & $3$ & $-19$ & $-10$ & $-29$ & $-0.67$\\
         \hline
         \tsubEight{AndroidSpecificTest}
-        ApplicationModeling1 & $235$ & $103$ & $851$ & $2370$ & $-616$ & $-2267$ & $-2883$\\
-        DirectLeak1 & $3$ & $0$ & $4$ & $0$ & $-1$ & $0$ & $-1$\\
-        InactiveActivity & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
-        Library2 & $5$ & $0$ & $6$ & $0$ & $-1$ & $0$ & $-1$\\
-        LogNoLeak & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
-        Obfuscation1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
-        Parcel1 & $144$ & $15$ & $66$ & $108$ & $78$ & $-93$ & $-15$\\
-        PrivateDataLeak1 & $410$ & $110$ & $865$ & $1874$ & $-455$ & $-1764$ & $-2219$\\
-        PrivateDataLeak2 & $15$ & $0$ & $5$ & $6$ & $10$ & $-6$ & $4$\\
-        PrivateDataLeak3 & $17$ & $2$ & $469$ & $1596$ & $-452$ & $-1594$ & $-2046$\\
-        runPublicAPIField1 & $89$ & $1$ & $73$ & $51$ & $16$ & $-50$ & $-34$\\
-        runPublicAPIField2 & $5$ & $0$ & $12$ & $7$ & $-7$ & $-7$ & $-14$\\
-        runView1 & $71$ & $50$ & $69$ & $0$ & $2$ & $50$ & $52$\\
+        ApplicationModeling1 & $235$ & $103$ & $851$ & $1208$ & $616$ & $1105$ & $1721$ & $5.09$\\
+        DirectLeak1 & $3$ & $0$ & $4$ & $0$ & $1$ & $0$ & $1$ & $0.33$\\
+        InactiveActivity & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+        Library2 & $5$ & $0$ & $6$ & $0$ & $1$ & $0$ & $1$ & $0.2$\\
+        LogNoLeak & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+        Obfuscation1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
+        Parcel1 & $144$ & $15$ & $66$ & $68$ & $-78$ & $53$ & $-25$ & $-0.16$\\
+        PrivateDataLeak1 & $410$ & $110$ & $599$ & $835$ & $189$ & $725$ & $914$ & $1.76$\\
+        PrivateDataLeak2 & $15$ & $0$ & $5$ & $6$ & $-10$ & $6$ & $-4$ & $-0.27$\\
+        PrivateDataLeak3 & $17$ & $2$ & $212$ & $143$ & $195$ & $141$ & $336$ & $17.68$\\
+        runPublicAPIField1 & $89$ & $1$ & $62$ & $31$ & $-27$ & $30$ & $3$ & $0.03$\\
+        runPublicAPIField2 & $5$ & $0$ & $11$ & $1$ & $6$ & $1$ & $7$ & $1.4$\\
+        runView1 & $71$ & $50$ & $69$ & $0$ & $-2$ & $-50$ & $-52$ & $-0.43$\\
         \hline
         \tsubEight{ArrayAndListTest}
-        ArrayAccess1 & $77$ & $34$ & $51$ & $100$ & $26$ & $-66$ & $-40$\\
-        ArrayAccess2 & $16$ & $4$ & $12$ & $0$ & $4$ & $4$ & $8$\\
-        ArrayAccess3 & $77$ & $34$ & $51$ & $100$ & $26$ & $-66$ & $-40$\\
-        ArrayAccess4 & $164$ & $84$ & $42$ & $21$ & $122$ & $63$ & $185$\\
-        ArrayAccess5 & $75$ & $5$ & $68$ & $70$ & $7$ & $-65$ & $-58$\\
-        ArrayCopy1 & $18$ & $2$ & $9$ & $5$ & $9$ & $-3$ & $6$\\
-        ArrayToString1 & $10$ & $1$ & $6$ & $1$ & $4$ & $0$ & $4$\\
-        HashMapAccess1 & $22$ & $5$ & $16$ & $16$ & $6$ & $-11$ & $-5$\\
-        ListAccess1 & $85$ & $9$ & $60$ & $163$ & $25$ & $-154$ & $-129$\\
-        MultidimensionalArray1 & $29$ & $3$ & $16$ & $23$ & $13$ & $-20$ & $-7$\\
+        ArrayAccess1 & $77$ & $34$ & $51$ & $100$ & $-26$ & $66$ & $40$ & $0.36$\\
+        ArrayAccess2 & $16$ & $4$ & $12$ & $0$ & $-4$ & $-4$ & $-8$ & $-0.4$\\
+        ArrayAccess3 & $77$ & $34$ & $51$ & $100$ & $-26$ & $66$ & $40$ & $0.36$\\
+        ArrayAccess4 & $164$ & $84$ & $42$ & $21$ & $-122$ & $-63$ & $-185$ & $-0.75$\\
+        ArrayAccess5 & $75$ & $5$ & $67$ & $63$ & $-8$ & $58$ & $50$ & $0.62$\\
+        ArrayCopy1 & $18$ & $2$ & $9$ & $2$ & $-9$ & $0$ & $-9$ & $-0.45$\\
+        ArrayToString1 & $10$ & $1$ & $6$ & $1$ & $-4$ & $0$ & $-4$ & $-0.36$\\
+        HashMapAccess1 & $22$ & $5$ & $15$ & $1$ & $-7$ & $-4$ & $-11$ & $-0.41$\\
+        ListAccess1 & $85$ & $9$ & $60$ & $97$ & $-25$ & $88$ & $63$ & $0.67$\\
+        MultidimensionalArray1 & $29$ & $3$ & $16$ & $23$ & $-13$ & $20$ & $7$ & $0.22$\\
         \hline
         \tsubEight{CallbackTest}
-        AnonymousClass1 & $152$ & $0$ & $209$ & $19$ & $-57$ & $-19$ & $-76$\\
-        Button1 & $58$ & $39$ & $43$ & $0$ & $15$ & $39$ & $54$\\
-        Button2 & $454$ & $66$ & $201$ & $865$ & $253$ & $-799$ & $-546$\\
-        Button3 & $355$ & $89$ & $181$ & $1104$ & $174$ & $-1015$ & $-841$\\
-        Button4 & $58$ & $39$ & $43$ & $0$ & $15$ & $39$ & $54$\\
-        Button5 & $80$ & $40$ & $6$ & $6$ & $74$ & $34$ & $108$\\
-        LocationLeak1 & $617$ & $222$ & $2019$ & $3091$ & $-1402$ & $-2869$ & $-4271$\\
-        LocationLeak2 & $212$ & $121$ & $1499$ & $1505$ & $-1287$ & $-1384$ & $-2671$\\
-        LocationLeak3 & $259$ & $73$ & $122$ & $216$ & $137$ & $-143$ & $-6$\\
-        MethodOverride1 & $3$ & $0$ & $2$ & $0$ & $1$ & $0$ & $1$\\
-        MultiHandlers1 & $17$ & $0$ & $190$ & $427$ & $-173$ & $-427$ & $-600$\\
-        Ordering1 & $456$ & $151$ & $82$ & $92$ & $374$ & $59$ & $433$\\
-        RegisterGlobal1 & $207$ & $103$ & $49$ & $0$ & $158$ & $103$ & $261$\\
-        RegisterGlobal2 & $52$ & $37$ & $48$ & $29$ & $4$ & $8$ & $12$\\
-        Unregister1 & $11$ & $0$ & $10$ & $6$ & $1$ & $-6$ & $-5$\\
+        AnonymousClass1 & $152$ & $0$ & $208$ & $1$ & $56$ & $1$ & $57$ & $0.38$\\
+        Button1 & $58$ & $39$ & $43$ & $0$ & $-15$ & $-39$ & $-54$ & $-0.56$\\
+        Button2 & $454$ & $66$ & $155$ & $257$ & $-299$ & $191$ & $-108$ & $-0.21$\\
+        Button3 & $355$ & $89$ & $109$ & $408$ & $-246$ & $319$ & $73$ & $0.16$\\
+        Button4 & $58$ & $39$ & $43$ & $0$ & $-15$ & $-39$ & $-54$ & $-0.56$\\
+        Button5 & $80$ & $40$ & $6$ & $6$ & $-74$ & $-34$ & $-108$ & $-0.9$\\
+        LocationLeak1 & $617$ & $222$ & $260$ & $300$ & $-357$ & $78$ & $-279$ & $-0.33$\\
+        LocationLeak2 & $212$ & $121$ & $152$ & $2$ & $-60$ & $-119$ & $-179$ & $-0.54$\\
+        LocationLeak3 & $259$ & $73$ & $104$ & $117$ & $-155$ & $44$ & $-111$ & $-0.33$\\
+        MethodOverride1 & $3$ & $0$ & $2$ & $0$ & $-1$ & $0$ & $-1$ & $-0.33$\\
+        MultiHandlers1 & $17$ & $0$ & $145$ & $151$ & $128$ & $151$ & $279$ & $16.41$\\
+        Ordering1 & $456$ & $151$ & $44$ & $2$ & $-412$ & $-149$ & $-561$ & $-0.92$\\
+        RegisterGlobal1 & $207$ & $103$ & $49$ & $0$ & $-158$ & $-103$ & $-261$ & $-0.84$\\
+        RegisterGlobal2 & $52$ & $37$ & $43$ & $0$ & $-9$ & $-37$ & $-46$ & $-0.52$\\
+        Unregister1 & $11$ & $0$ & $9$ & $1$ & $-2$ & $1$ & $-1$ & $-0.09$\\
         \hline
         \tsubEight{EmulatorDetectionTest}
-        Battery1 & $7$ & $0$ & $65$ & $60$ & $-58$ & $-60$ & $-118$\\
-        Bluetooth1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
-        Build1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
-        Contacts1 & $52$ & $0$ & $211$ & $54$ & $-159$ & $-54$ & $-213$\\
-        ContentProvider1 & $13$ & $0$ & $8$ & $0$ & $5$ & $0$ & $5$\\
-        DeviceId1 & $15$ & $0$ & $6$ & $0$ & $9$ & $0$ & $9$\\
-        File1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
-        IMEI1 & $129$ & $0$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
-        IP1 & $4$ & $0$ & $29$ & $1$ & $-25$ & $-1$ & $-26$\\
-        PI1 & $6$ & $0$ & $4$ & $0$ & $2$ & $0$ & $2$\\
-        PlayStore1 & $158$ & $0$ & $8$ & $0$ & $150$ & $0$ & $150$\\
-        PlayStore2 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
-        Sensors1 & $5$ & $0$ & $4$ & $0$ & $1$ & $0$ & $1$\\
-        SubscriberId1 & $29$ & $0$ & $4$ & $0$ & $25$ & $0$ & $25$\\
-        VoiceMail1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
+        Battery1 & $7$ & $0$ & $43$ & $15$ & $36$ & $15$ & $51$ & $7.29$\\
+        Bluetooth1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
+        Build1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
+        Contacts1 & $52$ & $0$ & $210$ & $19$ & $158$ & $19$ & $177$ & $3.4$\\
+        ContentProvider1 & $13$ & $0$ & $8$ & $0$ & $-5$ & $0$ & $-5$ & $-0.38$\\
+        DeviceId1 & $15$ & $0$ & $6$ & $0$ & $-9$ & $0$ & $-9$ & $-0.6$\\
+        File1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
+        IMEI1 & $129$ & $0$ & $140$ & $34$ & $11$ & $34$ & $45$ & $0.35$\\
+        IP1 & $4$ & $0$ & $29$ & $1$ & $25$ & $1$ & $26$ & $6.5$\\
+        PI1 & $6$ & $0$ & $4$ & $0$ & $-2$ & $0$ & $-2$ & $-0.33$\\
+        PlayStore1 & $158$ & $0$ & $8$ & $0$ & $-150$ & $0$ & $-150$ & $-0.95$\\
+        PlayStore2 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
+        Sensors1 & $5$ & $0$ & $4$ & $0$ & $-1$ & $0$ & $-1$ & $-0.2$\\
+        SubscriberId1 & $29$ & $0$ & $4$ & $0$ & $-25$ & $0$ & $-25$ & $-0.86$\\
+        VoiceMail1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
         \hline
         \tsubEight{FieldAndObjectSensitivityTest}
-        FieldSensitivity1 & $98$ & $50$ & $25$ & $3$ & $73$ & $47$ & $120$\\
-        FieldSensitivity2 & $35$ & $15$ & $19$ & $0$ & $16$ & $15$ & $31$\\
-        FieldSensitivity3 & $38$ & $15$ & $16$ & $0$ & $22$ & $15$ & $37$\\
-        FieldSensitivity4 & $14$ & $6$ & $8$ & $0$ & $6$ & $6$ & $12$\\
-        InheritedObjects1 & $4$ & $0$ & $6$ & $0$ & $-2$ & $0$ & $-2$\\
-        ObjectSensitivity1 & $19$ & $7$ & $15$ & $12$ & $4$ & $-5$ & $-1$\\
-        ObjectSensitivity2 & $15$ & $8$ & $10$ & $2$ & $5$ & $6$ & $11$\\
+        FieldSensitivity1 & $98$ & $50$ & $25$ & $3$ & $-73$ & $-47$ & $-120$ & $-0.81$\\
+        FieldSensitivity2 & $35$ & $15$ & $19$ & $0$ & $-16$ & $-15$ & $-31$ & $-0.62$\\
+        FieldSensitivity3 & $38$ & $15$ & $16$ & $0$ & $-22$ & $-15$ & $-37$ & $-0.7$\\
+        FieldSensitivity4 & $14$ & $6$ & $8$ & $0$ & $-6$ & $-6$ & $-12$ & $-0.6$\\
+        InheritedObjects1 & $4$ & $0$ & $6$ & $0$ & $2$ & $0$ & $2$ & $0.5$\\
+        ObjectSensitivity1 & $19$ & $7$ & $14$ & $1$ & $-5$ & $-6$ & $-11$ & $-0.42$\\
+        ObjectSensitivity2 & $15$ & $8$ & $10$ & $0$ & $-5$ & $-8$ & $-13$ & $-0.57$\\
         \hline
         \tsubEight{GeneralJavaTest}
-        Clone1 & $23$ & $2$ & $13$ & $9$ & $10$ & $-7$ & $3$\\
-        Exceptions1 & $16$ & $0$ & $13$ & $0$ & $3$ & $0$ & $3$\\
-        Exceptions2 & $22$ & $0$ & $13$ & $0$ & $9$ & $0$ & $9$\\
-        Exceptions3 & $18$ & $0$ & $11$ & $0$ & $7$ & $0$ & $7$\\
-        Exceptions4 & $20$ & $1$ & $25$ & $20$ & $-5$ & $-19$ & $-24$\\
-        Exceptions5 & $13$ & $1$ & $16$ & $2$ & $-3$ & $-1$ & $-4$\\
-        Exceptions6 & $77$ & $12$ & $31$ & $19$ & $46$ & $-7$ & $39$\\
-        Exceptions7 & $71$ & $12$ & $6$ & $0$ & $65$ & $12$ & $77$\\
-        FactoryMethods1 & $40$ & $0$ & $16$ & $14$ & $24$ & $-14$ & $10$\\
-        Loop1 & $93$ & $2$ & $47$ & $34$ & $46$ & $-32$ & $14$\\
-        Loop2 & $123$ & $2$ & $75$ & $62$ & $48$ & $-60$ & $-12$\\
-        Serialization1 & $50$ & $4$ & $22$ & $44$ & $28$ & $-40$ & $-12$\\
-        SourceCodeSpecific1 & $16$ & $0$ & $75$ & $153$ & $-59$ & $-153$ & $-212$\\
-        StartProcessWithSecret1 & $29$ & $8$ & $24$ & $13$ & $5$ & $-5$ & $0$\\
-        StaticInitialization1 & $-$ & $-$ & $9$ & $0$ & $-1$ & $-1$ & $-1$\\
-        StaticInitialization2 & $57$ & $29$ & $86$ & $0$ & $-29$ & $29$ & $0$\\
-        StaticInitialization3 & $35$ & $9$ & $5$ & $0$ & $30$ & $9$ & $39$\\
-        StringFormatter1 & $16$ & $1$ & $11$ & $15$ & $5$ & $-14$ & $-9$\\
-        StringPatternMatching1 & $23$ & $1$ & $8$ & $10$ & $15$ & $-9$ & $6$\\
-        StringToCharArray1 & $91$ & $4$ & $43$ & $35$ & $48$ & $-31$ & $17$\\
-        StringToOutputStream1 & $26$ & $3$ & $31$ & $11$ & $-5$ & $-8$ & $-13$\\
-        UnreachableCode & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
-        VirtualDispatch1 & $128$ & $31$ & $88$ & $28$ & $40$ & $3$ & $43$\\
-        VirtualDispatch2 & $7$ & $0$ & $12$ & $0$ & $-5$ & $0$ & $-5$\\
-        VirtualDispatch3 & $8$ & $0$ & $6$ & $0$ & $2$ & $0$ & $2$\\
-        VirtualDispatch4 & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
+        Clone1 & $23$ & $2$ & $12$ & $4$ & $-11$ & $2$ & $-9$ & $-0.36$\\
+        Exceptions1 & $16$ & $0$ & $13$ & $0$ & $-3$ & $0$ & $-3$ & $-0.19$\\
+        Exceptions2 & $22$ & $0$ & $13$ & $0$ & $-9$ & $0$ & $-9$ & $-0.41$\\
+        Exceptions3 & $18$ & $0$ & $11$ & $0$ & $-7$ & $0$ & $-7$ & $-0.39$\\
+        Exceptions4 & $20$ & $1$ & $22$ & $1$ & $2$ & $0$ & $2$ & $0.1$\\
+        Exceptions5 & $13$ & $1$ & $16$ & $1$ & $3$ & $0$ & $3$ & $0.21$\\
+        Exceptions6 & $77$ & $12$ & $23$ & $0$ & $-54$ & $-12$ & $-66$ & $-0.74$\\
+        Exceptions7 & $71$ & $12$ & $6$ & $0$ & $-65$ & $-12$ & $-77$ & $-0.93$\\
+        FactoryMethods1 & $40$ & $0$ & $14$ & $2$ & $-26$ & $2$ & $-24$ & $-0.6$\\
+        Loop1 & $93$ & $2$ & $46$ & $7$ & $-47$ & $5$ & $-42$ & $-0.44$\\
+        Loop2 & $123$ & $2$ & $74$ & $14$ & $-49$ & $12$ & $-37$ & $-0.3$\\
+        Serialization1 & $50$ & $4$ & $22$ & $29$ & $-28$ & $25$ & $-3$ & $-0.06$\\
+        SourceCodeSpecific1 & $16$ & $0$ & $45$ & $7$ & $29$ & $7$ & $36$ & $2.25$\\
+        StartProcessWithSecret1 & $29$ & $8$ & $17$ & $3$ & $-12$ & $-5$ & $-17$ & $-0.46$\\
+        StaticInitialization1 & $-$ & $-$ & $9$ & $0$ & $-$ & $-$ & $-$ & $-$\\
+        StaticInitialization2 & $57$ & $29$ & $86$ & $0$ & $29$ & $-29$ & $0$ & $0.0$\\
+        StaticInitialization3 & $35$ & $9$ & $5$ & $0$ & $-30$ & $-9$ & $-39$ & $-0.89$\\
+        StringFormatter1 & $16$ & $1$ & $10$ & $1$ & $-6$ & $0$ & $-6$ & $-0.35$\\
+        StringPatternMatching1 & $23$ & $1$ & $8$ & $6$ & $-15$ & $5$ & $-10$ & $-0.42$\\
+        StringToCharArray1 & $91$ & $4$ & $42$ & $6$ & $-49$ & $2$ & $-47$ & $-0.49$\\
+        StringToOutputStream1 & $26$ & $3$ & $30$ & $3$ & $4$ & $0$ & $4$ & $0.14$\\
+        UnreachableCode & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+        VirtualDispatch1 & $128$ & $31$ & $88$ & $28$ & $-40$ & $-3$ & $-43$ & $-0.27$\\
+        VirtualDispatch2 & $7$ & $0$ & $12$ & $0$ & $5$ & $0$ & $5$ & $0.71$\\
+        VirtualDispatch3 & $8$ & $0$ & $6$ & $0$ & $-2$ & $0$ & $-2$ & $-0.25$\\
+        VirtualDispatch4 & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
         \hline
         \tsubEight{LifecycleTest}
-        ActivityEventSequence1 & $58$ & $35$ & $107$ & $193$ & $-49$ & $-158$ & $-207$\\
-        ActivityEventSequence2 & $32$ & $24$ & $182$ & $583$ & $-150$ & $-559$ & $-709$\\
-        ActivityEventSequence3 & $233$ & $116$ & $897$ & $1718$ & $-664$ & $-1602$ & $-2266$\\
-        ActivityLifecycle1 & $99$ & $72$ & $157$ & $15$ & $-58$ & $57$ & $-1$\\
-        ActivityLifecycle2 & $47$ & $34$ & $33$ & $0$ & $14$ & $34$ & $48$\\
-        ActivityLifecycle3 & $65$ & $31$ & $38$ & $59$ & $27$ & $-28$ & $-1$\\
-        ActivityLifecycle4 & $49$ & $33$ & $14$ & $0$ & $35$ & $33$ & $68$\\
-        ActivitySavedState1 & $20$ & $0$ & $7$ & $6$ & $13$ & $-6$ & $7$\\
-        ApplicationLifecycle1 & $37$ & $10$ & $82$ & $0$ & $-45$ & $10$ & $-35$\\
-        ApplicationLifecycle2 & $86$ & $17$ & $94$ & $155$ & $-8$ & $-138$ & $-146$\\
-        ApplicationLifecycle3 & $32$ & $12$ & $21$ & $0$ & $11$ & $12$ & $23$\\
-        AsynchronousEventOrdering1 & $51$ & $31$ & $16$ & $0$ & $35$ & $31$ & $66$\\
-        BroadcastReceiverLifecycle1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$\\
-        BroadcastReceiverLifecycle2 & $109$ & $44$ & $254$ & $486$ & $-145$ & $-442$ & $-587$\\
-        BroadcastReceiverLifecycle3 & $3$ & $0$ & $201$ & $385$ & $-198$ & $-385$ & $-583$\\
-        EventOrdering1 & $61$ & $29$ & $33$ & $41$ & $28$ & $-12$ & $16$\\
-        FragmentLifecycle1 & $187$ & $127$ & $89$ & $0$ & $98$ & $127$ & $225$\\
-        FragmentLifecycle2 & $-$ & $-$ & $-$ & $-$ & $-1$ & $-1$ & $-1$\\
-        ServiceEventSequence1 & $53$ & $20$ & $209$ & $243$ & $-156$ & $-223$ & $-379$\\
-        ServiceEventSequence2 & $64$ & $21$ & $2088$ & $5209$ & $-2024$ & $-5188$ & $-7212$\\
-        ServiceEventSequence3 & $46$ & $12$ & $709$ & $1835$ & $-663$ & $-1823$ & $-2486$\\
-        ServiceLifecycle1 & $119$ & $44$ & $42$ & $0$ & $77$ & $44$ & $121$\\
-        ServiceLifecycle2 & $68$ & $20$ & $104$ & $81$ & $-36$ & $-61$ & $-97$\\
-        SharedPreferenceChanged1 & $13$ & $0$ & $20$ & $2$ & $-7$ & $-2$ & $-9$\\
+        ActivityEventSequence1 & $58$ & $35$ & $73$ & $0$ & $15$ & $-35$ & $-20$ & $-0.22$\\
+        ActivityEventSequence2 & $32$ & $24$ & $77$ & $0$ & $45$ & $-24$ & $21$ & $0.38$\\
+        ActivityEventSequence3 & $233$ & $116$ & $156$ & $1$ & $-77$ & $-115$ & $-192$ & $-0.55$\\
+        ActivityLifecycle1 & $99$ & $72$ & $156$ & $7$ & $57$ & $-65$ & $-8$ & $-0.05$\\
+        ActivityLifecycle2 & $47$ & $34$ & $33$ & $0$ & $-14$ & $-34$ & $-48$ & $-0.59$\\
+        ActivityLifecycle3 & $65$ & $31$ & $28$ & $0$ & $-37$ & $-31$ & $-68$ & $-0.71$\\
+        ActivityLifecycle4 & $49$ & $33$ & $14$ & $0$ & $-35$ & $-33$ & $-68$ & $-0.83$\\
+        ActivitySavedState1 & $20$ & $0$ & $7$ & $1$ & $-13$ & $1$ & $-12$ & $-0.6$\\
+        ApplicationLifecycle1 & $37$ & $10$ & $82$ & $0$ & $45$ & $-10$ & $35$ & $0.74$\\
+        ApplicationLifecycle2 & $86$ & $17$ & $94$ & $155$ & $8$ & $138$ & $146$ & $1.42$\\
+        ApplicationLifecycle3 & $32$ & $12$ & $21$ & $0$ & $-11$ & $-12$ & $-23$ & $-0.52$\\
+        AsynchronousEventOrdering1 & $51$ & $31$ & $16$ & $0$ & $-35$ & $-31$ & $-66$ & $-0.8$\\
+        BroadcastReceiverLifecycle1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
+        BroadcastReceiverLifecycle2 & $109$ & $44$ & $248$ & $114$ & $139$ & $70$ & $209$ & $1.37$\\
+        BroadcastReceiverLifecycle3 & $3$ & $0$ & $195$ & $110$ & $192$ & $110$ & $302$ & $100.67$\\
+        EventOrdering1 & $61$ & $29$ & $30$ & $0$ & $-31$ & $-29$ & $-60$ & $-0.67$\\
+        FragmentLifecycle1 & $187$ & $127$ & $90$ & $0$ & $-97$ & $-127$ & $-224$ & $-0.71$\\
+        FragmentLifecycle2 & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
+        ServiceEventSequence1 & $53$ & $20$ & $152$ & $34$ & $99$ & $14$ & $113$ & $1.55$\\
+        ServiceEventSequence2 & $64$ & $21$ & $389$ & $220$ & $325$ & $199$ & $524$ & $6.16$\\
+        ServiceEventSequence3 & $46$ & $12$ & $275$ & $151$ & $229$ & $139$ & $368$ & $6.34$\\
+        ServiceLifecycle1 & $119$ & $44$ & $42$ & $0$ & $-77$ & $-44$ & $-121$ & $-0.74$\\
+        ServiceLifecycle2 & $68$ & $20$ & $89$ & $21$ & $21$ & $1$ & $22$ & $0.25$\\
+        SharedPreferenceChanged1 & $13$ & $0$ & $20$ & $1$ & $7$ & $1$ & $8$ & $0.62$\\
         \hline
         \tsubEight{ReflectionTest}
-        Reflection1 & $15$ & $5$ & $8$ & $0$ & $7$ & $5$ & $12$\\
-        Reflection2 & $21$ & $5$ & $11$ & $0$ & $10$ & $5$ & $15$\\
-        Reflection3 & $42$ & $9$ & $62$ & $47$ & $-20$ & $-38$ & $-58$\\
-        Reflection4 & $9$ & $0$ & $8$ & $0$ & $1$ & $0$ & $1$\\
-        Reflection5 & $16$ & $1$ & $11$ & $0$ & $5$ & $1$ & $6$\\
-        Reflection6 & $7$ & $0$ & $134$ & $158$ & $-127$ & $-158$ & $-285$\\
-        Reflection7 & $15$ & $5$ & $15$ & $20$ & $0$ & $-15$ & $-15$\\
-        Reflection8 & $35$ & $7$ & $14$ & $0$ & $21$ & $7$ & $28$\\
-        Reflection9 & $42$ & $7$ & $21$ & $0$ & $21$ & $7$ & $28$\\
+        Reflection1 & $15$ & $5$ & $8$ & $0$ & $-7$ & $-5$ & $-12$ & $-0.6$\\
+        Reflection2 & $21$ & $5$ & $11$ & $0$ & $-10$ & $-5$ & $-15$ & $-0.58$\\
+        Reflection3 & $42$ & $9$ & $62$ & $25$ & $20$ & $16$ & $36$ & $0.71$\\
+        Reflection4 & $9$ & $0$ & $8$ & $0$ & $-1$ & $0$ & $-1$ & $-0.11$\\
+        Reflection5 & $16$ & $1$ & $11$ & $0$ & $-5$ & $-1$ & $-6$ & $-0.35$\\
+        Reflection6 & $7$ & $0$ & $134$ & $51$ & $127$ & $51$ & $178$ & $25.43$\\
+        Reflection7 & $15$ & $5$ & $15$ & $11$ & $0$ & $6$ & $6$ & $0.3$\\
+        Reflection8 & $35$ & $7$ & $14$ & $0$ & $-21$ & $-7$ & $-28$ & $-0.67$\\
+        Reflection9 & $42$ & $7$ & $21$ & $0$ & $-21$ & $-7$ & $-28$ & $-0.57$\\
         \hline
         \tsubEight{ThreadingTest}
-        AsyncTask1 & $22$ & $2$ & $11$ & $1$ & $11$ & $1$ & $12$\\
-        Executor1 & $34$ & $7$ & $17$ & $0$ & $17$ & $7$ & $24$\\
-        JavaThread1 & $34$ & $7$ & $17$ & $0$ & $17$ & $7$ & $24$\\
-        JavaThread2 & $62$ & $10$ & $31$ & $41$ & $31$ & $-31$ & $0$\\
-        Looper1 & $49$ & $3$ & $20$ & $16$ & $29$ & $-13$ & $16$\\
-        TimerTask1 & $203$ & $28$ & $32$ & $48$ & $171$ & $-20$ & $151$\\
+        AsyncTask1 & $22$ & $2$ & $11$ & $1$ & $-11$ & $-1$ & $-12$ & $-0.5$\\
+        Executor1 & $34$ & $7$ & $17$ & $0$ & $-17$ & $-7$ & $-24$ & $-0.59$\\
+        JavaThread1 & $34$ & $7$ & $17$ & $0$ & $-17$ & $-7$ & $-24$ & $-0.59$\\
+        JavaThread2 & $62$ & $10$ & $31$ & $8$ & $-31$ & $-2$ & $-33$ & $-0.46$\\
+        Looper1 & $49$ & $3$ & $20$ & $16$ & $-29$ & $13$ & $-16$ & $-0.31$\\
+        TimerTask1 & $203$ & $28$ & $32$ & $33$ & $-171$ & $5$ & $-166$ & $-0.72$\\
         \hline\hline
-        $\varnothing$ Propagations & $71.63$ & $21.58$ & $122.41$ & $221.06$ & $-50.78$ & $-199.48$ & $-250.26$
+        $\varnothing$ Propagations & $70.74$ & $21.42$ & $61.94$ & $41.54$ & $-8.8$ & $20.11$ & $11.32$ & $1.41$\\        
+        \caption{DroidBench Performance Evaluation Results}
+        \label{t:droidbenchevaluation}
     \end{longtable}
+    \normalsize
 
-    \section{Configuration}
-    Test setup...
-    Test server is shared, so use less cores than available to minimize variation due to background tasks?
+    \subsection{Result Explanation}
+    We define tests with a relative difference greater than $10$ as worth investigating. In the following, we explain why our implementation performed worse than expected.
 
-    \section{Performance}
+    \paragraph{PrivateDataLeak3} 
+    This test contains two sinks and one source. The tainted data is written to a file, later on read from the file and leaked. \textsc{FlowDroid} does not support tainting over files, so it only finds a leak from source to file write but misses the leak from file read to send SMS. 
+    Backwards, due to EasyTaintWrapper's simplicity overtainting happens. When \code{FileInputStream fis = openFileInput("out.txt");}
+    is called with \code{fis} tainted, EasyTaintWrapper taints also the base object - in this case the MainActivity. As the MainActivity has a large scope, the taint has a long lifetime and many other taints are derived from this taint. This explains the relative difference of $17.68$.
+    Using the more precise SummaryTaintWrapper, the edges reduce to $(51, 16)$ and a relative difference of $2.53$ which is more reasonable. It is still higher because of the second sink. 
+
+    \paragraph{MultiHandlers1}
+    Two \code{LocationListener}s are registered on the location in different activities. In both activities, an instance field is a parameter of a sink.
+    So there are two possible paths were something could be leaked. In the first path, the LocationListener does not call any source. The second path has an empty setter method killing the taint.
+    For the first path, the backwards analysis has to visit all the way into the \code{LocationListener} to notice that this is a dead end while the forwards search does not even start there.
+    For the second path, the backwards analysis seem to suffer because it starts with a instance field tainted which has a larger scope than a local.
+
+    \paragraph{BroadcastReceiverLifecycle3}
+    The test contains five sinks but only one source. If we only consider the leak path, both implementations perform equal. 
+    The four other sinks are responsible for the overhead on edge propagations.
+    
+    \paragraph{Reflection6}
+    The reflective call site has multiple callees in the interprocedural control-flow graph. Backwards all of these callees are visited of which only one contains a source statement. Forwards the taint is introduced in the callee at the source and just one return site needs to be processed.
+
+    \section{Real World Apps}
+
+    \subsection{Configuration}
+    Our test machine is equipped with four Intel Xeon E5-4650 and 1 TB of RAM. We limited the JVM to 50 GB RAM and \textsc{FlowDroid} on 16 threads per instance. We ran at most four instances in parallel to ensure a one-to-one mapping between CPU threads and \textsc{FlowDroid} threads. Note that the test machine is a shared system but we made sure there are always enough resources for our evaluation available. Still, background services might influence the performance of a single run. To stamp out this factor each app ran three times and only the median is used. If there were outliers we repeated the runs.
+    
+    This time we chose to not use \textsc{FlowDroid}'s default configuration. First, we disabled static field tracking due to the global scope as described in \autoref{s:complexity}. Next, instead of the \code{EasyTaintWrapper} we use the \code{SummaryTaintWrapper} which utilizes \textsc{StubDroid}. \textsc{StubDroid}'s precomputed dataflow summaries are more precise than \code{EasyTaintWrapper}'s simple rules. The timeout for the dataflow analysis was set to 10 minutes. 
+    The configuration is summarized in \autoref{t:realworldconfig}.
+
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{l | l}
+            \textbf{Option} & \textbf{Value}\\
+            \hline
+            Array Size Tainting & disabled\\
+            Inspect Sources \& Sinks & disabled\\
+            Static Field Tracking & disabled\\
+            Ignore Flows in System Packages & enabled\\
+            Exclude Soot Library Classes & enabled\\
+            Timeout & 10 minutes\\
+            Taint Wrapper & \code{SummaryTaintWrapper}\\
+        \end{tabular}
+        \caption{Real World Apps Configuration}
+        \label{t:realworldconfig}
+    \end{table}
+    
+    Also, we did not use the full sources and sinks list included in \textsc{FlowDroid} because such would result in hundreds of sources and sinks per app and probably a really long runtime. Instead, we chose to analyze which sensitive, possibly user-identifying data is sent out to the internet. As we want to compare the forwards and backwards implementation, it is also important to not put one in a disadvantage. We opted for a 2:1 ratio of sources to sinks. This decision is based on the results of \textsc{SuSi}, a tool to automatically find sources and sinks in the Android framework \cite{Rasthofer2014}. Their extracted list of sources and sinks contains roughly $2.17$ times more sources than sinks.
+    The list of sources and sinks used in this evaluation is in \autoref{t:realworldsources} and \autoref{t:realworldsinks}.
+
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{l | l}
+            \textbf{Class} & \textbf{Method}\\
+            \hline\hline
+            android.location.Location & getLatitude()\\
+            & getLongitude()\\
+            \hline
+            android.location.LocationManager & getLastKnownLocation()>\\
+            \hline
+            android.telephony.TelephonyManager & getDeviceId()\\
+            & getSubscriberId()\\
+            & getSimSerialNumber()\\
+            & getLine1Number()\\
+            & getImei()\\
+            & getMeid()\\
+            \hline
+            android.bluetooth.BluetoothAdapter & getAddress()\\
+            android.net.wifi.WifiInfo & getMacAddress()\\
+            & getSSID()\\
+            & getIpAddress()\\
+            \hline
+            java.net.InetAddress & getHostAddress()\\
+            \hline
+            android.telephony.gsm.GsmCellLocation & getCid()\\
+            & getLac()\\
+            android.content.pm.PackageManager & getInstalledApplications()\\
+            & getInstalledPackages()\\
+            & queryIntentActivities()\\
+            & queryIntentServices()\\
+            & queryBroadcastReceivers()\\
+            \hline
+            android.content.SharedPreferences & getDefaultSharedPreferences()\\
+            android.provider.Browser & getAllBookmarks()\\
+            & getAllVisitedUrls\\
+        \end{tabular}
+        \caption{Sources for Real World Apps Evaluation}
+        \label{t:realworldsources}
+    \end{table}
+
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{l | l}
+            \textbf{Class} & \textbf{Method}\\
+            \hline\hline
+            java.net.URL & set()\\
+            & openConnection()\\
+            java.net.URLConnection & connect()\\
+            & setRequestProperty()\\
+            \hline
+            android.net.http.HttpsConnection & openConnection()\\
+            android.net.http.Headers & setEtag()\\
+            & setContentType()\\
+            & setLastModified()\\
+            & setLocation()\\
+            \hline
+            android.net.http.AndroidHttpClientConnection & sendRequestHeader()\\
+            \hline
+            android.net.http.RequestQueue & queueRequest()\\
+        \end{tabular}
+        \caption{Sinks for Real World Apps Evaluation}
+        \label{t:realworldsinks}
+    \end{table}
+
+    The point of comparison with \textsc{FlowDroid}'s forwards implementation was run using the to-date latest upstream commit from the develop branch\footnote{The latest upstream commit was at that time b436733fc4a5130dfe4ce8ddb3f76fd374e9a487.}. The backwards implementation ran on our latest commit with all changes merged from the upstream.
+
+    For our app set, we chose 200 apps randomly out of an Google Playstore dump from 2021 containing over 6000 apps. The full list is appended to this work and can be found at \autoref{?}.
+
+    \subsection{Results}
+    Out of 200 apps, 60 apps do not have any sources or sinks and thus the analysis did not start. For 15 apps, the analysis aborted with errors. We are left with 125 apps for which both implementations completed the analysis.
+    \todo{Preliminary! Only one run without memwatcher}
+
+
+    
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{l | r | r}
+            \textbf{Metric} & \textbf{Forwards} & \textbf{Backwards}\\
+            \hline\hline
+            Average Runtime & $498.192s$ & $397.152s$\\
+            Median Runtime & 600.0 & 600.0\\
+            \hline
+            Abstractions Infoflow & 34223577 & 12318997\\
+            Abstractions Alias & 12347994 & 30013930\\
+            Total Abstractions & 46571571 & 42332927\\
+            \hline
+            Average Max Memory Consumption & $14559.38 GB$ & $25465.59 GB$\\
+        \end{tabular}
+        \caption{Results}
+        \label{t:realworldresults}
+    \end{table}
+
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{l | r | r}
+            & \textbf{Forwards} & \textbf{Backwards}\\
+            \hline\hline
+            Average Runtime & $19.15s$ & $38.07s$\\
+            Median Runtime & 0.0 & 0.0\\
+            \hline
+            Abstractions Infoflow & 459868 & 629202\\
+            Abstractions Alias & 155876 & 1403538\\
+            Total Abstractions & 615744 & 2032740\\
+            \hline
+            Average Max Memory Consumption & $4526.75 GB$ & $16005.16 GB$\\
+        \end{tabular}
+        \caption{Results without Timeouts}
+        \label{t:realworldresultswithouttimeout}
+    \end{table}
+
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{l | r | r}
+            \textbf{Metric} & \textbf{Forwards} & \textbf{Backwards}\\
+            \hline\hline
+            Memory Timeouts & $3.2\%$ & $6.4\%$\\
+            Time Timeouts & $80.8\%$ & $57.6\%$\\            
+        \end{tabular}
+        \caption{Timeout in the App Set}
+    \end{table}
+
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[]{0.45\textwidth}
+            \centering
+            \resizebox{\columnwidth}{!}{
+                \input{figs/fw_dataflow-sources.pgf}
+            }
+        \end{subfigure}
+        \qquad
+        \begin{subfigure}[]{0.45\textwidth}
+            \centering
+            \resizebox{\columnwidth}{!}{
+                \input{figs/fw_dataflow-sinks.pgf}
+            }
+        \end{subfigure}
+        \qquad
+        \begin{subfigure}[]{0.45\textwidth}
+            \centering
+            \resizebox{\columnwidth}{!}{
+                \input{figs/bw_dataflow-sources.pgf}
+            }
+        \end{subfigure}
+        \qquad
+        \begin{subfigure}[]{0.45\textwidth}
+            \centering
+            \resizebox{\columnwidth}{!}{
+                \input{figs/bw_dataflow-sinks.pgf}
+            }
+        \end{subfigure}
+        \caption{Dataflow time in comparison to source and sink count}
+    \end{figure}
+
+    \begin{figure}
+        \resizebox{\columnwidth}{!}{
+            \input{figs/dataflowDelta.pgf}
+        }
+        \caption{Dataflow Delta}
+    \end{figure}
+
+
+    \subsection{Comparison to forwards analysis}
     Basically the answer to RQ1: Is the backwards search efficient enough to perform analysis on real world apps?
 
-    \section{Comparison to forwards analysis}
+
     Basically the answer to RQ2: Can we find a pre-analysis known parameter to decide which analysis is more efficient?
 
 

@@ -21,24 +21,39 @@
 
     \textbf{HeapTestPtsAliasing} We focused in this work on flow-sensitive aliasing. Points-To-Aliasing is left for future work.
     
-    \textbf{ImplicitFlowTests} \todo{implement later if enough time}
+    \textbf{ImplicitFlowTests} Not implemented. \todo{implement later if enough time}
 
-    \textbf{SetTests} \code{containsTest} needs implicit flows to find the leak. It is supposed to fail.
+    \textbf{SetTests} \code{containsTest} needs implicit flows to find the leak.
 
     \section{DroidBench}\label{s:droidbenchvalidation}
-    \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 120 test cases are included in version 2\footnote{\url{https://github.com/secure-software-engineering/DroidBench}}.
-    We do not use it to evaluate our tool against others but to compare it against the forwards analysis of \textsc{FlowDroid}. We aim to achieve similiar results but they may subtle differences.
+    \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 190 test cases are included in the latest version 3\footnote{\url{https://github.com/secure-software-engineering/DroidBench/}}. We use the newest commit at the time of writing\footnote{6. March 2021, Commit \texttt{ddbd50c}}.
+    We aim to achieve similiar results as \textsc{FlowDroid}'s existing forwards implementation.
     
-    \subsection{Configuration}
-    The validation was run with the default configuration of the Android module of FlowDroid. We used EasyTaintWrapper as the taint wrapper.
+    \subsection{Configuration}\label{s:droidbenchconfig}
+    The validation was run with the default configuration of the Android module of FlowDroid  using EasyTaintWrapper as the taint wrapper. The configuration is summarized in \autoref{t:droidbenchconfig}.
+
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{l | l}
+            \textbf{Option} & \textbf{Value}\\
+            \hline
+            Array Size Tainting & disabled\\
+            Inspect Sources \& Sinks & disabled\\
+            Static Field Tracking & enabled\\
+            Ignore Flows in System Packages & enabled\\
+            Exclude Soot Library Classes & enabled\\
+            Timeout & -\\
+            Taint Wrapper & \code{EasyTaintWrapper}\\
+        \end{tabular}
+        \caption{Real World Apps Configuration}
+        \label{t:droidbenchconfig}
+    \end{table}
 
     We only used a subset of \textsc{DroidBench} tests to validate our results. Dynamic Code Loading, Self Modification, Unreachable Code and Native Code are all not supported by \textsc{FlowDroid}. The first three are all callgraph related and the latter is not supported because FlowDroid has no Android native call handler for now.
     Also Inter Component Communication, Reflection Inter Component Communication and Inter App Communication were left out. The Inter Component Communication module was - at the time of this work - not maintained anymore. 
     As all left out tests do not depend on the flow functions, if \textsc{FlowDroid} gets support for those in the future they should also work in backwards analysis.
 
     \subsection{Results}
-    \todo{ICC is buggy atm}
-
     \begin{longtable}{l | l | l}% begin droidbench
         \textbf{App Name} & \textbf{Forwards} & \textbf{Backwards}\\
         \hline\hline
@@ -218,9 +233,11 @@
         Precision & $ 88.79 \%$ & $ 88.7 \%$\\
         Recall & $ 89.57 \% $ & $ 88.7 \%$\\
         F1 measure & $ 0.89 $ & $ 0.89 $\\
+        \caption{DroidBench Validation Results}
+        \label{t:droidbenchvalidation}
     \end{longtable}
 
-    \subsection{Discussion}
+    \subsection{Results Explanation}
     The validation shows nearly identical results for backwards and forwards analysis. The differences are explained below. 
     
     We conclude the backwards analysis is working as expected.
