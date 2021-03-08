@@ -6,19 +6,19 @@
     We now evaluate our implementation against the existing implementation in \textsc{FlowDroid}.
     
     \section{DroidBench}
-    We already introduced \textsc{Droidbench} in \autoref{s:droidbenchvalidation} to validate the soundness of our backwards-directed implementation. In this section, we focus on the performance in comparison to the existing forwards implementation in \textsc{FlowDroid}. 
+    We already introduced \textsc{Droidbench} in \autoref{s:droidbenchvalidation} to validate the soundness of our backward-directed implementation. In this section, we focus on the performance in comparison to the existing forward-directed implementation in \textsc{FlowDroid}. 
 
-    \textsc{DroidBench} has the advantage that all apps are specificly crafted for benchmarking taint analysis. So, most tests only contain single-figure number of sources and sinks. Also, the number of sources and sinks are often equal or just differ by one to test whether the tool can differentiate something. These simplify the comparison between both analysis directions as neither one has an initial disadvantage.
+    \textsc{DroidBench} has the advantage that all apps are crafted explicitly for benchmarking taint analysis. So, most tests only contain a single-figure number of sources and sinks. Also, the number of sources and sinks are often equal or differ by one to test whether the tool can differentiate something. These simplify the comparison between both analysis directions as neither one has an initial disadvantage.
 
-    Most test cases are small enough to be analysed in sub-two seconds on an average four core desktop CPU from 2012. Our test environment is not isolated, so background tasks and the process scheduler can affect the runtime. The short runtime together with the variance of the unisolated testing environment render the runtime unusable as an comparison point. In constrast, edge propagations are deterministic\footnote{This is only true if there are enough resources. \textsc{FlowDroid} tries to terminate gracefully when running low on memory. Also, timeouts result in a non-reproducible number of edge propagations.} and correlate with the runtime. Thus, we only use the number of propagations to compare both implementations.
+    Most test cases are small enough to be analyzed in sub-two seconds on an average four-core desktop CPU from 2012. Our test environment is not isolated, so background tasks and the process scheduler can affect the runtime. The short runtime, together with the variance of the unisolated testing environment, render the runtime unusable as a comparison point. In contrast, edge propagations are deterministic\footnote{This is only true if there are enough resources. \textsc{FlowDroid} tries to gracefully terminate when running low on memory. Also, timeouts result in a non-reproducible number of edge propagations.} and correlate with the runtime. Thus, we only use the number of propagations to compare both implementations.
 
     The configuration is the same as described in \autoref{s:droidbenchconfig}.
 
     \subsection{Results}
-    We compare all test cases where both implementations yield the same result. Rows containing just hyphens are either test cases where the result differs or the IFDS analysis did not start, e.g. because no sink was found in the reachable code. \#I denotes the number of edge propagations inside the infoflow analysis and \#A the number of edge propagations inside the alias analysis. The absolute difference columns calculate from $\mathit{Result}_{\mathit{B}} - \mathit{Result}_{\mathit{F}}$. The relative difference is calculated as follows: $\frac{\mathit{TotalDifference}}{|\mathit{\#I_\mathit{F} + \#A_\mathit{F}}|}$. Hence, negative values signify the backwards analysis performed better. The full results can be found in \autoref{t:droidbenchevaluation}.
+    We compare all test cases where both implementations yield the same result. When rows only contain hyphens, either the result of the test case differed between the two analyses or the IFDS analysis did not start, e.g., because no sink is in the reachable code. \#I denotes the number of edge propagations inside the infoflow analysis and \#A the number of edge propagations inside the alias analysis. We calculated the absolute difference as $\mathit{Result}_{\mathit{B}} - \mathit{Result}_{\mathit{F}}$. The relative difference calculates as follows: $\frac{\mathit{TotalDifference}}{|\mathit{\#I_\mathit{F} + \#A_\mathit{F}}|}$. Hence, negative values signify the backward analysis performed better. The full results are in \autoref{t:droidbenchevaluation}.
 
-    In general, both implementations have similiar average edge propagation counts. There are not many test cases where both perform identical, instead dependent on the specific test case the relative difference is in between $-1$ and $1$. So, the expected behavior from \autoref{s:complexity} occured: it highly depends on the analyzed app.
-    But what we did not expect is some sort of condition which lets the backwards edge propagations explode up to a factor of $10 000\%$ as seen in \code{LifecycleTest#BroadcastReceiverLifecycle3} and others. In contrast, the existing forwards implementation only at most $100\%$ relative difference.
+    In general, both implementations have similar average edge propagation counts. There are not many test cases where both perform identically; instead, dependent on the specific test case, the relative difference is between $-1$ and $1$. So, the expected behavior from \autoref{s:complexity} occurred: it highly depends on the analyzed app.
+    However, we did not expect cases that let the backward edge propagations explode up to a factor of $10 000\%$, as seen in \code{LifecycleTest#BroadcastReceiverLifecycle3} and others. In contrast, the existing forward implementation only at most a relative difference of $100\%$.
 
     \footnotesize
     \newcommand{\tsubEight}[1]{\multicolumn{9}{c}{#1}\\\hline}
@@ -188,31 +188,31 @@
     We define tests with a relative difference greater than $10$ as worth investigating. In the following, we explain why our implementation performed worse than expected.
 
     \paragraph{PrivateDataLeak3} 
-    This test contains two sinks and one source. The tainted data is written to a file, later on read from the file and leaked. \textsc{FlowDroid} does not support tainting over files, so it only finds a leak from source to file write but misses the leak from file read to send SMS. 
-    Backwards, due to EasyTaintWrapper's simplicity overtainting happens. When \code{FileInputStream fis = openFileInput("out.txt");}
-    is called with \code{fis} tainted, EasyTaintWrapper taints also the base object - in this case the MainActivity. As the MainActivity has a large scope, the taint has a long lifetime and many other taints are derived from this taint. This explains the relative difference of $17.68$.
-    Using the more precise SummaryTaintWrapper, the edges reduce to $(51, 16)$ and a relative difference of $2.53$ which is more reasonable. It is still higher because of the second sink. 
+    This test contains two sinks and one source. The tainted data is written to a file, later read from the file and then leaked. \textsc{FlowDroid} does not support tracking taints over files, so it only finds a leak from source to file write but misses the leak from file read to send SMS. 
+    Due to EasyTaintWrapper's simplicity, overtainting happens in the backward direction. When \code{FileInputStream fis = openFileInput("out.txt");}
+    is called with \code{fis} tainted, EasyTaintWrapper also taints the base object - the \code{MainActivity} in this case. As the \code{MainActivity} has a enourmous scope, the taint has a long lifetime and many other taints could derive from this taint. This taint explains the relative difference of $17.68$.
+    Using the more precise SummaryTaintWrapper, the edges reduce to $(51, 16)$ and a relative difference of $2.53$, which is more reasonable. It is still higher because of the second sink. 
 
     \paragraph{MultiHandlers1}
-    Two \code{LocationListener}s are registered on the location in different activities. In both activities, an instance field is a parameter of a sink.
-    So there are two possible paths were something could be leaked. In the first path, the LocationListener does not call any source. The second path has an empty setter method killing the taint.
-    For the first path, the backwards analysis has to visit all the way into the \code{LocationListener} to notice that this is a dead end while the forwards search does not even start there.
-    For the second path, the backwards analysis seem to suffer because it starts with a instance field tainted which has a larger scope than a local.
+    Two \code{LocationListener}s are registered in different activities. In both activities, an instance field is a parameter of a sink.
+    So there are two possible paths where something could be leaked. The LocationListener does not call any source on the first path, while the second path has an empty setter method killing the taint.
+    For the first path, the backward analysis has to propagate the taint into the \code{LocationListener} to notice that this is a dead-end while the forward's search does not even start there.
+    For the second path, the backward analysis seems to suffer because it starts at an instance field taint with a larger scope than a local variable.
 
     \paragraph{BroadcastReceiverLifecycle3}
-    The test contains five sinks but only one source. If we only consider the leak path, both implementations perform equal. 
+    The test contains five sinks but only one source. If we only consider the leak path, both implementations perform equally. 
     The four other sinks are responsible for the overhead on edge propagations.
     
     \paragraph{Reflection6}
-    The reflective call site has multiple callees in the interprocedural control-flow graph. Backwards all of these callees are visited of which only one contains a source statement. Forwards the taint is introduced in the callee at the source and just one return site needs to be processed.
+    The reflective call site has multiple callees in the interprocedural control-flow graph. Backward all of these callees are visited, of which only one contains a source statement. Forwards, the taint is introduced in the callee at the source and just one return site needs to be processed.
 
     \section{Real World Apps}
 
     \subsection{Configuration}
-    Our test machine is equipped with four Intel Xeon E5-4650 and 1 TB of RAM. We limited the JVM to 50 GB RAM and \textsc{FlowDroid} on 16 threads per instance. We ran at most four instances in parallel to ensure a one-to-one mapping between CPU threads and \textsc{FlowDroid} threads. Note that the test machine is a shared system but we made sure there are always enough resources for our evaluation available. Still, background services might influence the performance of a single run. To stamp out this factor each app ran three times and only the median is used. If there were outliers we repeated the runs.
+    Our test machine is equipped with four Intel Xeon E5-4650 and 1 TB of RAM. We limited the JVM to 50 GB RAM and \textsc{FlowDroid} on 16 threads per instance. We ran at most four instances in parallel to ensure a one-to-one mapping between CPU threads and \textsc{FlowDroid} threads. Note that the test machine is a shared system, but we made sure there are always enough resources for our evaluation available. Still, background services might influence the performance of a single run. To stamp out this factor, we ran each app three times. If there were outliers, we repeated the runs.
     
-    This time we chose to not use \textsc{FlowDroid}'s default configuration. First, we disabled static field tracking due to the global scope as described in \autoref{s:complexity}. Next, instead of the \code{EasyTaintWrapper} we use the \code{SummaryTaintWrapper} which utilizes \textsc{StubDroid}. \textsc{StubDroid}'s precomputed dataflow summaries are more precise than \code{EasyTaintWrapper}'s simple rules. The timeout for the dataflow analysis was set to 10 minutes. 
-    The configuration is summarized in \autoref{t:realworldconfig}.
+    For this evaluation, we chose to use a non-default configuration of \textsc{FlowDroid}. First, we disabled static field tracking due to the global scope as described in \autoref{s:complexity}. Next, instead of the \code{EasyTaintWrapper}, we use the \code{SummaryTaintWrapper}, which utilizes \textsc{StubDroid}. \textsc{StubDroid}'s precomputed dataflow summaries are more precise than \code{EasyTaintWrapper}'s simple rules. We set the timeout for the dataflow analysis to 10 minutes. 
+    The configuration summary is in \autoref{t:realworldconfig}.
 
     \begin{table}[ht]
         \centering
@@ -231,7 +231,7 @@
         \label{t:realworldconfig}
     \end{table}
     
-    Also, we did not use the full sources and sinks list included in \textsc{FlowDroid} because such would result in hundreds of sources and sinks per app and probably a really long runtime. Instead, we chose to analyze which sensitive, possibly user-identifying data is sent out to the internet. As we want to compare the forwards and backwards implementation, it is also important to not put one in a disadvantage. We opted for a 2:1 ratio of sources to sinks. This decision is based on the results of \textsc{SuSi}, a tool to automatically find sources and sinks in the Android framework \cite{Rasthofer2014}. Their extracted list of sources and sinks contains roughly $2.17$ times more sources than sinks.
+    We did not use the full sources and sinks list included in \textsc{FlowDroid} because such would result in hundreds of sources and sinks per app and probably a long runtime. Instead, we chose to analyze which sensitive and possibly user-identifying data is sent out to the internet. As we want to compare the forwards and backward implementation, it is also essential to not put one at a disadvantage. We opted for a 2:1 ratio of sources to sinks. This decision is based on the results of \textsc{SuSi}, a tool to automatically find sources and sinks in the Android framework \cite{Rasthofer2014}. Their extracted list of sources and sinks contains roughly $2.17$ times more sources than sinks.
     The list of sources and sinks used in this evaluation is in \autoref{t:realworldsources} and \autoref{t:realworldsinks}.
 
     \begin{table}[ht]
@@ -242,7 +242,7 @@
             android.location.Location & getLatitude()\\
             & getLongitude()\\
             \hline
-            android.location.LocationManager & getLastKnownLocation()>\\
+            android.location.LocationManager & getLastKnownLocation()\\
             \hline
             android.telephony.TelephonyManager & getDeviceId()\\
             & getSubscriberId()\\
@@ -260,6 +260,7 @@
             \hline
             android.telephony.gsm.GsmCellLocation & getCid()\\
             & getLac()\\
+            \hline
             android.content.pm.PackageManager & getInstalledApplications()\\
             & getInstalledPackages()\\
             & queryIntentActivities()\\
@@ -281,10 +282,12 @@
             \hline\hline
             java.net.URL & set()\\
             & openConnection()\\
+            \hline
             java.net.URLConnection & connect()\\
             & setRequestProperty()\\
             \hline
             android.net.http.HttpsConnection & openConnection()\\
+            \hline
             android.net.http.Headers & setEtag()\\
             & setContentType()\\
             & setLastModified()\\
@@ -298,12 +301,12 @@
         \label{t:realworldsinks}
     \end{table}
 
-    The point of comparison with \textsc{FlowDroid}'s forwards implementation was run using the to-date latest upstream commit from the develop branch\footnote{The latest upstream commit was at that time b436733fc4a5130dfe4ce8ddb3f76fd374e9a487.}. The backwards implementation ran on our latest commit with all changes merged from the upstream.
+    We used FlowDroid's forwards implementation on the to that date latest upstream commit\footnote{The latest upstream commit was at that time b436733fc4a5130dfe4ce8ddb3f76fd374e9a487.} from the develop branch for the point of comparison. The backward implementation ran on our latest commit with all changes merged from the upstream.
 
-    For our app set, we chose 200 apps randomly out of an Google Playstore dump from 2021 containing over 6000 apps. The full list is appended to this work and can be found at \autoref{?}.
+    We chose 200 apps randomly out of a Google Playstore dump from 2021 containing over 6000 apps for our evaluation set. The full list is appended to this work in \autoref{?}.
 
     \subsection{Results}
-    Out of 200 apps, 60 apps do not have any sources or sinks and thus the analysis did not start. For 15 apps, the analysis aborted with errors. We are left with 125 apps for which both implementations completed the analysis.
+    Out of 200 apps, 60 apps do not have any sources or sinks and thus, the analysis did not start. For 15 apps, the analysis aborted with errors. We are left with 125 apps for which both implementations completed the analysis.
     \todo{Preliminary! Only one run without memwatcher}
 
 
@@ -314,13 +317,16 @@
             \textbf{Metric} & \textbf{Forwards} & \textbf{Backwards}\\
             \hline\hline
             Average Runtime & $498.192s$ & $397.152s$\\
-            Median Runtime & 600.0 & 600.0\\
+            Median Runtime & $600.0s$ & $600.0s$\\
             \hline
-            Abstractions Infoflow & 34223577 & 12318997\\
-            Abstractions Alias & 12347994 & 30013930\\
-            Total Abstractions & 46571571 & 42332927\\
+            Abstractions Infoflow & $34223577$ & $12318997$\\
+            Abstractions Alias & $12347994$ & $30013930$\\
+            Total Abstractions & $46571571$ & $42332927$\\
             \hline
-            Average Max Memory Consumption & $14559.38 GB$ & $25465.59 GB$\\
+            % Average Max Memory Consumption & $14559.38 GB$ & $25465.59 GB$\\
+            \hline
+            Memory Timeouts & $3.2\%$ & $6.4\%$\\
+            Time Timeouts & $80.8\%$ & $57.6\%$\\                
         \end{tabular}
         \caption{Results}
         \label{t:realworldresults}
@@ -332,28 +338,19 @@
             & \textbf{Forwards} & \textbf{Backwards}\\
             \hline\hline
             Average Runtime & $19.15s$ & $38.07s$\\
-            Median Runtime & 0.0 & 0.0\\
+            Median Runtime & $0.0s$ & $0.0s$\\
             \hline
-            Abstractions Infoflow & 459868 & 629202\\
-            Abstractions Alias & 155876 & 1403538\\
-            Total Abstractions & 615744 & 2032740\\
+            Abstractions Infoflow & $459868$ & $629202$\\
+            Abstractions Alias & $155876$ & $1403538$\\
+            Total Abstractions & $615744$ & $2032740$\\
             \hline
-            Average Max Memory Consumption & $4526.75 GB$ & $16005.16 GB$\\
+            % Average Max Memory Consumption & $4526.75 GB$ & $16005.16 GB$\\            
         \end{tabular}
         \caption{Results without Timeouts}
         \label{t:realworldresultswithouttimeout}
     \end{table}
 
-    \begin{table}[ht]
-        \centering
-        \begin{tabular}{l | r | r}
-            \textbf{Metric} & \textbf{Forwards} & \textbf{Backwards}\\
-            \hline\hline
-            Memory Timeouts & $3.2\%$ & $6.4\%$\\
-            Time Timeouts & $80.8\%$ & $57.6\%$\\            
-        \end{tabular}
-        \caption{Timeout in the App Set}
-    \end{table}
+    \todo{Avg w/o timeouts is only per direction, so bw contains way more entries}
 
 
     \begin{figure}
