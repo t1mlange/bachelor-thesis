@@ -46,7 +46,7 @@
 \usepackage{longtable} % Mehrseitige Tabellen
 % \usepackage{xltabular} % Mehrseitige Tabellen mit anpassarer Breite
 % \usepackage{booktabs}   % Verbesserte Möglichkeiten für Tabellenlayout über horizontale Linien
-
+\usepackage{adjustbox}
 %%%%%%%%%%%%%%%%%%%
 %Paketvorschläge Mathematik
 %%%%%%%%%%%%%%%%%%%
@@ -146,7 +146,10 @@ Bei einer Thesis des Fachbereichs Architektur entspricht die eingereichte elektr
 \subfile{chapters/07relatedwork.tex}
 \subfile{chapters/08conclusion.tex}
 
-\printbibliography
+\printbibliography[
+	heading=bibintoc,
+	title={Bibliography}
+]
 
 \subfile{chapters/09appendix.tex}
 

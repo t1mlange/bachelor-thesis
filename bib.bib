@@ -1,5 +1,32 @@
 % Encoding: UTF-8
 
+@Article{Spaeth2019,
+  author   = {Späth, Johannes and Ali, Karim and Bodden, Eric},
+  journal  = {Proceedings of the ACM on Programming Languages},
+  title    = {Context-, flow-, and field-sensitive data-flow analysis using synchronized {Pushdown} systems},
+  year     = {2019},
+  month    = jan,
+  pages    = {1--29},
+  volume   = {3},
+  abstract = {Precise static analyses are context-, field- and flow-sensitive. Context- and field-sensitivity are both expressible as context-free language (CFL) reachability problems. Solving both CFL problems along the same data-flow path is undecidable, which is why most flow-sensitive data-flow analyses over-approximate field-sensitivity through k-limited access-path, or through access graphs. Unfortunately, as our experience and this paper show, both representations do not scale very well when used to analyze programs with recursive data structures.
+Any single CFL-reachability problem is efficiently solvable, by means of a pushdown system. This work thus introduces the concept of synchronized pushdown systems (SPDS). SPDS encode both procedure calls/returns and field stores/loads as separate but “synchronized” CFL reachability problems. An SPDS solves both individual problems precisely, and approximation occurs only in corner cases that are apparently rare in practice: at statements where both problems are satisfied but not along the same data-flow path.
+SPDS are also efficient: formal complexity analysis shows that SPDS shift the complexity from {\textbar}F{\textbar}3k under k-limiting to {\textbar}S{\textbar}{\textbar}F{\textbar}², where F is the set of fields and S the set of statements involved in a data-flow. Our evaluation using DaCapo shows this shift to pay off in practice: SPDS are almost as efficient as k-limiting with k=1 although their precision equals k=∞. For a typestate analysis SPDS accelerate the analysis up to 83× for data-flows of objects that involve many field accesses but span rather few methods.
+We conclude that SPDS can provide high precision and further improve scalability, in particularly when used in analyses that expose rather local data flows.},
+  doi      = {10.1145/3290361},
+  file     = {ResearchGate Link:https\://www.researchgate.net/publication/330152854_Context-_flow-_and_field-sensitive_data-flow_analysis_using_synchronized_Pushdown_systems:},
+}
+
+@InProceedings{Lam2011,
+  author     = {Lam, Patrick and Bodden, Eric and Lhotak, Ondrej and Hendren, Laurie},
+  title      = {The {Soot} framework for {Java} program analysis: a retrospective},
+  year       = {2011},
+  month      = oct,
+  language   = {en},
+  shorttitle = {The {Soot} framework for {Java} program analysis},
+  url        = {http://www.bodden.de/pubs/lblh11soot.pdf},
+  urldate    = {2021-03-11},
+}
+
 @InProceedings{Rasthofer2014,
   author    = {Rasthofer, Siegfried and Arzt, Steven and Bodden, E.},
   booktitle = {{NDSS}},
@@ -144,6 +171,19 @@ Static data flow analysis has been proposed as a means for automatically enumera
   bibsource = {dblp computer science bibliography, https://dblp.org},
   biburl    = {https://dblp.org/rec/books/mk/Muchnick1997.bib},
   timestamp = {Mon, 05 Jan 2004 14:58:03 +0100},
+}
+
+@Book{Khedker2009,
+  author     = {Khedker, Uday and Sanyal, Amitabha and Sathe, Bhaurao},
+  title      = {Data {Flow} {Analysis}: {Theory} and {Practice}},
+  year       = {2009},
+  isbn       = {9780849332517},
+  month      = jan,
+  abstract   = {This work provides an in-depth treatment of data flow analysis technique. Apart from including interprocedural data flow analysis, this book is the first to extend detailed coverage of analysis beyond bit vectors. Supplemented by numerous examples, it equips readers with a combination of mutually supportive theory and practice, presenting mathematical foundations and including study of data flow analysis implementation through use of the GNU Compiler Collection (GCC). Readers can experiment with the analyses described in the book by accessing the authors web page, where they will find the source code of gdfa (generic data flow analyzer).},
+  doi        = {10.1201/9780849332517},
+  file       = {ResearchGate Link:https\://www.researchgate.net/publication/262493821_Data_Flow_Analysis_Theory_and_Practice:},
+  journal    = {Data Flow Analysis: Theory and Practice},
+  shorttitle = {Data {Flow} {Analysis}},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

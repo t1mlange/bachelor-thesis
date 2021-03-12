@@ -36,26 +36,30 @@
         \centering
         \begin{subfigure}[b]{0.45\textwidth}
             \centering
-            \begin{lstlisting}[gobble=16]
-                void aliasRule1() {
-                    A a = b;
-                    b.str = source();
-                    sink(a.str);
-                }
-            \end{lstlisting}
+            \begin{adjustbox}{max width=\columnwidth}
+                \begin{lstlisting}[gobble=20]
+                    void aliasRule1() {
+                        A a = b;
+                        b.str = source();
+                        sink(a.str);
+                    }
+                \end{lstlisting}
+            \end{adjustbox}
             \caption{Example for alias analysis initiated by rule 1}
             \label{lst:aliasex_a}
         \end{subfigure}
         \hfill
         \begin{subfigure}[b]{0.45\textwidth}
             \centering
-            \begin{lstlisting}[gobble=16]
-                void aliasRule3() {
-                    A a = b;
-                    a.str = source();
-                    sink(b.str);
-                }
-            \end{lstlisting}
+            \begin{adjustbox}{max width=\columnwidth}
+                \begin{lstlisting}[gobble=20]
+                    void aliasRule3() {
+                        A a = b;
+                        a.str = source();
+                        sink(b.str);
+                    }
+                \end{lstlisting}
+            \end{adjustbox}
             \caption{Example for alias analysis initiated by rule 3}
             \label{lst:aliasex_b}
         \end{subfigure}
@@ -74,14 +78,16 @@
 
     \begin{figure}[ht]
         \centering
-        \begin{lstlisting}
-            void turnStmtNeeded() {
-                A a = b;
-                String str = b.str;
-                a.str = source();
-                sink(str);
-            }
-        \end{lstlisting}
+        \begin{adjustbox}{max width=\columnwidth}
+            \begin{lstlisting}[gobble=16]
+                void turnStmtNeeded() {
+                    A a = b;
+                    String str = b.str;
+                    a.str = source();
+                    sink(str);
+                }
+            \end{lstlisting}
+        \end{adjustbox}
         \caption{Aliasing example with turn unit}
         \label{lst:turnunit}
     \end{figure}
@@ -311,11 +317,11 @@
         \begin{subfigure}[b]{\textwidth}
             \begin{lstlisting}[language=Jimple]
                 public static void static2Test() {
-                    tainted = staticinvoke <soot.jimple.infoflow.test.android.TelephonyManager: java.lang.String getDeviceId()>();
+                    tainted = staticinvoke <soot.jimple.infoflow.test.android.TelephonyManager: java.lang.String getDeviceId()>(); // Line 2 in (a)
 
                     // [...]
             
-                    virtualinvoke cm.<soot.jimple.infoflow.test.android.ConnectionManager: void publish(java.lang.String)>(alsoTainted);
+                    virtualinvoke cm.<soot.jimple.infoflow.test.android.ConnectionManager: void publish(java.lang.String)>(alsoTainted); // Line 9 in (a)
 
                     return;
                 }

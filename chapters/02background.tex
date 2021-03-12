@@ -5,40 +5,43 @@
     In this chapter we introduce the necessary background.
 
     \section{Static Data Flow Analysis}
-    Muchnick \cite{Muchnick1997} defines data-flow analysis as follows:
+
+    Khedker \cite{Khedker2009} defines data-flow analysis as follows:
     \begin{quote}
-        Data-flow analysis provides global information about how a procedure (or a larger segment of a program) manipulates its data.
+        Data flow analysis is a process of deriving information about the run time behaviour of a program.
     \end{quote}
+    Data flow analyses are used in many different ways. Compilers use it to apply optimizations, others use it for software verification and it is also used for reverse-engineering. A special kind of data flow analysis is taint analysis which falls under the category of reverse-engineering. In taint analysis, the goal is to find out whether the information contents of a certain variable flows through the program to another statement. Variables which contain such worthwhile information are tainted. This worthwhile information has to come from somewhere, the so-called sources. Sources can be any expression but are most likely methods. On the other end, there are sinks which leak the worthwhile information. A data flow between a source and a sink is called leak. If you would apply taint analysis to the use case of tracking detection, a source would be a method returning a unique identifier and a sink would be a method which sents out data to the internet. When a leak is found, we know the receiving server is able to identify the device.  
      
-    In the field of compilers, there is a distinction between static and dynamic. Static generally refers to something that is decided at compile-time while dynamic refers to decisions taken at runtime \cite{Aho1986}. A common example is typing. In Java the type of a variable has to be declared before a value can be assigned to it while in Python the type of a variable is determined by the value assigned at runtime. Same distinction is also present for analyses. Dynamic analysis observes the run behavior of the program while static analysis works on a representation of the code. Both have different tradeoffs. Dynamic it is hard to achieve code coverage and static it is hard to not overapproximate the possible paths. 
-    \begin{figure}[ht]
-        \centering
-        \begin{tikzpicture}
-            \draw[fill=yellow, opacity=0.7, thick] (0,0) ellipse (2cm and 1.25cm);
-            \draw[fill=green, opacity=0.7, thick] (0.25,0.25) ellipse (1.5cm and 0.9cm);
-            \draw[fill=red, opacity=0.7, thick] (0.25, 0.25) ellipse (0.65cm and 0.5cm);
+    In the field of compilers, there is a distinction between static and dynamic. Static generally refers to something that is decided at compile-time while dynamic refers to decisions taken at runtime \cite{Aho1986}. 
+    % A common example is typing. In Java the type of a variable has to be declared before a value can be assigned to it while in Python the type of a variable is determined by the value assigned at runtime. 
+    Same distinction is also present for analyses. Dynamic analysis observes the run behavior of the program while static analysis works on a representation of the code. Both have different tradeoffs. Dynamic it is hard to achieve code coverage and static it is hard to only traverse the actually taken paths. Thus, in case of analysis, dynamic analysis is an underapproxmiation and static analysis is an overapproximation.  
+
+    % \begin{figure}[ht]
+    %     \centering
+    %     \begin{tikzpicture}
+    %         \draw[fill=yellow, opacity=0.7, thick] (0,0) ellipse (2cm and 1.25cm);
+    %         \draw[fill=green, opacity=0.7, thick] (0.25,0.25) ellipse (1.5cm and 0.9cm);
+    %         \draw[fill=red, opacity=0.7, thick] (0.25, 0.25) ellipse (0.65cm and 0.5cm);
 
 
-            \node (s) at (-1,-1.75) {Static Analysis};
-            \draw (s) to (-0.5, -1);
-            \node (d) at (3.25,1) {Dynamic Analysis};
-            \draw (d) to (0.5, 0.25);
-            \node (t) at (3, -1) {Ground Truth};
-            \draw (t) to (1.25, 0);
-        \end{tikzpicture}
-        \caption{Data-flow Analysis Coverage}
-    \end{figure}
+    %         \node (s) at (-1,-1.75) {Static Analysis};
+    %         \draw (s) to (-0.5, -1);
+    %         \node (d) at (3.25,1) {Dynamic Analysis};
+    %         \draw (d) to (0.5, 0.25);
+    %         \node (t) at (3, -1) {Ground Truth};
+    %         \draw (t) to (1.25, 0);
+    %     \end{tikzpicture}
+    %     \caption{Data-flow Analysis Coverage}
+    % \end{figure}
 
-
-    In taint analysis, a taint is a variable which contains interesting data. Sources provide data which is interesting and sinks leak data. A path from a source to a sink is leak.
-
-    Explain key terms such as static, fact, taint, source, sink, leak, sensitivity.
-    
-    Static analyses are also categorized using sensitivities. These describe whether the analysis considers a certain aspect.
-    First, there is flow-sensitivity. A flow-sensitive analysis can determine if a fact holds at a certain statement. Data-flow analyses are always flow-sensitive.
-    Next up, context-sensitivity describes an interprocedural analysis which can distinguish the context of a called method, e.g. knows the original call site at a return.
-    Object-sensitive analyses also distinguishes a fields between objects.
-    Then there is also path-sensitivity. Basically, if an conditional branch is taken, the condition must hold and this knowledge is used by the analysis.
+    Data flow analyses are also categorized using sensitivities. 
+    \begin{itemize}
+        \item \textbf{Flow Sensitivity}: A flow-sensitive analysis can determine if a fact holds at a certain statement. Thus, data flow analyses are always flow-sensitive.
+        \item \textbf{Context Sensitivity}: An interprocedural analysis is able to distinguish the context of a called method, e.g. knows the original call site at a return statement.
+        \item \textbf{Object Sensitivity}: An analysis can distinguish fields of different objects.
+        \item \textbf{Field Sensitivity}:
+        \item \textbf{Path Sensitivity}: An analysis takes conditional branches into account, e.g. uses the fact that the condition holds after the branch.
+    \end{itemize}
 
     \section{IFDS}
     \subsection{Original Definition}
@@ -154,11 +157,14 @@
 
     A more convenient representation for static analysis are three-address codes. Each statement consists of up to three operands and is either an assigment or a control-flow statement. Such a representation is closer to the original source code while reducing the number of the possible combinations to a managable amount \cite{Aho1986}.
 
-    Jimple is a three-address intermediate representation and can be constructed from the Java and Dalvik bytecode, the IR used for Android apps. It is a high-level representation and its syntax is close to Java. Complex expressions are split up into multiple statements, for example, there can be only one field reference per statement and arguments are always local variables. Jimple also reconstructs reference types \cite{Valleerai2004}. This greatly reduces the possible cases the data flow analysis needs consider and therefore is the IR of choice for FlowDroid \cite{Arzt2017PhD}. 
-    The conversion to Jimple is provided by the underlying framework Soot. 
+    Jimple is a three-address intermediate representation and can be constructed from the Java and Dalvik bytecode, the IR used for Android apps. It is a high-level representation and its syntax is close to Java. Complex expressions are split up into multiple statements, for example, there can be only one field reference per statement and arguments are always local variables. Jimple also reconstructs reference types \cite{Valleerai2004}. This greatly reduces the possible cases the data flow analysis needs consider and therefore is the IR of choice for \textsc{FlowDroid} \cite{Arzt2017PhD}.
 
-    \section{Soot}
-    Soot is a 
-    just short, but probably needs to be introduced before FlowDroid and especially before clinit rule
     \section{FlowDroid}    
+    \textsc{FlowDroid} is a precise context-, flow- and object-sensitive static taint analysis tool \cite{Arzt2014}. It is based on \textsc{Soot}, a Java optimization framework, which later has been extended for static analysis \cite{Lam2011}. \textsc{Soot} provides the call-graph and also the conversion from Java and Dalvik bytecode to Jimple, the intermediate representation \textsc{FlowDroid} works on \cite{Arzt2014}.
+
+    \textsc{FlowDroid} models the entire Android lifecycle. Android apps do not have a single entry point, thus \textsc{FlowDroid} computes a dummy main method as an entry point for the taint analysis. Also, an Android app can contain multiple components for which \textsc{FlowDroid} assumes they can be run in a arbitrary sequential order. Furthermore, Android makes use of callbacks which \textsc{FlowDroid} also models.
+
+    To provide precise results even with aliases, \textsc{FlowDroid} contains besides the taint analysis another IFDS problem to resolve all encountered aliases on-demand. For this, a high object-sensitivity is needed, hence it makes use of symbolic access paths.
+
+    \textsc{FlowDroid} is implemented in a modular, easily extensible way and offers many additional features. Two of them are noteworthy for this work. First, the native call handler. As both, Java and Android, allow calling native methods, \textsc{FlowDroid} also needs to model those cases. It currently does not allow to analyze those methods but contains rules for important methods. The second are taint wrappers. They allow to define rules for methods, for example of a commonly used library, which allows the taint analysis to skip the method and just apply a summary \cite{Arzt2014}. \textsc{StubDroid}, which is an extension to \textsc{FlowDroid} also by Arzt et al, allows to precompute summaries using \textsc{FlowDroid} and serialize them in an XML format for tool-independent use \cite{Arzt2017PhD}.
 \end{document}

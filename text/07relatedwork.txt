@@ -8,4 +8,5 @@
 
     FlowTwist? He starts in the middle and searches fowards and backwards.
 
+    Synchronized pushdown systems (SPDS) are an alternative to IFDS with access paths for modelling a precise context-, flow- and field-sensitive analysis. Similiar to IFDS it constructs a context-free grammar similar to a call stack to ensure context-sensitivity. In addition, it also modells field-sensitivity using a context-free grammar. Then it computes the acceptance state of both pushdown automaton to combine context- and field-sensitivity. This omits the need for $k$-limiting.
     SPDS taint analysis?
