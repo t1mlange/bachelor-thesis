@@ -1,12 +1,13 @@
 
     Related Work
     Yan et al proposed a vulnerability detection tool for PHP with a focus on web applications. They aim to detect typical web application vulnerabilities such as cross-site-scripting and SQL injections using backwards taint analysis. 
-    Instead of relying on reducing the problem to proven frameworks such as IFDS or IDE, they seemingly define their own dataflow algorithm. The proposed algorithm traverses the basic blocks backwards and copies taints left after traversing the basic block to its predecessors. Unlike in our work and in general in dataflow analysis, they do not try to reach a fixpoint, instead they just do not follow circular paths in the control-flow graph. 
+    Instead of relying on reducing the problem to proven frameworks such as IFDS or IDE, they seemingly define their own data flow algorithm. The proposed algorithm traverses the basic blocks backwards and copies taints left after traversing the basic block to its predecessors. Unlike in our work and in general in data flow analysis, they do not try to reach a fixpoint, instead they just do not follow circular paths in the control-flow graph. 
     They also emphasize their concept of "cleans": a predefined list of sanitization methods which kill the incoming taints. 
     In FlowDroid the same is possible using taint wrappers and both shipped implementations support such a concept.
-    A rationale for searching backwards, which is why we included it as related work, is not provided.
+    A rationale for traversing backwards, which is why we included it as related work, is not provided.
+
+    Synchronized pushdown systems (SPDS) by Späth et al are an alternative to IFDS with access paths for modelling a precise context-, flow- and field-sensitive data flow analysis. Similiar to IFDS it constructs a context-free grammar representing the call stack to ensure context-sensitivity. In addition, it also modells field-sensitivity using a context-free grammar. Then it computes the acceptance state of both pushdown automaton to combine context- and field-sensitivity. This allows to represent recursive access paths such as lst.next.prev.next... without loss of precision where with IFDS and access paths, -limiting is needed to ensure termination. SPDS are still an overapproximation in the case where at a statement both automaton are in acceptance state but via a different paths.
+
+    Another way to realize data flow anlaysis
 
     FlowTwist? He starts in the middle and searches fowards and backwards.
-
-    Synchronized pushdown systems (SPDS) are an alternative to IFDS with access paths for modelling a precise context-, flow- and field-sensitive analysis. Similiar to IFDS it constructs a context-free grammar similar to a call stack to ensure context-sensitivity. In addition, it also modells field-sensitivity using a context-free grammar. Then it computes the acceptance state of both pushdown automaton to combine context- and field-sensitivity. This omits the need for $k$-limiting.
-    SPDS taint analysis?

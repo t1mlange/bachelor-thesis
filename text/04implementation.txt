@@ -29,21 +29,23 @@
     Handover
     
                 [b]0.45
-                        [gobble=16]
-                void aliasRule1() 
-                    A a = b;
-                    b.str = source();
-                    sink(a.str);
-                
-                        Example for alias analysis initiated by rule 1
+                        max width=
+                [gobble=20]
+                    void aliasRule1() 
+                        A a = b;
+                        b.str = source();
+                        sink(a.str);
+                    
+                                        Example for alias analysis initiated by rule 1
                                     [b]0.45
-                        [gobble=16]
-                void aliasRule3() 
-                    A a = b;
-                    a.str = source();
-                    sink(b.str);
-                
-                        Example for alias analysis initiated by rule 3
+                        max width=
+                [gobble=20]
+                    void aliasRule3() 
+                        A a = b;
+                        a.str = source();
+                        sink(b.str);
+                    
+                                        Example for alias analysis initiated by rule 3
                             Normal flow Aliasing examples
                 Whenever we visit a statement and notice a taint could have an alias, the taint is handed over to the alias analysis. 
     Normal flow rule 3 is such a case. The taint is on the right side and we notice that the left side also refers to the same value in memory due to being stored in the heap. The left side gets tainted and propagated forwards to find out if we missed a write to the alias.
@@ -56,14 +58,15 @@
     We added another field to the Abstraction class called turnUnit. This is the equivalent to the activationUnit in forwards analysis. The turnUnit references the last statement for which the taint is relevant in the infoflow search. At start, it is the sink where the taint was introduced. Later on, it is set whenever we visit an assigment with a primitive or string on the left side(The String object is a special case in Java. It is saved on the heap but immutable and therefore can not alias.). Consider the code in lst:turnunit. At line 5, the taint is introduced, line 3 taints b.str and sets the turnUnit to this statement. In line 2, a is found to be an alias of b and causes a handover to the alias problem. The turnUnit now stops the alias search at line 3 and prevents a false positive.
 
     
+                max width=
+            [gobble=16]
+                void turnStmtNeeded() 
+                    A a = b;
+                    String str = b.str;
+                    a.str = source();
+                    sink(str);
                 
-            void turnStmtNeeded() 
-                A a = b;
-                String str = b.str;
-                a.str = source();
-                sink(str);
-            
-                Aliasing example with turn unit
+                            Aliasing example with turn unit
             
     Rules
     Flow functions can get quite large, complicated to understand and hard to maintain. To counteract this, FlowDroid outsources certain features into rules. These rules also implement the four flow functions and are applied in the corresponding flow function.
@@ -185,11 +188,11 @@
                         [b]
             [language=Jimple]
                 public static void static2Test() 
-                    tainted = staticinvoke <soot.jimple.infoflow.test.android.TelephonyManager: java.lang.String getDeviceId()>();
+                    tainted = staticinvoke <soot.jimple.infoflow.test.android.TelephonyManager: java.lang.String getDeviceId()>(); // Line 2 in (a)
 
                     // [...]
             
-                    virtualinvoke cm.<soot.jimple.infoflow.test.android.ConnectionManager: void publish(java.lang.String)>(alsoTainted);
+                    virtualinvoke cm.<soot.jimple.infoflow.test.android.ConnectionManager: void publish(java.lang.String)>(alsoTainted); // Line 9 in (a)
 
                     return;
                 

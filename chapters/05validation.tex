@@ -26,7 +26,7 @@
     \textbf{SetTests} \code{containsTest} needs implicit flows to find the leak.
 
     \section{DroidBench}\label{s:droidbenchvalidation}
-    \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 190 test cases are included in the latest version 3\footnote{\url{https://github.com/secure-software-engineering/DroidBench/}}. We use the newest commit at the time of writing\footnote{6. March 2021, Commit \texttt{ddbd50c}}.
+    \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 190 test cases are included in the latest development version 3\footnote{\url{https://github.com/secure-software-engineering/DroidBench/}}. We use the newest commit at the time of writing\footnote{6. March 2021, Commit \texttt{ddbd50c}}.
     We aim to achieve similiar results as \textsc{FlowDroid}'s existing forwards implementation.
     
     \subsection{Configuration}\label{s:droidbenchconfig}
@@ -54,6 +54,12 @@
     As all left out tests do not depend on the flow functions, if \textsc{FlowDroid} gets support for those in the future they should also work in backwards analysis.
 
     \subsection{Results}
+    The full overview of the results are in \autoref{t:droidbenchvalidation}. 
+    \tp\ denotes true positive, \fp\ false positive and \fn\ false negative.
+    If a row is empty, there are no expected leaks and also none were found. 
+    
+    Our backwards-directed implementation yields nearly the same result as the existing forwards implementation with just a one missed leak more than the baseline.  We achieve a F1 measure of $0.89$ which is the same as the baseline.
+
     \begin{longtable}{l | l | l}% begin droidbench
         \textbf{App Name} & \textbf{Forwards} & \textbf{Backwards}\\
         \hline\hline
@@ -238,12 +244,10 @@
     \end{longtable}
 
     \subsection{Results Explanation}
-    The validation shows nearly identical results for backwards and forwards analysis. The differences are explained below. 
-    
-    We conclude the backwards analysis is working as expected.
+    In greater detail, we miss both leaks in \code{EmulatorDetectionTests#IMEI1} whereas in \code{StaticTests#StaticInitialization1} we do not miss the leak. We provide explanation on why below.
 
     \subsubsection{Emulator Detection}
-    \begin{figure}
+    \begin{figure}[ht]
         \begin{lstlisting}
             String imei = telephonyManager.getDeviceId(); // source
             String suffix = "000000000000000"; // T={}
@@ -270,9 +274,11 @@
         \label{lst:testimei}
     \end{figure}
 
-    \textbf{IMEI1} needs implicit flows to find both leaks. The source is only used inside the condition of an if statement. See \autoref{lst:testimei}, we are unable to taint imei without an implicit taint created in line 8. \todo{could be fixed in the future}
+    \textbf{IMEI1} needs implicit flows to find both leaks. The source is only used inside the condition of an if statement. See \autoref{lst:testimei}, we are unable to taint the variable \code{imei} without an implicit taint created in line 8. \todo{could be fixed in the future}
 
     \subsubsection{General Java}
+    As all StaticInitialization tests depends on the modelling of the \code{<clinit>} behavior, we decided to explain all three even though only StaticInitialization1 is different.
+
     \textbf{StaticInitialization1} differs in forwards and backwards analysis. Backwards it reports one leak due to the explicit modelling of \code{<clinit>} edges instead of relying on SPARK. Recall \autoref{s:clinitrule}, leaks inside static blocks are missed in forward analysis. This test case is quite similiar to \autoref{lst:clinit_examples_b} and therefore the leak is only reported in backwards analysis at the moment.
     
     \textbf{StaticInitialization2} yields the same result but because of different reasons. The test assigns a tainted value to a static field in the static initializer. Again, recall \autoref{s:clinitrule}. Backwards, the clinit rule takes care of visiting the \code{<clinit>} edge while forwards the followReturnsPastSeeds option of the IFDS solver is responsible. 
@@ -281,7 +287,7 @@
     The taint is now introduced at the sink and refers to the field through the \code{this} instance. When we visit line 13, the \code{<clinit>} edge is not taken due to the taint being an instance field. Line 12 kills the only taint and stops the analysis as there is no taint to propagate anymore. We never get to see the statement where the static field \code{v} aliases \code{this}. 
     We miss the leak because the test violates our assumption of the clinit rule that only static taints can leak inside static blocks. To catch this leak, an inactive taint could be propagated upwards after line 12 to later turn around and let the aliasing visit the clinit edge with the downside that we can not kill any overwrite of an instance field until the end of the callgraph. We decided to deliberately miss those kind of leaks in favor of much less edges to be propagated. This is one limitiation of the alias analysis where only encountered aliases are tracked. Tracking all alias is too inefficient for the analysis to be applicable \cite{Bodden2012}.  
     
-    \begin{figure}
+    \begin{figure}[ht]
         \begin{lstlisting}
             public class MainActivity extends Activity {
                 public static MainActivity v;

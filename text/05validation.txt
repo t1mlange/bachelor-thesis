@@ -19,7 +19,7 @@
 
     SetTests containsTest needs implicit flows to find the leak.
 
-    DroidBench    DroidBench is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on FlowDroid to assess it in comparison to other tools. 190 test cases are included in the latest version 3(https://github.com/secure-software-engineering/DroidBench/). We use the newest commit at the time of writing(6. March 2021, Commit ddbd50c).
+    DroidBench    DroidBench is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on FlowDroid to assess it in comparison to other tools. 190 test cases are included in the latest development version 3(https://github.com/secure-software-engineering/DroidBench/). We use the newest commit at the time of writing(6. March 2021, Commit ddbd50c).
     We aim to achieve similiar results as FlowDroid's existing forwards implementation.
     
     Configuration    The validation was run with the default configuration of the Android module of FlowDroid  using EasyTaintWrapper as the taint wrapper. The configuration is summarized in t:droidbenchconfig.
@@ -33,13 +33,17 @@
     As all left out tests do not depend on the flow functions, if FlowDroid gets support for those in the future they should also work in backwards analysis.
 
     Results
+    The full overview of the results are in t:droidbenchvalidation. 
+     denotes true positive,  false positive and  false negative.
+    If a row is empty, there are no expected leaks and also none were found. 
+    
+    Our backwards-directed implementation yields nearly the same result as the existing forwards implementation with just a one missed leak more than the baseline.  We achieve a F1 measure of  which is the same as the baseline.
+
     
 
 
     Results Explanation
-    The validation shows nearly identical results for backwards and forwards analysis. The differences are explained below. 
-    
-    We conclude the backwards analysis is working as expected.
+    In greater detail, we miss both leaks in EmulatorDetectionTests#IMEI1 whereas in StaticTests#StaticInitialization1 we do not miss the leak. We provide explanation on why below.
 
     Emulator Detection
     
@@ -66,9 +70,11 @@
             sm.sendTextMessage("+49 123", null, newImei, null, null); // T=newImei
                 IMEI1 excerpt
             
-    IMEI1 needs implicit flows to find both leaks. The source is only used inside the condition of an if statement. See lst:testimei, we are unable to taint imei without an implicit taint created in line 8. could be fixed in the future
+    IMEI1 needs implicit flows to find both leaks. The source is only used inside the condition of an if statement. See lst:testimei, we are unable to taint the variable imei without an implicit taint created in line 8. could be fixed in the future
 
     General Java
+    As all StaticInitialization tests depends on the modelling of the <clinit> behavior, we decided to explain all three even though only StaticInitialization1 is different.
+
     StaticInitialization1 differs in forwards and backwards analysis. Backwards it reports one leak due to the explicit modelling of <clinit> edges instead of relying on SPARK. Recall s:clinitrule, leaks inside static blocks are missed in forward analysis. This test case is quite similiar to lst:clinit_examples_b and therefore the leak is only reported in backwards analysis at the moment.
     
     StaticInitialization2 yields the same result but because of different reasons. The test assigns a tainted value to a static field in the static initializer. Again, recall s:clinitrule. Backwards, the clinit rule takes care of visiting the <clinit> edge while forwards the followReturnsPastSeeds option of the IFDS solver is responsible. 

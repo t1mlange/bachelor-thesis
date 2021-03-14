@@ -1,5 +1,45 @@
 % Encoding: UTF-8
 
+@Article{Rice1953,
+  author   = {Rice, H.},
+  title    = {Classes of recursively enumerable sets and their decision problems},
+  year     = {1953},
+  abstract = {1. Introduction. In this paper we consider classes whose elements are re-cursively enumerable sets of non-negative integers. No discussion of recur-sively enumerable sets can avoid the use of such classes, so that it seems desirable to know some of their properties. We give our attention here to the properties of complete recursive enumerability and complete recursiveness (which may be intuitively interpreted as decidability). Perhaps our most interesting result (and the one which gives this paper its name) is the fact that no nontrivial class is completely recursive. We assume familiarity with a paper of Kleene [5](2), and with ideas which are well summarized in the first sections of a paper of Post Í7].},
+  doi      = {10.1090/S0002-9947-1953-0053041-6},
+  file     = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/Classes-of-recursively-enumerable-sets-and-their-Rice/664a7d3c60b753a34f1601a7378ca952ea92e9a8:text/html;Full Text PDF:https\://pdfs.semanticscholar.org/664a/7d3c60b753a34f1601a7378ca952ea92e9a8.pdf:application/pdf},
+}
+
+@InProceedings{Rodriguez2011,
+  author    = {Rodriguez, Jonathan and Lhoták, Ondřej},
+  booktitle = {Compiler {Construction}},
+  title     = {Actor-{Based} {Parallel} {Dataflow} {Analysis}},
+  year      = {2011},
+  address   = {Berlin, Heidelberg},
+  editor    = {Knoop, Jens},
+  pages     = {179--197},
+  publisher = {Springer},
+  series    = {Lecture {Notes} in {Computer} {Science}},
+  abstract  = {Defining algorithms in a way which allows parallel execution is becoming increasingly important as multicore computers become ubiquitous. We present IFDS-A, a parallel algorithm for solving context-sensitive interprocedural finite distributive subset (IFDS) dataflow problems. IFDS-A defines these problems in terms of Actors, and dataflow dependencies as messages passed between these Actors. We implement the algorithm in Scala, and evaluate its performance against a comparable sequential algorithm. With eight cores, IFDS-A is 6.12 times as fast as with one core, and 3.35 times as fast as a baseline sequential algorithm. We also found that Scala’s default Actors implementation is not optimal for this algorithm, and that a custom-built implementation outperforms it by a significant margin. We conclude that Actors are an effective way to parallelize this type of algorithm.},
+  doi       = {10.1007/978-3-642-19861-8_11},
+  file      = {Springer Full Text PDF:https\://link.springer.com/content/pdf/10.1007%2F978-3-642-19861-8_11.pdf:application/pdf},
+  isbn      = {9783642198618},
+  keywords  = {Actors , compilers , concurrency , dataflow analysis , IFDS , Scala },
+  language  = {en},
+}
+
+@InProceedings{Deutsch1994,
+  author     = {Deutsch, A.},
+  booktitle  = {{PLDI} '94},
+  title      = {Interprocedural may-alias analysis for pointers: beyond k-limiting},
+  year       = {1994},
+  abstract   = {Existing methods for alias analysis of recursive pointer data structures are based on two approximation techniques: k-limiting, and store-based (or equivalently location or region-based) approximations, which blur distinction between elements of recursive data structures. Although notable progress in inter-procedural alias analysis has been recently accomplished, very little progress in the precision of analysis of recursive pointer data structures has been seen since the inception of these approximation techniques by Jones and Muchnick a decade ago. As a result, optimizing, verifying and parallelizing programs with pointers has remained difficult.
+We present a new parametric framework for analyzing recursive pointer data structures which can express a new natural class of alias information not accessible to existing methods. The key idea is to represent alias information by pairs of symbolic access paths which are qualified by symbolic descriptions of the positions for which the alias pair holds.
+Based on this result, we present an algorithm for interprocedural may-alias analysis with pointers which on numerous examples that occur in practice is much more precise than recently published algorithms [CWZ90, He90, LR92, CBC93].},
+  doi        = {10.1145/178243.178263},
+  file       = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/Interprocedural-may-alias-analysis-for-pointers%3A-Deutsch/7ff982c9608cfab62c4c5c1a65ad737dae3ab0f8:text/html},
+  shorttitle = {Interprocedural may-alias analysis for pointers},
+}
+
 @Article{Spaeth2019,
   author   = {Späth, Johannes and Ali, Karim and Bodden, Eric},
   journal  = {Proceedings of the ACM on Programming Languages},
@@ -184,6 +224,17 @@ Static data flow analysis has been proposed as a means for automatically enumera
   file       = {ResearchGate Link:https\://www.researchgate.net/publication/262493821_Data_Flow_Analysis_Theory_and_Practice:},
   journal    = {Data Flow Analysis: Theory and Practice},
   shorttitle = {Data {Flow} {Analysis}},
+}
+
+@InProceedings{Jones1979,
+  author   = {Jones, Neil and Muchnick, Steven},
+  title    = {Flow {Analysis} and {Optimization} of {Lisp}-{Like} {Structures}.},
+  year     = {1979},
+  month    = jan,
+  pages    = {244--256},
+  abstract = {In [12] the authors introduced the concept of binding time optimization and presented a series of data flow analytic methods for determining some of the binding time characteristics of programs. In this paper we extend that work by providing methods for determining the class of shapes which an unbounded data object may assume during execution of a LISP-like program, and describe a number of uses to which that information may be put to improve storage allocation in compilers and interpreters for advanced programming languages.We are concerned chiefly with finding, for each program point and variable a finite description of a set of graphs which includes all the shapes of values the variable could assume at that point during the execution of a program. If this set is small or regular in structure, this information can be used to optimize the program's execution, mainly by use of more efficient storage allocation schemes.In the first part we show how to construct from a program without selective updating a tree grammar whose nonterminals generate the desired sets of graphs; in this case they will all be trees. The tree grammars are of a more general form than is usually studied [8, 19], so we show that they may be converted to the usual form. The resulting tree grammar could naturally be viewed as a recursive type definition [11] of the values the variables may assume. Further, standard algorithms may be employed to test for infiniteness, emptiness or linearity of the tree structure.In the second part selective updating is allowed, so an alternate semantics is introduced which more closely resembles traditional LISP implementations, and which is equivalent to the tree model for programs without selective updating. In this model data objects are directed graphs. We devise a finite approximation method which provides enough information to detect cell sharing and cyclic structures whenever they can possibly occur. This information can be used to recognize when the use of garbage collection or of reference counts may be avoided.The work reported in the second part of this paper extends that of Schwartz [17] and Cousot and Cousot [7]. They have developed methods for determining whether the values of two or more variables share cells, while we provide information on the detailed structure of what is shared. The ability to detect cycles is also new. It also extends the work of Kaplan [13], who distinguishes only binary relations among the variables of a program, does not handle cycles, and does not distinguish selectors (so that his analysis applies to nodes representing sets rather than ordered tuples).},
+  doi      = {10.1145/567752.567776},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Neil-Jones-12/publication/220997426_Flow_Analysis_and_Optimization_of_Lisp-Like_Structures/links/00b4951922ad3ee2bc000000/Flow-Analysis-and-Optimization-of-Lisp-Like-Structures.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/220997426_Flow_Analysis_and_Optimization_of_Lisp-Like_Structures:},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}
