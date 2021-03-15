@@ -211,7 +211,7 @@
     \subsection{Configuration}
     Our test machine is equipped with four Intel Xeon E5-4650 and 1 TB of RAM. We limited the JVM to 50 GB RAM and \textsc{FlowDroid} on 16 threads per instance. We ran at most four instances in parallel to ensure a one-to-one mapping between CPU threads and \textsc{FlowDroid} threads. Note that the test machine is a shared system, but we made sure there are always enough resources for our evaluation available. Still, background services might influence the performance of a single run. To stamp out this factor, we ran each app three times. If there were outliers, we repeated the runs.
     
-    For this evaluation, we chose to use a non-default configuration of \textsc{FlowDroid}. First, we disabled static field tracking due to the global scope as described in \autoref{s:complexity}. Next, instead of the \code{EasyTaintWrapper}, we use the \code{SummaryTaintWrapper}, which utilizes \textsc{StubDroid}. \textsc{StubDroid}'s precomputed dataflow summaries are more precise than \code{EasyTaintWrapper}'s simple rules. We set the timeout for the dataflow analysis to 10 minutes. 
+    For this evaluation, we chose to use a non-default configuration of \textsc{FlowDroid}. First, we disabled static field tracking due to the global scope as described in \autoref{s:complexity}. Next, instead of the \code{EasyTaintWrapper}, we use the \code{SummaryTaintWrapper}, which utilizes \textsc{StubDroid}. \textsc{StubDroid}'s precomputed data flow summaries are more precise than \code{EasyTaintWrapper}'s simple rules. We set the timeout for the data flow analysis to 10 minutes. 
     The configuration summary is in \autoref{t:realworldconfig}.
 
     \begin{table}[ht]
@@ -307,8 +307,7 @@
 
     \subsection{Results}
     Out of 200 apps, 60 apps do not have any sources or sinks and thus, the analysis did not start. For 15 apps, the analysis aborted with errors. We are left with 125 apps for which both implementations completed the analysis.
-    \todo{Preliminary! Only one run without memwatcher}
-
+    \todo{Preliminary! Without memwatcher}
 
     
     \begin{table}[ht]
@@ -316,17 +315,17 @@
         \begin{tabular}{l | r | r}
             \textbf{Metric} & \textbf{Forwards} & \textbf{Backwards}\\
             \hline\hline
-            Average Runtime & $498.192s$ & $397.152s$\\
+            Average Runtime & $504.7s$ & $409.5s$\\
             Median Runtime & $600.0s$ & $600.0s$\\
             \hline
-            Abstractions Infoflow & $34223577$ & $12318997$\\
-            Abstractions Alias & $12347994$ & $30013930$\\
-            Total Abstractions & $46571571$ & $42332927$\\
+            Average Abstractions Infoflow & $34651810$ & $13741637$\\
+            Average Abstractions Alias & $12492775$ & $33686397$\\
+            Average Total Abstractions & $47144585$ & $47428034$\\
             \hline
-            % Average Max Memory Consumption & $14559.38 GB$ & $25465.59 GB$\\
-            \hline
-            Memory Timeouts & $3.2\%$ & $6.4\%$\\
-            Time Timeouts & $80.8\%$ & $57.6\%$\\                
+            % Average Max Memory Consumption & $24830.68 GB$ & $25243.53 GB$\\
+            % \hline
+            Memory Timeouts & $3.48\%$ & $4.35\%$\\
+            Time Timeouts & $59.13\%$ & $53.91\%$\\                     
         \end{tabular}
         \caption{Results}
         \label{t:realworldresults}
@@ -337,21 +336,18 @@
         \begin{tabular}{l | r | r}
             & \textbf{Forwards} & \textbf{Backwards}\\
             \hline\hline
-            Average Runtime & $19.15s$ & $38.07s$\\
-            Median Runtime & $0.0s$ & $0.0s$\\
+            Average Runtime & $331.6s$ & $133.96s$\\
+            Median Runtime & $591.0s$ & $1.0s$\\
             \hline
-            Abstractions Infoflow & $459868$ & $629202$\\
-            Abstractions Alias & $155876$ & $1403538$\\
-            Total Abstractions & $615744$ & $2032740$\\
+            Average Abstractions Infoflow & $7468347$ & $2262268$\\
+            Average Abstractions Alias & $2658090$ & $4884307$\\
+            Average Total Abstractions & $10126437$ & $7146575$\\
             \hline
-            % Average Max Memory Consumption & $4526.75 GB$ & $16005.16 GB$\\            
+            % Average Max Memory Consumption & $17127.26 GB$ & $18689.29 GB$\\                       
         \end{tabular}
         \caption{Results without Timeouts}
         \label{t:realworldresultswithouttimeout}
     \end{table}
-
-    \todo{Avg w/o timeouts is only per direction, so bw contains way more entries}
-
 
     \begin{figure}
         \centering
@@ -382,14 +378,15 @@
                 \input{figs/bw_dataflow-sinks.pgf}
             }
         \end{subfigure}
-        \caption{Dataflow time in comparison to source and sink count}
+        \caption{Data flow time in comparison to source and sink count}
     \end{figure}
 
     \begin{figure}
-        \resizebox{\columnwidth}{!}{
-            \input{figs/dataflowDelta.pgf}
+        \centering
+        \resizebox{0.75\columnwidth}{!}{
+            \input{figs/deltaHist.pgf}
         }
-        \caption{Dataflow Delta}
+        \caption{Histogram of the Delta Data Flow Time}
     \end{figure}
 
 

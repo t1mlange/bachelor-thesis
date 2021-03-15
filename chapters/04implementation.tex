@@ -285,10 +285,10 @@
     
     % Typing Propagation Rule has no backwards equivalent. We decided to implement type checking in the infoflow problem instead.
 
-    \section{Code Optimizer}
+    \section{Other Components}
+    \subsection{Code Optimizer: AddNOPStmts}
     Before starting the analysis, \textsc{FlowDroid} applies code optimization to the interprocedural call graph. By default, dead code elimination and within constant value propagation is performed. Those are also applied before backwards analysis but we needed another code optimizer to handle an edge case in backwards analysis.
 
-    \subsection{AddNOPStmts}
     First, take a look at \code{StatictTestCode#static2Test} in \autoref{lst:static2TestJava}. The method and entry point \code{static2Test} is static and does not have any parameters. Same is true for the source method \code{TelephonyManager#getDeviceId}. Due to the first condition, \code{static2Test} has no identity statements and because of the second  condition there are also no assign statements before the source statement in Jimple. Therefore the source statement is the first statement in the graph. 
     Next, a detail of \textsc{FlowDroid}'s IFDS solver is important. The Return and CallToReturn flow function is only applied if a return site is available \cite{Arzt2017PhD}.
     When searching backwards, the source statement is the last statement and thus has no return sites. Now recall \autoref{s:sourcerule}, taints flowing into sources are registered in the CallToReturn flow function. Altogether, leaks can not be found if the source statement is the first statement.
@@ -296,7 +296,7 @@
     Moving the detection of incoming taints flows into sources from the CallToReturn to the Call flow function was not an option because by default source methods are not visited. 
     Our solution is to just add a NOP statement in such cases. This saves us from introducing new edge cases inside the flow functions which are already complex enough. Due to the entry points being known beforehand, the overhead is negligible.
 
-    \begin{figure}
+    \begin{figure}[ht]
         \centering
         \begin{subfigure}[b]{\textwidth}
             \begin{lstlisting}[gobble=12]
@@ -331,6 +331,17 @@
         \caption{static2Test Code}
         \label{lst:static2TestJava}
     \end{figure}
+
+    \subsection{Taint Wrappers}
+    \textsc{FlowDroid} already provides an interface \code{IReversibleTaintWrapper} for taint wrappers which also provide inversed summaries. The Summary Taint Wrapper for \textsc{StubDroid} already implements this. For the Easy Taint Wrapper we contributed the inverse implementation.
+    
+    \subsection{Native Call Handler}
+    The native call handler of \textsc{FlowDroid} handles two methods:
+    \begin{itemize}
+        \item \code{System#arraycopy}: If the first parameter is tainted, taint the second parameter.
+        \item \code{reflect.Array#newArray}: If the length is tainted, propagate it over the statement.
+    \end{itemize}
+    We adapated the existing implementation and only reversed the logic of \code{System#arraycopy} to reflect the analysis direction.
 
     
 

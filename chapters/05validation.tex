@@ -16,6 +16,7 @@
 
     \textbf{EasyTaintWrapperTests} \code{equalsTest} and \code{hashCodeTest} are expected to return one leak but the backwards analysis does report no leaks. This difference is related to the \code{EasyTaintWrapper} implementation. The implementation marks \code{equals()} and \code{hashCode()} as exclusive. This means we can skip this method because we already have a rule for it. The check for exclusiveness is part of the Call and CallToReturn flow function. In both tests, the source is inside the \code{equals()} or \code{hashCode()} method. The IFDS solver behaves as already observed in \autoref{s:clinitrule} and when searching forwards it creates a return edge returning from the method while going backwards we do not propagate into the method because it is exclusive.
     We marked those two tests forwards-specific and created two equivalent backwards-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method with one expected leak.
+    To achieve the exact behavior, we should not search for sources and sinks in exclusive methods. This change could break expected behaivor, thus we decided against the change.
     
     \textbf{SourceSinkTests} These tests ensure the source sink manager can be swapped out. This is not relevant for the correctness of the backwards analysis and therefore are ignored.
 

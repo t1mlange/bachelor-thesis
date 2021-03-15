@@ -1,5 +1,7 @@
 
     Theory
+    In the first part of this chapter, we define the flow functions and in the second part we discuss the time complexity of taint analysis specificly hightlighting differences between forward and backward analysis.
+
     Flow Functions
     In this section, we describe the behavior of the flow functions based on the Jimple language and define semi-formal rules.
 
@@ -80,17 +82,19 @@
     The number of taint propagations depends on two factors: the lifetime of taints and the number of taints. Both factors highly depend on the search direction which we will explain in the following paragraphs.
 
     
-        
-            String returnParam(int i, String s1, String s2, String s3) 
-                if (i == 1)
-                    return s1;
-                else if (i == 2)
-                    return s2;
-                else if (i == 3)
-                    return s3;
-                else
-                    return "default";
-            
+                max width=
+            [gobble=16]
+                String returnParam(int i, String s1, String s2, String s3) 
+                    if (i == 1)
+                        return s1;
+                    else if (i == 2)
+                        return s2;
+                    else if (i == 3)
+                        return s3;
+                    else
+                        return "default";
+                
+                
                 Branching Factor Example
             
     First, we take a look at the is the branching factor. The branching factor describes the number outgoing edges from a node. A smaller branching factor is favorable.   
