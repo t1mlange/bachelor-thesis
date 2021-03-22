@@ -1,5 +1,32 @@
 % Encoding: UTF-8
 
+@Article{Grech2017,
+  author     = {Grech, Neville and Smaragdakis, Yannis},
+  journal    = {Proceedings of the ACM on Programming Languages},
+  title      = {P/{Taint}: unified points-to and taint analysis},
+  year       = {2017},
+  month      = oct,
+  pages      = {1--28},
+  volume     = {1},
+  abstract   = {Static information-flow analysis (especially taint-analysis) is a key technique in software security, computing where sensitive or untrusted data can propagate in a program. Points-to analysis is a fundamental static program analysis, computing what abstract objects a program expression may point to. In this work, we propose a deep unification of information-flow and points-to analysis. We observe that information-flow analysis is not a mere high-level client of points-to information, but it is indeed identical to points-to analysis on artificial abstract objects that represent different information sources. The very same algorithm can compute, simultaneously, two interlinked but separate results (points-to and information-flow values) with changes only to its initial conditions.
+The benefits of such a unification are manifold. We can use existing points-to analysis implementations, with virtually no modification (only minor additions of extra logic for sanitization) to compute information flow concepts, such as value tainting. The algorithmic enhancements of points-to analysis (e.g., different flavors of context sensitivity) can be applied transparently to information-flow analysis. Heavy engineering work on points-to analysis (e.g., handling of the reflection API for Java) applies to information-flow analysis without extra effort. We demonstrate the benefits in a realistic implementation that leverages the Doop points-to analysis framework (including its context-sensitivity and reflection analysis features) to provide an information-flow analysis with excellent precision (over 91\%) and recall (over 99\%) for standard Java information-flow benchmarks.
+The analysis comfortably scales to large, real-world Android applications, analyzing the Facebook Messenger app with more than 55K classes in under 7 hours.},
+  doi        = {10.1145/3133926},
+  file       = {ResearchGate Link:https\://www.researchgate.net/publication/320390381_PTaint_unified_points-to_and_taint_analysis:},
+  shorttitle = {P/{Taint}},
+}
+
+@Article{Lerch2014,
+  author     = {Lerch, J. and Hermann, Ben and Bodden, E. and Mezini, M.},
+  journal    = {SIGSOFT FSE},
+  title      = {{FlowTwist}: efficient context-sensitive inside-out taint analysis for large codebases},
+  year       = {2014},
+  abstract   = {Over the past years, widely used platforms such as the Java Class Library have been under constant attack through vulnerabilities that involve a combination of two taint-analysis problems: an integrity problem allowing attackers to trigger sensitive operations within the platform, and a confidentiality problem allowing the attacker to retrieve sensitive information or pointers from the results of those operations. While existing static taint analyses are good at solving either of those problems, we show that they scale prohibitively badly when being applied to situations that require the exploitation of both an integrity and confidentiality problem in combination. The main problem is the huge attack surface of libraries such as the Java Class Library, which exposes thousands of methods potentially controllable by an attacker. In this work we thus present FlowTwist, a novel taint-analysis approach that works inside-out, i.e., tracks data flows from potentially vulnerable calls to the outer level of the API which the attacker might control. This inside-out analysis requires a careful, context-sensitive coordination of both a backward and a forward taint analysis. In this work, we expose a design of the analysis approach based on the IFDS algorithm, and explain several extensions to IFDS that enable not only this coordination but also a helpful reporting of error situations to security analysts. Experiments with the Java Class Library show that, while a simple forward taint-analysis approach does not scale even with much machine power, FlowTwist's algorithm is able to fully analyze the library within 10 minutes.},
+  doi        = {10.1145/2635868.2635878},
+  file       = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/FlowTwist%3A-efficient-context-sensitive-inside-out-Lerch-Hermann/28f538ccabcc9edbbf27d0f0a027031615936e42:text/html},
+  shorttitle = {{FlowTwist}},
+}
+
 @Article{Rice1953,
   author   = {Rice, H.},
   title    = {Classes of recursively enumerable sets and their decision problems},
@@ -235,6 +262,19 @@ Static data flow analysis has been proposed as a means for automatically enumera
   abstract = {In [12] the authors introduced the concept of binding time optimization and presented a series of data flow analytic methods for determining some of the binding time characteristics of programs. In this paper we extend that work by providing methods for determining the class of shapes which an unbounded data object may assume during execution of a LISP-like program, and describe a number of uses to which that information may be put to improve storage allocation in compilers and interpreters for advanced programming languages.We are concerned chiefly with finding, for each program point and variable a finite description of a set of graphs which includes all the shapes of values the variable could assume at that point during the execution of a program. If this set is small or regular in structure, this information can be used to optimize the program's execution, mainly by use of more efficient storage allocation schemes.In the first part we show how to construct from a program without selective updating a tree grammar whose nonterminals generate the desired sets of graphs; in this case they will all be trees. The tree grammars are of a more general form than is usually studied [8, 19], so we show that they may be converted to the usual form. The resulting tree grammar could naturally be viewed as a recursive type definition [11] of the values the variables may assume. Further, standard algorithms may be employed to test for infiniteness, emptiness or linearity of the tree structure.In the second part selective updating is allowed, so an alternate semantics is introduced which more closely resembles traditional LISP implementations, and which is equivalent to the tree model for programs without selective updating. In this model data objects are directed graphs. We devise a finite approximation method which provides enough information to detect cell sharing and cyclic structures whenever they can possibly occur. This information can be used to recognize when the use of garbage collection or of reference counts may be avoided.The work reported in the second part of this paper extends that of Schwartz [17] and Cousot and Cousot [7]. They have developed methods for determining whether the values of two or more variables share cells, while we provide information on the detailed structure of what is shared. The ability to detect cycles is also new. It also extends the work of Kaplan [13], who distinguishes only binary relations among the variables of a program, does not handle cycles, and does not distinguish selectors (so that his analysis applies to nodes representing sets rather than ordered tuples).},
   doi      = {10.1145/567752.567776},
   file     = {Full Text PDF:https\://www.researchgate.net/profile/Neil-Jones-12/publication/220997426_Flow_Analysis_and_Optimization_of_Lisp-Like_Structures/links/00b4951922ad3ee2bc000000/Flow-Analysis-and-Optimization-of-Lisp-Like-Structures.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/220997426_Flow_Analysis_and_Optimization_of_Lisp-Like_Structures:},
+}
+
+@InProceedings{Bravenboer2009,
+  author   = {Bravenboer, M. and Smaragdakis, Yannis},
+  title    = {Strictly {Declarative} {Specification} of {Sophisticated} {Points}-to {Analyses}},
+  year     = {2009},
+  month    = oct,
+  pages    = {243--262},
+  volume   = {44},
+  abstract = {We present the DOOP framework for points-to analysis of Java programs. DOOP builds on the idea of specifying pointer analysis algorithms declaratively, using Datalog: a logic-based language for defining (recursive) relations. We carry the declarative approach further than past work by describing the full end-to-end analysis in Datalog and optimizing aggressively using a novel technique specifically targeting highly recursive Datalog programs.
+As a result, DOOP achieves several benefits, including full order-of-magnitude improvements in runtime. We compare DOOP with Lhotak and Hendren's PADDLE, which defines the state of the art for context-sensitive analyses. For the exact same logical points-to definitions (and, consequently, identical precision) DOOP is more than 15x faster than PADDLE for a 1-call-site sensitive analysis of the DaCapo benchmarks, with lower but still substantial speedups for other important analyses. Additionally, DOOP scales to very precise analyses that are impossible with PADDLE and Whaley et al.'s bddbddb, directly addressing open problems in past literature. Finally, our implementation is modular and can be easily configured to analyses with a wide range of characteristics, largely due to its declarativeness.},
+  doi      = {10.1145/1640089.1640108},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/M-Bravenboer/publication/221321022_Strictly_Declarative_Specification_of_Sophisticated_Points-to_Analyses/links/552413cd0cf2caf11bfcbf1e/Strictly-Declarative-Specification-of-Sophisticated-Points-to-Analyses.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/221321022_Strictly_Declarative_Specification_of_Sophisticated_Points-to_Analyses:},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

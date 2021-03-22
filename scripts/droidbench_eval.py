@@ -1,13 +1,13 @@
 import itertools
 
-# filenames = [
-#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/sumfw.txt",
-#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/sumbw.txt",
-#     ]
 filenames = [
-    "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easyfw.txt",
     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easybw.txt",
+    "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/sumbw.txt",
     ]
+# filenames = [
+#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easyfw.txt",
+#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easybw.txt",
+#     ]
 dic = {}
 
 class TestResult:
@@ -63,7 +63,7 @@ for k, v in dic.items():
     string += "\\hline\n\\tsubEight{%s}\n" % k
     for k2, v2 in sorted(v.items()):
         string += v2.toString()
-        if v2.totalDiff != "-":
+        if v2.totalDiff != "-" and k2 != "Serialization1":
             summary[0] += v2.infoflowFw
             summary[1] += v2.aliasFw
             summary[2] += v2.infoflowBw

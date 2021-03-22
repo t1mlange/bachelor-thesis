@@ -12,11 +12,10 @@
 \begin{document}
     \chapter{Validation}
     \section{Unit Tests}
-    \textsc{FlowDroid} already contains 519 unit tests for the core infoflow component. We also validated the backwards analysis with these tests with positive results. Because we focused on the context-sensitive analysis, not all analysis-related tests were applicable. In the following, we briefly explain why tests were left out or did not return the same results.
+    \textsc{FlowDroid} already contains 519 unit tests for the core component. We also validated the backwards analysis with these tests with good results. Because we focused on the context-sensitive analysis, not all analysis-related tests were applicable. In the following, we briefly explain why tests were left out or did not return the same results.
 
     \textbf{EasyTaintWrapperTests} \code{equalsTest} and \code{hashCodeTest} are expected to return one leak but the backwards analysis does report no leaks. This difference is related to the \code{EasyTaintWrapper} implementation. The implementation marks \code{equals()} and \code{hashCode()} as exclusive. This means we can skip this method because we already have a rule for it. The check for exclusiveness is part of the Call and CallToReturn flow function. In both tests, the source is inside the \code{equals()} or \code{hashCode()} method. The IFDS solver behaves as already observed in \autoref{s:clinitrule} and when searching forwards it creates a return edge returning from the method while going backwards we do not propagate into the method because it is exclusive.
     We marked those two tests forwards-specific and created two equivalent backwards-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method with one expected leak.
-    To achieve the exact behavior, we should not search for sources and sinks in exclusive methods. This change could break expected behaivor, thus we decided against the change.
     
     \textbf{SourceSinkTests} These tests ensure the source sink manager can be swapped out. This is not relevant for the correctness of the backwards analysis and therefore are ignored.
 
@@ -27,11 +26,12 @@
     \textbf{SetTests} \code{containsTest} needs implicit flows to find the leak.
 
     \section{DroidBench}\label{s:droidbenchvalidation}
-    \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 190 test cases are included in the latest development version 3\footnote{\url{https://github.com/secure-software-engineering/DroidBench/}}. We use the newest commit at the time of writing\footnote{6. March 2021, Commit \texttt{ddbd50c}}.
-    We aim to achieve similiar results as \textsc{FlowDroid}'s existing forwards implementation.
+    \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. The latest development version 3 includes 190 test cases\footnote{\url{https://github.com/secure-software-engineering/DroidBench/}}. We used the newest commit on develop at the time of writing\footnote{6th March 2021, Commit \texttt{ddbd50c}} for validating our implementation.
+    We aim to achieve similiar results as \textsc{FlowDroid}'s existing forwards implementation. 
+    % Still, there might be subtle differences due to the alias approximation.
     
     \subsection{Configuration}\label{s:droidbenchconfig}
-    The validation was run with the default configuration of the Android module of FlowDroid  using EasyTaintWrapper as the taint wrapper. The configuration is summarized in \autoref{t:droidbenchconfig}.
+    For the validation we ran \textsc{FlowDroid} with the default configuration of the Android module using the Easy Taint Wrapper as the taint wrapper. The configuration is summarized in \autoref{t:droidbenchconfig}.
 
     \begin{table}[ht]
         \centering
@@ -50,16 +50,16 @@
         \label{t:droidbenchconfig}
     \end{table}
 
-    We only used a subset of \textsc{DroidBench} tests to validate our results. Dynamic Code Loading, Self Modification, Unreachable Code and Native Code are all not supported by \textsc{FlowDroid}. The first three are all callgraph related and the latter is not supported because FlowDroid has no Android native call handler for now.
-    Also Inter Component Communication, Reflection Inter Component Communication and Inter App Communication were left out. The Inter Component Communication module was - at the time of this work - not maintained anymore. 
-    As all left out tests do not depend on the flow functions, if \textsc{FlowDroid} gets support for those in the future they should also work in backwards analysis.
+    We only used a subset of \textsc{DroidBench}'s tests to validate our results. Dynamic Code Loading, Self Modification, Unreachable Code and Native Code are all not supported by \textsc{FlowDroid}. The first three are all call-graph related and the latter is not supported because \textsc{FlowDroid} has no Android native call handler for now. 
+    Also Inter Component Communication (ICC), Reflection Inter Component Communication and Inter App Communication were left out because the ICC module is - at the time of this work - not maintained anymore. 
+    All of the tests stated above are flow function independent. If \textsc{FlowDroid} gets support for those features in the future they should also work in backward analysis.
 
     \subsection{Results}
-    The full overview of the results are in \autoref{t:droidbenchvalidation}. 
+    The full overview of the results is in \autoref{t:droidbenchvalidation}. 
     \tp\ denotes true positive, \fp\ false positive and \fn\ false negative.
-    If a row is empty, there are no expected leaks and also none were found. 
+    If a row is empty, the test expects no leaks and also none were found. 
     
-    Our backwards-directed implementation yields nearly the same result as the existing forwards implementation with just a one missed leak more than the baseline.  We achieve a F1 measure of $0.89$ which is the same as the baseline.
+    Our backwards-directed implementation yields nearly the same result as the existing forwards implementation with one missed leak more than the baseline. We achieve a F1 measure of $0.89$ which is the same as the baseline.
 
     \begin{longtable}{l | l | l}% begin droidbench
         \textbf{App Name} & \textbf{Forwards} & \textbf{Backwards}\\
@@ -286,7 +286,8 @@
 
     \textbf{StaticInitialization3}'s leak is missed despite the explicit modelling of clinit. The code is provided in \autoref{lst:staticinit3}. \code{MainActivity} is using the singleton pattern and thus has a static field \code{v} refering to its instance. The source statement is inside the static block of the \code{Test} class using the singleton to access the instance field \code{s}.
     The taint is now introduced at the sink and refers to the field through the \code{this} instance. When we visit line 13, the \code{<clinit>} edge is not taken due to the taint being an instance field. Line 12 kills the only taint and stops the analysis as there is no taint to propagate anymore. We never get to see the statement where the static field \code{v} aliases \code{this}. 
-    We miss the leak because the test violates our assumption of the clinit rule that only static taints can leak inside static blocks. To catch this leak, an inactive taint could be propagated upwards after line 12 to later turn around and let the aliasing visit the clinit edge with the downside that we can not kill any overwrite of an instance field until the end of the callgraph. We decided to deliberately miss those kind of leaks in favor of much less edges to be propagated. This is one limitiation of the alias analysis where only encountered aliases are tracked. Tracking all alias is too inefficient for the analysis to be applicable \cite{Bodden2012}.  
+    % We miss the leak because the test violates our assumption of the clinit rule that only static taints can leak inside static blocks. To catch this leak, an inactive taint could be propagated upwards after line 12 to later turn around and let the aliasing visit the clinit edge with the downside that we can not kill any overwrite of an instance field until the end of the callgraph. We decided to deliberately miss those kind of leaks in favor of much less edges to be propagated. 
+    This is a limitiation of the alias analysis where only encountered aliases are tracked. Tracking more aliases is too inefficient for the analysis to be applicable and also fully precise aliasing is still an unsolved problem \cite{Bodden2012}.
     
     \begin{figure}[ht]
         \begin{lstlisting}
@@ -318,4 +319,7 @@
         \label{lst:staticinit3}
     \end{figure}
 
+    \subsection{Improvements From The Summary Taint Wrapper}
+    We briefly explained the simple but not always precise rules of the Easy Taint Wrapper in \autoref{s:taintwrapper}. Using \textsc{StubDroid}'s more precise summaries yields even better results for both directions. The false positives in the test cases \code{BroadcastReceiverLifecycle2} and \code{SharedPreferenceChanged1} are gone and the leak in \code{Serialization1} is found. 
+    % Otherwise, the results are unchanged.
 \end{document}

@@ -96,8 +96,8 @@
 
 %Formatierungen für Beispiele in diesem Dokument. Im Allgemeinen nicht notwendig!
 \let\file\texttt
-% \let\code\lstinline[basicstyle=\ttfamily]
-\newcommand{\code}[1]{\lstinline[basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true]{#1}}
+\newcommand{\code}[1]{\lstinline[basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true, language=]{#1}}
+\newcommand{\footnotecode}[1]{\lstinline[basicstyle=\footnotesize\selectfont\ttfamily, breaklines=true, language=]{#1}}
 \newcommand{\smallcode}[1]{\lstinline[breaklines=true]{#1}}
 \newcommand{\jimple}[1]{\lstinline[language=Jimple,basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true]{#1}}
 \let\tbs\textbackslash

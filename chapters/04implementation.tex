@@ -5,29 +5,26 @@
     In this chapter, we describe the details of our backwards-directed implementation and how we integrated it into \textsc{FlowDroid}.
 
     \section{Integration}
-    \textsc{FlowDroid} is built to be extensible from to ground up. We wanted to reuse as much components of \textsc{FlowDroid} as possible. For the backwards analysis, we introduce unconditional taints at sinks and check for the matching access paths at sources. Facts are propagated through a reversed interprocedural control flow graph.
-
-    The methods for retrieving sources and sinks from a SourceSinkManager have different signatures because only at one end the access paths must match and at the other the taints are unconditional. 
-    We added the interface \code{IReversibleSourceSinkManager} extending the \code{ISourceSinkManager}. It enforces two additional methods:
+    \textsc{FlowDroid} is built to be extensible from to ground up. We wanted to reuse as much components of \textsc{FlowDroid} as possible. 
+    
+    First, we needed a backwards interprocedural control-flow graph. \textsc{FlowDroid} already contained one for the on-demand aliasing whcih only missed the \code{notifyMethodChanged()} method.
+    Next, we need to introduce unconditional taints at sinks and check for the matching access paths at sources.
+    The methods for retrieving sources and sinks from a Source Sink Manager have different signatures because in the forwards case, only at sinks access paths have to match. We added the interface \code{IReversibleSourceSinkManager} extending the \code{ISourceSinkManager}. It enforces two additional methods:
     \begin{itemize}
         \item \code{SourceInfo getInverseSinkInfo(Stmt sCallSite, InfoflowManager manager)}
         \item \code{SinkInfo getInverseSourceInfo(Stmt sCallSite, InfoflowManager manager, AccessPath ap)}
     \end{itemize}
     \code{getInverseSinkInfo} returns the necessary information for introducing unconditional taints at sinks while \code{getInverseSourceInfo} also matches the access paths at sources.
-    All three source sink managers \code{DefaultSourceSinkManager} for modelling Java, \code{AccessPathBasedSourceSinkManager} for modelling Android and \code{SummarySourceSinkManager} for summaries now implement the \code{IReversibleSourceSinkManager} interface.
+    The source sink managers \code{DefaultSourceSinkManager} and \code{AccessPathBasedSourceSinkManager} now implement the \code{IReversibleSourceSinkManager} interface.
     Reversible source sink manager currently do not support the one-source-at-a-time mode.
 
-    Due to the flow-sensitive aliasing of \textsc{FlowDroid} using IFDS, \textsc{FlowDroid} already provides an implementation of a reversed interprocedural control flow graph called \code{BackwardsInfoflowCFG}.
-    For the core - the flow functions - we created two new components implementing \code{IInfoflowProblem}: the backwards infoflow problem and an alias problem. More on that in \autoref{s:problems}.
+    For the core, we created two new classes implementing \code{IInfoflowProblem}. \code{BackwardsInfoflowProblem} implements the flow functions described in \autoref{s:flowfunctions}. Additional language features are sourced out into rules which are informally described in \autoref{s:rules}. \code{BackwardsAliasProblem} is the on-demand forward alias analysis. We describe the on-demand aliasing in greater detail in \autoref{s:aliasing}.
 
-    To hide the fact that we internally swapped the sources and sinks, we also created a \code{BackwardsInfoflowResults} extending \code{InfoflowResults}. The implementation is quite simple. It overwrites the \code{addResult} implementations and reverses the constructed paths.
+    To hide the fact that we internally searched backwards, we also created a \code{BackwardsInfoflowResults} extending \code{InfoflowResults}. The implementation is quite simple. It overwrites only the \code{addResult} implementations to swap the source and sink. If full path reconstruction is enabled, we also reverse the path.
 
-    The modularity of \textsc{FlowDroid} allowed us to easily use the newly created components. We created another implementation of \code{IInfoflow} responsible for initialization of those closely to the already existing default implementation \code{Infoflow}.
+    % The modularity of \textsc{FlowDroid} allowed us to easily use the newly created components. We created another implementation of \code{IInfoflow} responsible for initialization of those closely to the already existing default implementation \code{Infoflow}.
 
-    \section{Flow Function Implementation}\label{s:problems}
-    \subsection{Infoflow Analysis}
-
-    \subsection{Flow-Sensitive Alias Analysis}\label{s:aliasing}
+    \section{Flow-Sensitive Alias Analysis}\label{s:aliasing}
     \textsc{FlowDroid} offers multiple aliasing strategies.
     In this work, we focus on the flow-sensitive alias analysis which is implemented as another IFDS problem called \code{BackwardsAliasProblem}. Basically, this is a forwards IFDS search with flow functions using aliasing rules. 
 
@@ -92,8 +89,9 @@
         \label{lst:turnunit}
     \end{figure}
 
-    \section{Rules}
+    \section{Rules}\label{s:rules}
     Flow functions can get quite large, complicated to understand and hard to maintain \cite{Lerch2015}. To counteract this, \textsc{FlowDroid} outsources certain features into rules. These rules also implement the four flow functions and are applied in the corresponding flow function.
+    In this section, we describe our rule implementation and informally state the rule behavior.
 
     \subsection{Source \& Sink Propagation Rule}\label{s:sourcerule}
     In backwards analysis, sources act like sinks and vice versa. Thus, the Source Propagation Rule records taints flowing into sources and the Sink Propagation Rule unconditionally introduces taints at sinks.
@@ -114,7 +112,9 @@
     By default, the whole array is tainted and indices are not tracked. Following, all three rules kill the incoming taint unless the left side is an \code{ArrayRef}. 
 
     \subsection{Backwards Exception Propagation Rule}
-    The Backwards Exception Propagation Rule handling is
+    The Backwards Exception Propagation Rule handling is similiar to forward. 
+
+    We first observe a statement catching the exception such as \code{\$someVar := @caughtexception}. If \code{someVar} is tainted, we derive a new taint with the throw flag set. In the next propagation of this taint, we either find the ThrowStmt in the normal flow or in the call flow. Similiar to call flow function, if the throw is inside another method, we need to iterate over all possible ThrowStmts in the callee. 
 
     \subsection{Backwards Wrapper Propagation Rule}
     \textsc{FlowDroid} already provided a \code{IReversibleTaintWrapper} interface. Implementing taint wrappers support \code{getInverseTaints()} which takes the outcoming taint as an input and computes the incoming taints.
@@ -127,6 +127,15 @@
     % Not implemented.
 
     \subsection{Backwards Strong Update Rule}
+    Strong updates are assignments where the content of a variable gets overwritten. In our normal flow rules, this is modelled in rule 1. When a statement is observed with its left side tainted, we know it got its tainted content at this statement. Thus we kill the taint because the content above this statement is of no interest and taint the right hand side. So we performed a strong update on the left side. 
+
+    But with aliasing this gets quite more complicated. Now, we can observe a taint not matching the left side and propagate it over the statement according to the default rule of normal flow but the taint is an alias of the left side and should have been killed. Linking aliasing taints to support such strong updates would lose the distributiveness property of the flow functions. 
+    
+    In this case, \textsc{FlowDroid} falls back to Soot's must-aliasing analysis. However, the built-in must-aliasing is only intraprocedural. Thus, the strong update rule can not detect strong updates split over methods.
+
+    \begin{itemize}
+        \item \textbf{Strong Update Rule}: If the incoming taint must-aliases the left side then apply the normal flow rules just as if the left side was tainted. 
+    \end{itemize}
 
     \begin{figure}[ht]
         \centering
@@ -222,17 +231,9 @@
         \label{tikz:strongupdate}
     \end{figure}
 
-    Strong updates are assignments where the content of a variable gets overwritten. In our normal flow rules, this is modelled in rule 1. When a statement is observed with its left side tainted, we know it got its tainted content at this statement. Thus we kill the taint because the content above this statement is of no interest and taint the right hand side. So we performed a strong update on the left side. 
-
-    But with aliasing this gets quite more complicated. Now, we can observe a taint not matching the left side and propagate it over the statement according to the default rule of normal flow but the taint is an alias of the left side and should have been killed. Linking aliasing taints to support such strong updates would lose the distributiveness property of the flow functions. 
+    Searching backwards also allows for easier strong updates. Backwards, the first observed strong update is the last before the sink. 
     
-    In this case, \textsc{FlowDroid} falls back to Soot's must-aliasing analysis. However, the built-in must-aliasing is only intraprocedural. Thus, the strong update rule can not detect strong updates split over methods.
-
-    \begin{itemize}
-        \item \textbf{Strong Update Rule}: If the incoming taint must-aliases the left side then apply the normal flow rules just as if the left side was tainted. 
-    \end{itemize}
-
-    Searching backwards also removes one limitation of strong updates. Consider the example in \autoref{tikz:strongupdate}. \code{IR} is a wrapper around an integer to provide integers by reference. The main idea behind this example is a strong update on an alias of a tainted variable and later retaint the alias. In \ref{tikz:strongupdate_a}, taints are created at both source statements. The critical point is \code{i.v = 42;} where the forwards strong update rule kills \code{k.v} because it must aliases \code{i.v} and the taint \code{i.v}, later found through aliasing, is killed according to normal flow. Both kills are appropriate because it is unknown whether there will be another strong update. This is not the case in backwards analysis. Here the last write before the sink to the leaked variable or one of its aliases is found first. So after one propagation the taint already reaches a source statement.
+    Consider the example in \autoref{tikz:strongupdate}. \code{IR} is a wrapper around an integer to provide integers by reference. The main idea behind this example is a strong update on an alias of a tainted variable and later retaint the alias. In \ref{tikz:strongupdate_a}, taints are created at both source statements. The critical point is \code{i.v = 42;} where the forwards strong update rule kills \code{k.v} because it must aliases \code{i.v} and the taint \code{i.v}, later found through aliasing, is killed according to normal flow. Both kills are appropriate because it is unknown whether there will be another strong update. This is not the case in backwards analysis. Here the last write before the sink to the leaked variable or one of its aliases is found first. So after one propagation the taint already reaches a source statement.
 
     \subsection{Backwards Clinit Rule}\label{s:clinitrule}
     \code{<clinit>} is a special method in the JVM and stands for class loader init. The function is generated by the compiler and can not be called explicitly. Examples of statements which get compiled into clinit can be seen in \autoref{lst:clinit_examples}. The invokation is implicit at the initialization phase of the class and is executed at most once for each class \footnote{\url{https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html\#jvms-2.9}}. 
@@ -332,7 +333,7 @@
         \label{lst:static2TestJava}
     \end{figure}
 
-    \subsection{Taint Wrappers}
+    \subsection{Taint Wrappers}\label{s:taintwrapper}
     \textsc{FlowDroid} already provides an interface \code{IReversibleTaintWrapper} for taint wrappers which also provide inversed summaries. The Summary Taint Wrapper for \textsc{StubDroid} already implements this. For the Easy Taint Wrapper we contributed the inverse implementation.
     
     \subsection{Native Call Handler}

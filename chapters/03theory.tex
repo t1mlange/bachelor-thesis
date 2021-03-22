@@ -4,92 +4,141 @@
     \chapter{Theory}
     In the first part of this chapter, we define the flow functions and in the second part we discuss the time complexity of taint analysis specificly hightlighting differences between forward and backward analysis.
 
-    \section{Flow Functions}
-    In this section, we describe the behavior of the flow functions based on the Jimple language and define semi-formal rules.
+    \section{Flow Functions}\label{s:flowfunctions}
+    We describe the behavior of the flow functions based on the Jimple language and define semi-formal rules analogous to the publication\cite{Arzt2017PhD} on \textsc{FlowDroid}. These rules only focus on the base control-flow, we describe flows for additional language features such as arrays and exceptions later more informal in \autoref{s:rules}. Note that traversing the interprocedural control-flow graph backwards means call edges are now return edges and vice versa. 
 
     \subsection{Normal Flow}\label{s:normalflow}
-    Normal flow functions handle every statement that does not contain an \code{InvokeExpr}. The only case where a new taint can be produced is at an \code{AssignStmt}. It is straight-forward that this is true for statements like \code{IfStmt} if we recall \autoref{s:jimple}. The conditition is either an \code{UnopExpr} or \code{BinopExpr} of which both have no effect on the taint set. But we also skip over \code{IdentityStmt} even though they define a value. This is because we wait for the return site to map all parameters back into the callee.
+    Normal flow functions handle every statement that does not contain an \code{InvokeExpr} and assignments are always explicit in Jimple.
+    For the base cases, new taint are only produced at \code{AssignStmt}s. We skip over \code{IdentityStmt} even though they also assign values such as the \code{this} reference or the parameters to locals. The Return Flow Function is responsible for mapping all parameters back into the callee and the return edge is after the \code{IdentityStmt}s.
 
-    Now, lets consider the current statement is an \code{AssignStmt}. It consists of a variable, either a reference or a local, on the left side and an expression on the right side. Jimple ensures we just see one field reference at a time but to reduce the semi-formal rules, we take a shortcut here. So our assigment has the structure $x.f^n \leftarrow y.g^m$ with $n,m \in \{0,1\}$ modelling a possible field reference. Note that the taints can have an access path of an arbitrary length $k$ which is denoted as $h^k$.
+    Now, lets consider the current statement is an \code{AssignStmt}. It consists of a variable, either a reference or a local, on the left side and an expression on the right side. The assigment has the structure $x.f^n \leftarrow y.g^m$ with $n,m \in \{0,1\}$ modelling a possible field reference. As taints may have an access path of an arbitrary length, we denote the rest as $h^k$.\footnote{$h^k$ is a $k$-length access path, not $k$-times the same field reference} Jimple also ensures only one field dereference per statement which Arzt chose not to represent in the semi-formal definitions. 
 
-    First, we look at the case when the access path matches exactly. Either we have a local ($n=0$) or a field reference ($n=1$) on the left. In the first case, the base of our taint needs to match and in the latter, the first field must also match. If the field references another heap object, we might encounter a non-empty access path $h^k$. This access path needs to be added to the newly created taint. We conclude:
+    In the first case, we look at exact matches. Either we have an assignment with a local ($n=0$) or a field dereference ($n=1$). For both, the base variable needs to match. For the latter, also the first field of the access path has to match the field dereference.
+    The first field dereference is removed from the taint and the remaining access path is copied to the newly created taint. The incoming taint is killed because it received the worthwhile information at this statement.
     \begin{itemize}
-        \item[] \textbf{Rule 1:} An incoming taint $t = x.f^n.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{y.g^m.h^k\}$.
+        \item[] \textbf{Rule 1:} An incoming taint $T = x.f^n.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{y.g^m.h^k\right\}$.
     \end{itemize} 
 
-    Next, we might encounter a whole object tainted. In this case, just the base needs to match but the left side is also kept alive because other fields also might be tainted if the object has more than one field.
+    Next, we need a rule for the wildcard. Recall \autoref{s:ap}, symbolic access paths can also be $k$-limited to speedup the analysis and they are $k=5$-limited in \textsc{FlowDroid} by default. Thus, we might encounter a taint with no field dereferences and a wildcard appended. In this case, just the base needs to match. But this time, the left side is kept alive because we can not reason which field is tainted due to the cut-off approximation.
     \begin{itemize}
-        \item[] \textbf{Rule 2:} An incoming taint $t = x.*$ with $k \geq 0$ produces the outflowing taint set $T = \{y.g^m.*, t\}$.
+        \item[] \textbf{Rule 2:} An incoming taint $T = x.*$ with $k \geq 0$ produces the outflowing taint set $\left\{y.g^m.*, T\right\}$.
     \end{itemize} 
 
-    Lastly, the right side could also be tainted. This rule is equivalent to the default behaivor but is important later when we consider aliasing in \autoref{s:aliasing}.
+    Lastly, we could also observe a taint on the right side. In this case, we simply apply the identity, so propagate the taint over the statement. This case also gets important later when we consider aliasing in \autoref{s:aliasing}.
     \begin{itemize}
-        \item[] \textbf{Rule 3:} An incoming taint $t = y.g^m.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{t\}$.
+        \item[] \textbf{Rule 3:} An incoming taint $T = y.g^m.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{T\right\}$.
     \end{itemize}
 
+    Whenever a taint neither matches on the left nor on the right side, we also perform the identity as the statement does not touch the contents of the tainted variable.  
 
-    Whenever the taint neither matches on the left nor on the right side, we propagate it further untouched.
-
-    Rule 1 and Rule 3 also work with $*$ appended.
+    Rule 1 and Rule 3 work likewise with a wildcard appended. Similiary to the rest access path $h^k$, it is copied to the left side in Rule 1.
 
     \subsection{Call Flow}
-    For call statements, we have statements of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument, $p_i$ the $i$-th parameter and $c$ the class the method is defined in.
+    The Call Flow Function and subsequently also Return and Call TO Return Flow Function is applied whenever a statements contains an \code{InvokeExpr}.
+    For call statements without assignments, we have statements of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument, $p_i$ the $i$-th parameter and $c$ the class instance of the callee's base object.
 
-    If we encounter a tainted argument in the caller, the taint need to go through the callee. Due to the backwards direction this is only true for heap objects because only they have references. For primitives or strings we already know the tainted value is not visible in the callee.
+    When we encounter a tainted argument in the caller, the taint needs to go through the callee. Java uses pass-by-value, so the arguments are copied into the callee. Thus, for reference types, the pointer to the object is copied into the callee. If only the base reference is tainted but nothing more ($k=0$ and no wildcard), the callee can only access and overwrite the reference saved in the parameter on the stack but not change the data of the object on the heap. 
+    Due to the backwards direction, we know the update to such a taint can not be inside the callee. This gets more clear when we get specific to Java's types. Primitives do not have fields and strings are immutable\footnote{The immutable conditions results in transparent fields, e.g. we can treat strings as if they were primitives.}. Consider the example in \autoref{lst:primret}. On the left, we use the built-in String type. In line 2, \code{str} is copied into \code{callee}. At this point, \code{main} holds the \code{str} with the value "42" but pointing to another memory location than \code{str} in \code{callee}\footnote{The JVM might only set a copy-on-write flag on \footnotecode{str} in \footnotecode{callee} and point it to the same location as \footnotecode{str} in \footnotecode{main} to save memory. At least right before the update happens, it is guranteed that the variable points to a different location.}. Thus, \code{callee} can write to \code{str} without changing the contents of \code{str} in \code{main}. On the right, the callee can update the field on the heap and therefore, the taint needs to be propagated into the callee to find the leak. Conclusively, $k$ needs to be greater than $0$.
+
+    \begin{figure}[t]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{adjustbox}{max width=\columnwidth}
+                \begin{lstlisting}[gobble=20]
+                    void main() {
+                        String str = "42";
+                        callee(str);
+                        sink(str);
+                    }
+            
+                    void callee(String str) {
+                        str = source();
+                    }
+                \end{lstlisting}
+            \end{adjustbox}
+            \caption{Taint Without Fields}
+        \end{subfigure}
+        \qquad
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{adjustbox}{max width=\columnwidth}
+                \begin{lstlisting}[gobble=20]
+                    void main() {
+                        SomeObject o = new SomeObject();
+                        callee(o);
+                        sink(o.str);
+                    }
+            
+                    void callee(SomeObject o) {
+                        o.str = source();
+                    }
+                \end{lstlisting}
+            \end{adjustbox}
+            \caption{Taint With Fields}
+        \end{subfigure}
+        \caption{Call Flow Example}
+        \label{lst:primret} 
+    \end{figure}
+
     \begin{itemize}
-        \item[] \textbf{Rule 1:} An incoming taint $t = a_i.h^k$ with $k \geq 0 \land 0 \leq i \leq n \land \text{typeof}(a_i) \in \mathit{HeapTypes}$ produces the outflowing taint set $T = \{p_i.h^k\}$.
+        \item[] \textbf{Rule 1:} An incoming taint $T=a_i.h^k$ with $k > 0 \land 0 \leq i \leq n$ produces the outflowing taint set $\left\{p_i.h^k\right\}$.
+        \item[] \textbf{Rule 2:} An incoming taint $T=a_i.*$ with $0 \leq i \leq n$ produces the outflowing taint set $\left\{p_i.*\right\}$.
     \end{itemize}
 
-    If the object the method is called on is tainted, the tainted path is visible inside the callee. The callee must be not static.
+    For a non-static callee, it can also access instance fields of the base object. When we observe a tainted base object, the taint also needs to flow through the callee. The tainted object transforms into a $\mathit{this}$ reference.
     \begin{itemize}
-        \item[] \textbf{Rule 2:} An incoming taint $t = o.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{\mathit{this}_c.h^k\}$. 
+        \item[] \textbf{Rule 3:} An incoming taint $T=o.h^k$ with $k > 0$ produces the outflowing taint set $\left\{\mathit{this}_c.h^k\right\}$. 
+        \item[] \textbf{Rule 4:} An incoming taint $T=o.*$ produces the outflowing taint set $\left\{\mathit{this}_c.*\right\}$.
     \end{itemize}
     
-    Tainted static fields are propagated untouched and unconditionally in the callee as they are always visible.
+    Static fields are a special case. Their scope is the whole program and thus, are always visible in the callee. The taint is untouched as the reference is the same everywhere.
     \begin{itemize}
-        \item[] \textbf{Rule 3:} An incoming taint $t = S.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{t\}$. 
+        \item[] \textbf{Rule 5:} An incoming taint $T = S.f.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{T\right\}$.
     \end{itemize}
 
-    Next, if the call statement is also an assign statement and the left side is tainted we also need to taint the return value. Methods can have multiple return statements and as we traverse the reversed interprocedural control flow graph, we need to taint all possible return values. The structure of the statement is in this case $x \leftarrow o.m(a_0,...,a_n)$. $r_i$ denotes a return value. $n$ is the number of return statements in the callee. 
+    In Jimple, an \code{AssignStmt} can also consist of a \code{Local} on the left side and an \code{InvokeExpr} on the right side. The structure of the statement is in this case $x \leftarrow o.m(a_0,...,a_n)$. $r_i$ denotes a return value. $m$ is the number of return statements in the callee. If we observe such a statement and the left side is tainted as well, we need to map the returned value into the callee. Now, methods can have multiple return statements and as we traverse the reversed interprocedural control-flow graph, there are multiple edges to go with. We can not reason which return statement is the right one, so we need to taint the operand of every return statement in the callee.
     \begin{itemize}
-        \item[] \textbf{Rule 4:} An incoming taint $t = x.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \left\{r_i.h^k \mid 0 \leq i < n \right\}$. 
+        \item[] \textbf{Rule 6:} An incoming taint $T = x.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{r_i.h^k \mid 0 \leq i < m \right\}$. 
     \end{itemize}
 
-    The taint is killed if it is not matched inside a rule. Instead, it is propagated over the call statement in the CallToReturn flow function.
+    Unlike at normal flows, we kill all taints not matching any of the rules. In the case of a taint being out of the callee's scope, the Call To Return flow function propagates the taint over the statement.
+
     \subsection{Return Flow}
-    All taints reaching the end of a callee need to be mapped back into the caller. The statement is of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument, $p_i$ the $i$-th parameter and $c$ the class the method is defined in.
+    Reaching the end of a method, the taints need to be mapped back into the caller. The statement we consider is of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. Again, $a_i$ denotes the $i$-th argument, $p_i$ the $i$-th parameter and $c$ the class instance.
 
-    First, we match rule 1 of call flow and map all parameters back into the caller. This time even primitives are mapped back because if we find a tainted value at the start of the method it had to be passed as an argument into the method.
+    The first rule matches rule 1 and 2 of call flow: map all parameters back into the caller. In contrast to call flow, this time we also map primitives and strings back into the caller because the contents of the variable were copied from the caller's argument into the callee.
     \begin{itemize}
-        \item[] \textbf{Rule 1:} An incoming taint $t = p_i.h^k$ with $k \geq 0 \land 0 \leq i \leq n$ produces the outflowing taint set $T = \{a_i.h^k\}$.
+        \item[] \textbf{Rule 1:} An incoming taint $T = p_i.h^k$ with $k \geq 0 \land 0 \leq i \leq n$ produces the outflowing taint set $\{a_i.h^k\}$.
     \end{itemize}
 
-    The $\mathit{this}$ reference is visible in the caller. This is the reverse of rule 2 in call flow.
+    The $\mathit{this}$ reference also needs to be mapped back into the caller.
     \begin{itemize}
         \item[] \textbf{Rule 2:} An incoming taint $t = \mathit{this}_c.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{o.h^k\}$. 
     \end{itemize}
     
-    Tainted static fields are also mapped back untouched and unconditionally equivalent to rule 3 in call flow.
+    Tainted static fields are also mapped back untouched. This is the same as rule 5 of the Call Flow.
     \begin{itemize}
         \item[] \textbf{Rule 3:} An incoming taint $t = S.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{t\}$. 
     \end{itemize}
+    
+    Again, taints not matching any rule are killed. For example, this is the case when a method is left and the local variable is not in the scope of the caller.
 
-    The taint is killed if it is not matched in a rule.
     \subsection{CallToReturn Flow}
-    As already seen in call flow, not every taint is visible inside a callee. 
-    Again, the statement structure is $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument.
+    The statement structure is $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument.
 
-    If the taint neither matches an argument nor the object the method is called on, it is not visible in the callee. Static fields are always visible and thus can not propagated over a statement.
+    A taint is not in scope of the callee if it is not static and neither matches an argument nor the base object the method is called on. Such a taint is not matched inside Call Flow and needs to be propagated over the call statement.
     \begin{itemize}
-        \item[] \textbf{Rule 1:} An incoming taint $t = x.h^k$ with $k \geq 0 \land (\forall a \in \mathit{Arguments}: a \neq x) \land x \neq o \land x \notin \mathit{Static}$ produces the outflowing taint set $T = \{t\}$. 
+        \item[] \textbf{Rule 1:} An incoming taint $T = x.h^k$ with $k \geq 0 \land \left(\forall a \in \mathit{Arguments}: a \neq x\right) \land x \neq o \land x \notin \mathit{Static}$ produces the outflowing taint set $T = \{t\}$. 
     \end{itemize}
 
-    If a taint is limited to its base, so no fields are tainted, the taint is also propagated over the statement as the reference is passed by copy-by-value and assigments to the parameter overwrites the reference in the callee but has no effect on the reference in the caller.
+    Consider again the left side of \autoref{lst:primret}. In line 3, the taint is in the kill set of Call Flow. But as we want to preserve the taint after the call, we need to propagate the taint over the call statement in such cases. 
     \begin{itemize}
         \item[] \textbf{Rule 2:} An incoming taint $t = a_i$ with $0 \leq i \leq n$ produces the outflowing taint set $T = \{t\}$. 
     \end{itemize}
         
-
+    Like in Call and Return Flow, here we also kill taints which do not match any of these rules.
+    
     \section{Complexity of Data Flow Analysis}\label{s:complexity}
     IFDS has a time-complexity of $O(E \cdot D^3)$. The edges in the control-flow graph are set by the to-be-analyzed app. The domain depends on the tainted variables observed by the IFDS analysis. Arzt et al evaluation of \textsc{FlowDroid} shows no correlation between a-priori known parameters and the runtime of the analysis \cite{Arzt2017PhD}. So, we are left with the number of taint propagations as the only parameter correlated to the runtime but they are only known afterwards. 
 
