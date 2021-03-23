@@ -376,7 +376,7 @@
     \normalsize
 
 
-    \section{Real World Apps}
+    \section{Real World Apps}\label{s:realworld}
 
     \subsection{Configuration}
     Our test machine is equipped with four Intel Xeon E5-4650 and 1 TB of RAM. We limited the JVM to 50 GB RAM and \textsc{FlowDroid} on 16 threads per instance. We ran at most four instances in parallel to ensure a one-to-one mapping between CPU threads and \textsc{FlowDroid} threads. Note that the test machine is a shared system, but we made sure there are always enough resources for our evaluation available. Still, background services might influence the performance of a single run. To stamp out this factor, we ran each app three times. If there were outliers, we repeated the runs.

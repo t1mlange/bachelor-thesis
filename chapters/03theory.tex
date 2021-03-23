@@ -18,8 +18,9 @@
     \begin{itemize}
         \item[] \textbf{Rule 1:} An incoming taint $T = x.f^n.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{y.g^m.h^k\right\}$.
     \end{itemize} 
+    Rule 1 work likewise with a wildcard appended after $h^k$. Similiary to the rest access path $h^k$, it is copied to the right side.
 
-    Next, we need a rule for the wildcard. Recall \autoref{s:ap}, symbolic access paths can also be $k$-limited to speedup the analysis and they are $k=5$-limited in \textsc{FlowDroid} by default. Thus, we might encounter a taint with no field dereferences and a wildcard appended. In this case, just the base needs to match. But this time, the left side is kept alive because we can not reason which field is tainted due to the cut-off approximation.
+    Next, we need a rule for the case the field dereference $f$ is included in $*$. Recall \autoref{s:ap}, symbolic access paths can also be $k$-limited to speedup the analysis and they are $k=5$-limited in \textsc{FlowDroid} by default. Thus, we might encounter a taint with no field dereferences and a wildcard appended. In this case, just the base needs to match. But this time, the left side is kept alive because we can not reason which field is tainted due to the cut-off approximation.
     \begin{itemize}
         \item[] \textbf{Rule 2:} An incoming taint $T = x.*$ with $k \geq 0$ produces the outflowing taint set $\left\{y.g^m.*, T\right\}$.
     \end{itemize} 
@@ -27,18 +28,17 @@
     Lastly, we could also observe a taint on the right side. In this case, we simply apply the identity, so propagate the taint over the statement. This case also gets important later when we consider aliasing in \autoref{s:aliasing}.
     \begin{itemize}
         \item[] \textbf{Rule 3:} An incoming taint $T = y.g^m.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{T\right\}$.
+        \item[] \textbf{Rule 4:} An incoming taint $T = y.*$ produces the outflowing taint set $\left\{T\right\}$.
     \end{itemize}
 
     Whenever a taint neither matches on the left nor on the right side, we also perform the identity as the statement does not touch the contents of the tainted variable.  
-
-    Rule 1 and Rule 3 work likewise with a wildcard appended. Similiary to the rest access path $h^k$, it is copied to the left side in Rule 1.
 
     \subsection{Call Flow}
     The Call Flow Function and subsequently also Return and Call TO Return Flow Function is applied whenever a statements contains an \code{InvokeExpr}.
     For call statements without assignments, we have statements of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument, $p_i$ the $i$-th parameter and $c$ the class instance of the callee's base object.
 
-    When we encounter a tainted argument in the caller, the taint needs to go through the callee. Java uses pass-by-value, so the arguments are copied into the callee. Thus, for reference types, the pointer to the object is copied into the callee. If only the base reference is tainted but nothing more ($k=0$ and no wildcard), the callee can only access and overwrite the reference saved in the parameter on the stack but not change the data of the object on the heap. 
-    Due to the backwards direction, we know the update to such a taint can not be inside the callee. This gets more clear when we get specific to Java's types. Primitives do not have fields and strings are immutable\footnote{The immutable conditions results in transparent fields, e.g. we can treat strings as if they were primitives.}. Consider the example in \autoref{lst:primret}. On the left, we use the built-in String type. In line 2, \code{str} is copied into \code{callee}. At this point, \code{main} holds the \code{str} with the value "42" but pointing to another memory location than \code{str} in \code{callee}\footnote{The JVM might only set a copy-on-write flag on \footnotecode{str} in \footnotecode{callee} and point it to the same location as \footnotecode{str} in \footnotecode{main} to save memory. At least right before the update happens, it is guranteed that the variable points to a different location.}. Thus, \code{callee} can write to \code{str} without changing the contents of \code{str} in \code{main}. On the right, the callee can update the field on the heap and therefore, the taint needs to be propagated into the callee to find the leak. Conclusively, $k$ needs to be greater than $0$.
+    When we encounter a tainted argument in the caller, the taint needs to go through the callee. Java uses pass-by-value, so the arguments are copied into the callee. Thus, for primitives, the value is copied and pushed onto the stack and for reference types, the pointer to the object is copied into the callee. In the second case, if only the base reference is tainted but nothing more ($k=0$ and no wildcard), the callee can only access and overwrite the reference saved in the parameter on the stack but not change the data of the object on the heap. 
+    Due to the backwards direction, we know the update which tainted the primitive or reference without field dereferences can not be inside the callee. This gets more clear when we get specific to Java's types. Primitives do not have fields and strings are immutable\footnote{The special handling of strings results in transparent fields, e.g. we can treat strings as if they were primitives in this case.}. Consider the example in \autoref{lst:primret}. On the left, we use the built-in String type. In line 2, \code{str} is copied into \code{callee}. At this point, \code{main} holds the \code{str} with the value "42" but pointing to another memory location than \code{str} in \code{callee}\footnote{The JVM might only set a copy-on-write flag on \footnotecode{str} in \footnotecode{callee} and point it to the same location as \footnotecode{str} in \footnotecode{main} to save memory. At least right before the update happens, it is guranteed that the variable points to a different location.}. Thus, \code{main} carries on with the original value of \code{str} no matter what \code{callee} writes to \code{str}. In contrast on the right, the callee can update the field on the heap and therefore, the taint needs to be propagated into the callee to find the leak. Conclusively, $k$ needs to be greater than $0$.
 
     \begin{figure}[t]
         \centering
@@ -49,7 +49,7 @@
                     void main() {
                         String str = "42";
                         callee(str);
-                        sink(str);
+                        sink(str); // no leak
                     }
             
                     void callee(String str) {
@@ -67,7 +67,7 @@
                     void main() {
                         SomeObject o = new SomeObject();
                         callee(o);
-                        sink(o.str);
+                        sink(o.str); // leak
                     }
             
                     void callee(SomeObject o) {
@@ -86,18 +86,18 @@
         \item[] \textbf{Rule 2:} An incoming taint $T=a_i.*$ with $0 \leq i \leq n$ produces the outflowing taint set $\left\{p_i.*\right\}$.
     \end{itemize}
 
-    For a non-static callee, it can also access instance fields of the base object. When we observe a tainted base object, the taint also needs to flow through the callee. The tainted object transforms into a $\mathit{this}$ reference.
+    A non-static callee can also access instance fields of the base object. When we observe a tainted base object, the taint also needs to flow through the callee. The tainted object transforms into a $\mathit{this}$ reference. In Java \code{this} is used to  reference the current instance the method operates on.
     \begin{itemize}
-        \item[] \textbf{Rule 3:} An incoming taint $T=o.h^k$ with $k > 0$ produces the outflowing taint set $\left\{\mathit{this}_c.h^k\right\}$. 
+        \item[] \textbf{Rule 3:} An incoming taint $T=o.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{\mathit{this}_c.h^k\right\}$. 
         \item[] \textbf{Rule 4:} An incoming taint $T=o.*$ produces the outflowing taint set $\left\{\mathit{this}_c.*\right\}$.
     \end{itemize}
     
-    Static fields are a special case. Their scope is the whole program and thus, are always visible in the callee. The taint is untouched as the reference is the same everywhere.
+    Static fields are a special case. Their scope is the whole program and thus, are always visible in the callee. The taint is untouched as the access path to those is the same everywhere.
     \begin{itemize}
         \item[] \textbf{Rule 5:} An incoming taint $T = S.f.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{T\right\}$.
     \end{itemize}
 
-    In Jimple, an \code{AssignStmt} can also consist of a \code{Local} on the left side and an \code{InvokeExpr} on the right side. The structure of the statement is in this case $x \leftarrow o.m(a_0,...,a_n)$. $r_i$ denotes a return value. $m$ is the number of return statements in the callee. If we observe such a statement and the left side is tainted as well, we need to map the returned value into the callee. Now, methods can have multiple return statements and as we traverse the reversed interprocedural control-flow graph, there are multiple edges to go with. We can not reason which return statement is the right one, so we need to taint the operand of every return statement in the callee.
+    In Jimple, an \code{AssignStmt} can also consist of a \code{Local} on the left side and an \code{InvokeExpr} on the right side. The structure of the statement is in this case $x \leftarrow o.m(a_0,...,a_n)$. $r_i$ denotes a return value. $m$ is the number of return statements in the callee. If we observe such a statement and the left side is tainted as well, we need to map the returned value back into the callee. Now, methods can have multiple return statements and as we traverse the reversed interprocedural control-flow graph, there are multiple edges to go with. We can not reason which return statement is the right one, so we need to taint the operand of every return statement in the callee.
     \begin{itemize}
         \item[] \textbf{Rule 6:} An incoming taint $T = x.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{r_i.h^k \mid 0 \leq i < m \right\}$. 
     \end{itemize}
@@ -114,35 +114,34 @@
 
     The $\mathit{this}$ reference also needs to be mapped back into the caller.
     \begin{itemize}
-        \item[] \textbf{Rule 2:} An incoming taint $t = \mathit{this}_c.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{o.h^k\}$. 
+        \item[] \textbf{Rule 2:} An incoming taint $T = \mathit{this}_c.h^k$ with $k \geq 0$ produces the outflowing taint set $\{o.h^k\}$. 
+        \item[] \textbf{Rule 3:} An incoming taint $T = \mathit{this}_c.*$ with $k \geq 0$ produces the outflowing taint set $\{o.*\}$.
     \end{itemize}
     
     Tainted static fields are also mapped back untouched. This is the same as rule 5 of the Call Flow.
     \begin{itemize}
-        \item[] \textbf{Rule 3:} An incoming taint $t = S.h^k$ with $k \geq 0$ produces the outflowing taint set $T = \{t\}$. 
+        \item[] \textbf{Rule 4:} An incoming taint $T = S.h^k$ with $k \geq 0$ produces the outflowing taint set $\{T\}$. 
     \end{itemize}
     
-    Again, taints not matching any rule are killed. For example, this is the case when a method is left and the local variable is not in the scope of the caller.
+    Again, taints not matching any rule are killed. For example, this is the case when returning from a method and the variable is not in the scope of the caller.
 
     \subsection{CallToReturn Flow}
     The statement structure is $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument.
 
     A taint is not in scope of the callee if it is not static and neither matches an argument nor the base object the method is called on. Such a taint is not matched inside Call Flow and needs to be propagated over the call statement.
     \begin{itemize}
-        \item[] \textbf{Rule 1:} An incoming taint $T = x.h^k$ with $k \geq 0 \land \left(\forall a \in \mathit{Arguments}: a \neq x\right) \land x \neq o \land x \notin \mathit{Static}$ produces the outflowing taint set $T = \{t\}$. 
+        \item[] \textbf{Rule 1:} An incoming taint $T = x.h^k$ with $k \geq 0 \land \left(\forall i \in [0, n] \cap \mathbb{N}: a_i \neq x\right) \land x \neq o \land x \notin \mathit{StaticVariables}$ produces the outflowing taint set $T = \{t\}$. 
     \end{itemize}
 
     Consider again the left side of \autoref{lst:primret}. In line 3, the taint is in the kill set of Call Flow. But as we want to preserve the taint after the call, we need to propagate the taint over the call statement in such cases. 
     \begin{itemize}
-        \item[] \textbf{Rule 2:} An incoming taint $t = a_i$ with $0 \leq i \leq n$ produces the outflowing taint set $T = \{t\}$. 
+        \item[] \textbf{Rule 2:} An incoming taint $T = a_i$ with $0 \leq i \leq n$ produces the outflowing taint set $\{T\}$. 
     \end{itemize}
         
     Like in Call and Return Flow, here we also kill taints which do not match any of these rules.
     
     \section{Complexity of Data Flow Analysis}\label{s:complexity}
-    IFDS has a time-complexity of $O(E \cdot D^3)$. The edges in the control-flow graph are set by the to-be-analyzed app. The domain depends on the tainted variables observed by the IFDS analysis. Arzt et al evaluation of \textsc{FlowDroid} shows no correlation between a-priori known parameters and the runtime of the analysis \cite{Arzt2017PhD}. So, we are left with the number of taint propagations as the only parameter correlated to the runtime but they are only known afterwards. 
-
-    The number of taint propagations depends on two factors: the lifetime of taints and the number of taints. Both factors highly depend on the search direction which we will explain in the following paragraphs.
+    IFDS has a time-complexity of $O(E \cdot D^3)$. The edges in the control-flow graph are set by the to-be-analyzed app. The domain depends on the tainted variables observed by the IFDS analysis. The number of taint propagations should directly correlate to the runtime and depends on two factors: the lifetime of taints and the number of taints. Both factors are influenced by the search direction which we will explain in the following paragraphs.
 
     \begin{figure}[ht]
         \centering
@@ -165,10 +164,11 @@
     \end{figure}
 
     First, we take a look at the is the branching factor. The branching factor describes the number outgoing edges from a node. A smaller branching factor is favorable.   
-    Think of binary operator expression such as \code{int c = a + b;}, backwards we can not argue which operand is responsible for the tainted output and thus proceed with both operands tainted. The same restriction is present in rule 4 of Call Flow which describes how the returned value is mapped back into the callee. This time the branching factor can be even larger. As an example, in \autoref{lst:branching} is a method which conditionally returns one of its parameters and is part of the leak path. Lets assume the returned value of a call to \code{returnParam()} is tainted. Backwards, every returned operand is tainted and later on mapped according to Return Flow rule 2 back into the caller. Thus, the IFDS algorithm ends up with a summary $\mathit{retVal} \rightarrow \{s1, s2, s3\}$. Forwards, a tainted parameter is mapped into the callee and later on returned to the caller resulting in a summary $sX \rightarrow \mathit\{\mathit{retVal}, sX\}$ with $X \in \{1,2,3\}$. Such a case favors forwards analysis.
+    Think of binary operator expression such as \code{int c = a + b;}, backwards we can not argue which operand is responsible for the tainted output and thus proceed with both operands tainted. The same restriction is present in rule 5 of Call Flow which describes how the returned value is mapped back into the callee. This time the branching factor can be even larger. As an example, in \autoref{lst:branching} is a method which conditionally returns one of its parameters and is part of the leak path. Lets assume the returned value of a call to \code{returnParam()} is tainted. Backwards, every returned operand is tainted and later on mapped according to Return Flow rule 2 back into the caller. Thus, the IFDS algorithm ends up with a summary $\mathit{retVal} \rightarrow \{s1, s2, s3\}$. Forwards, a tainted parameter is mapped into the callee and later on returned to the caller resulting in a summary $sX \rightarrow \mathit\{\mathit{retVal}, sX\}$ with $X \in \{1,2,3\}$. Such cases favors forwards analysis.
 
-    In contrast, a strict right-to-left flow favors backwards analysis as backwards taints are killed more often due to a stronger overwrite rule meaning a shorter lifetime per taint. In \autoref{tikz:rtol} is such a right-to-left flow displayed. Forwards, the right hand side is always kept alive because it still holds the tainted value below the statement and could be leaked. Starting at the sinks this fact can be confidently ignored because the fact is known to be not on a leak path.
-    
+    In contrast, a strict right-to-left flow favors backward analysis as backwards taints are killed more often due to a stronger overwrite rule meaning a shorter lifetime per taint. In \autoref{tikz:rtol} is such a right-to-left flow displayed. Forwards, the right hand side is always kept alive because it still holds the tainted value below the statement and could be leaked. 
+    This is not the case when searching backward. When the incoming taint is on the left side, the statement is the update which is responsible for tainting. Above this, the contents of the left side is uninteresting. With aliasing, this advantage is not as present.
+
     \begin{figure}[ht]
         \centering
         \begin{subfigure}[b]{0.45\textwidth}
@@ -246,21 +246,14 @@
         \label{tikz:rtol}
     \end{figure}
 
-    Static field taints are a special case and an issue in both directions. Their scope is global, so a static field can be accessed anywhere in the code. Thus such a taint needs to be propagated into every method and can only be killed on overwrite.
+    We already mentioned the global scope of static field taints in the last section. This global scope is an issue in both directions as a static field can be accessed anywhere in the code and therefore need to be propagated into every method. Unless the static taint is overwritten, they traverse the whole interprocedural control-flow graph. \textsc{FlowDroid} already applies an optimization and looks ahead in methods and skips methods in which the static field is not used. Still, static fields stay an issue \cite{Arzt2017PhD}.
 
-    In special cases of application, the direction of the dtaflow analysis might be more important. We bring in classical web-oriented applications as an example. Typical vulnerabilities such as cross-site-scripting and SQL injection occur because untrusted user input was not validated. Normally the content is escaped right before output or sanitized before execution of the command, respectively. So the sanitization method is expected to be close to the sink. Being able to kill taints ealier is advantageous and therefore backwards analysis should be the better choice.
+    Now, it would be beneficial to be able to decide which direction is the best before analyzing an app. An obvious choice for a clue would be the ratio of sources and sinks. If one is much less than the other, we could argue less taints to start with should also lower the taint propagations. 
+    Likewise, Lerch et al. claims in their work that much less sources than sinks are advantageous for a backward-directed search \cite{Lerch2014}. 
+    Sadly, it is not as easy to just say less starting taints mean less runtime. Arzt's evaluation of \textsc{FlowDroid} has shown no correlation between the number of sources and the runtime \cite{Arzt2017PhD}. This results is probably owed to the unpredictable lifetime of taints.
+    As a part of this work, we evaluate whether the favorable search direction can be decided at least on the same app in \autoref{s:realworld}.
 
-    We discussed cases where one direction is better than the other but it still highly depends on the analyzed app. 
+    In general, we can not really predict the lifetime of taints before actually analyzing the app. But in special cases of application, this might be given. Think of a case where sanitization methods\footnote{Sanitization methods are run against user input to ensure the input is safe to be processed.} are in use. Depending on the use case, it might be possible to deduce a proximity between sanitization methods and sources or sinks. Whenever this is possible, there should be a clear favor for one direction due to the lower lifetime of the taints. 
 
-    \begin{itemize}
-        \item Number of taints
-        \begin{itemize}
-            \item There seems to be no correlation between source count and analysis time
-            \item Probably also holds for sinks?
-            \item There might be indicator for a single app whether it is better to start at sources or sinks
-        \end{itemize}
-    \end{itemize}
-
-
-
+    Summarized, we discussed cases where one direction seems favorable but no generalized statement can be made on which analysis direction is better. Further, most of the influencing factors are most influencing factors depend on the app and thus, at most a favorable direction can be determined for a single app.
 \end{document}
