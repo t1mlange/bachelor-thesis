@@ -1,5 +1,23 @@
 % Encoding: UTF-8
 
+@InProceedings{Ferrara2020,
+  author     = {Ferrara, Pietro and Olivieri, Luca and Spoto, Fausto},
+  booktitle  = {Verification, {Model} {Checking}, and {Abstract} {Interpretation}},
+  title      = {BackFlow: {Backward} {Context}-{Sensitive} {Flow} {Reconstruction} of {Taint} {Analysis} {Results}},
+  year       = {2020},
+  address    = {Cham},
+  editor     = {Beyer, Dirk and Zufferey, Damien},
+  pages      = {23--43},
+  publisher  = {Springer International Publishing},
+  series     = {Lecture {Notes} in {Computer} {Science}},
+  abstract   = {Taint analysis detects if data coming from a source, such as user input, flows into a sink, such as an SQL query, unsanitized (not properly escaped). Both static and dynamic taint analyses have been widely applied to detect injection vulnerabilities in real world software. A main drawback of static analysis is that it could produce false alarms. In addition, it is extremely time-consuming to manually explain the flow of tainted data from the results of the analysis, to understand why a specific warning was raised. This paper formalizes BackFlowBackFlow{\textbackslash}mathsf \{BackFlow\}, a context-sensitive taint flow reconstructor that, starting from the results of a taint-analysis engine, reconstructs how tainted data flows inside the program and builds paths connecting sources to sinks. BackFlowBackFlow{\textbackslash}mathsf \{BackFlow\} has been implemented on Julia’s static taint analysis. Experimental results on a set of standard benchmarks show that, when BackFlowBackFlow{\textbackslash}mathsf \{BackFlow\} produces a taint graph for an injection warning, then there is empirical evidence that such warning is a true alarm. Moreover BackFlowBackFlow{\textbackslash}mathsf \{BackFlow\} scales to real world programs.},
+  doi        = {10.1007/978-3-030-39322-9_2},
+  file       = {Springer Full Text PDF:https\://link.springer.com/content/pdf/10.1007%2F978-3-030-39322-9_2.pdf:application/pdf},
+  isbn       = {9783030393229},
+  language   = {en},
+  shorttitle = {\$\${\textbackslash}mathsf \{{BackFlow}\}\$\$},
+}
+
 @Article{Grech2017,
   author     = {Grech, Neville and Smaragdakis, Yannis},
   journal    = {Proceedings of the ACM on Programming Languages},
@@ -275,6 +293,13 @@ Static data flow analysis has been proposed as a means for automatically enumera
 As a result, DOOP achieves several benefits, including full order-of-magnitude improvements in runtime. We compare DOOP with Lhotak and Hendren's PADDLE, which defines the state of the art for context-sensitive analyses. For the exact same logical points-to definitions (and, consequently, identical precision) DOOP is more than 15x faster than PADDLE for a 1-call-site sensitive analysis of the DaCapo benchmarks, with lower but still substantial speedups for other important analyses. Additionally, DOOP scales to very precise analyses that are impossible with PADDLE and Whaley et al.'s bddbddb, directly addressing open problems in past literature. Finally, our implementation is modular and can be easily configured to analyses with a wide range of characteristics, largely due to its declarativeness.},
   doi      = {10.1145/1640089.1640108},
   file     = {Full Text PDF:https\://www.researchgate.net/profile/M-Bravenboer/publication/221321022_Strictly_Declarative_Specification_of_Sophisticated_Points-to_Analyses/links/552413cd0cf2caf11bfcbf1e/Strictly-Declarative-Specification-of-Sophisticated-Points-to-Analyses.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/221321022_Strictly_Declarative_Specification_of_Sophisticated_Points-to_Analyses:},
+}
+
+@InProceedings{Arzt2021,
+  author    = {Arzt, Steven},
+  booktitle = {ICSE 2021 Technical Track},
+  title     = {{Sustainable Solving}: Reducing The Memory Footprint of IFDS-Based Data Flow Analyses Using Intelligent Garbage Collection},
+  year      = {2021},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

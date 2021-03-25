@@ -11,22 +11,22 @@
     Next, we need to introduce unconditional taints at sinks and check for the matching access paths at sources.
     The methods for retrieving sources and sinks from a Source Sink Manager have different signatures because in the forwards case, only at sinks access paths have to match. We added the interface \code{IReversibleSourceSinkManager} extending the \code{ISourceSinkManager}. It enforces two additional methods:
     \begin{itemize}
-        \item \code{SourceInfo getInverseSinkInfo(Stmt sCallSite, InfoflowManager manager)}
-        \item \code{SinkInfo getInverseSourceInfo(Stmt sCallSite, InfoflowManager manager, AccessPath ap)}
+        \item \code{SourceInfo getInverseSinkInfo(Stmt sCallSite,}\\
+              \phantom{\code{ceInfo getInverseSinkInfo(}}\code{InfoflowManager manager)}
+        \item \code{SinkInfo getInverseSourceInfo(Stmt sCallSite,}\\
+              \phantom{\code{Info getInverseSourceInfo(}}\code{InfoflowManager manager, AccessPath ap)}
     \end{itemize}
     \code{getInverseSinkInfo} returns the necessary information for introducing unconditional taints at sinks while \code{getInverseSourceInfo} also matches the access paths at sources.
-    The source sink managers \code{DefaultSourceSinkManager} and \code{AccessPathBasedSourceSinkManager} now implement the \code{IReversibleSourceSinkManager} interface.
-    Reversible source sink manager currently do not support the one-source-at-a-time mode.
+    All Source Sink Managers needed for the data flow analysis now implement the corresponding interface.
+    Note that reversible source sink manager currently do not support the one-source-at-a-time mode.
 
-    For the core, we created two new classes implementing \code{IInfoflowProblem}. \code{BackwardsInfoflowProblem} implements the flow functions described in \autoref{s:flowfunctions}. Additional language features are sourced out into rules which are informally described in \autoref{s:rules}. \code{BackwardsAliasProblem} is the on-demand forward alias analysis. We describe the on-demand aliasing in greater detail in \autoref{s:aliasing}.
+    For the core flow functions, we created two new classes implementing \code{IInfoflowProblem}. \code{BackwardsInfoflowProblem} implements the flow functions described in \autoref{s:flowfunctions}. Additional language features are sourced out into rules which are informally described in \autoref{s:rules}. The second class is \code{BackwardsAliasProblem} which is responsible for the on-demand forward alias analysis. We describe the on-demand aliasing in greater detail in \autoref{s:aliasing}.
 
-    To hide the fact that we internally searched backwards, we also created a \code{BackwardsInfoflowResults} extending \code{InfoflowResults}. The implementation is quite simple. It overwrites only the \code{addResult} implementations to swap the source and sink. If full path reconstruction is enabled, we also reverse the path.
-
-    % The modularity of \textsc{FlowDroid} allowed us to easily use the newly created components. We created another implementation of \code{IInfoflow} responsible for initialization of those closely to the already existing default implementation \code{Infoflow}.
+    After the analysis, the path builder constructs a path out of the leaked taint and its predecessors. Because the path builder expects a forwards-built taint, the path ends up being the wrong way round. To hide the fact that we internally searched backwards, we also created a \code{BackwardsInfoflowResults} extending \code{InfoflowResults}. The implementation is quite simple. It overwrites only the \code{addResult} implementations to swap the start and end. If full path reconstruction is enabled, we also reverse the path in between.
 
     \section{Flow-Sensitive Alias Analysis}\label{s:aliasing}
     \textsc{FlowDroid} offers multiple aliasing strategies.
-    In this work, we focus on the flow-sensitive alias analysis which is implemented as another IFDS problem called \code{BackwardsAliasProblem}. Basically, this is a forwards IFDS search with flow functions using aliasing rules. 
+    In this work, we focus on the flow-sensitive alias analysis which is implemented as another IFDS problem. Basically, this is a forward-directed IFDS analysis using aliasing rules. It is invoked on-demand when the backwards analysis discovers an alias and independent from the main anlaysis, e.g. it runs asynchronous. 
 
     \paragraph{Handover}
     \begin{figure}[ht]
@@ -71,7 +71,7 @@
     A taint is handed back to the infoflow search if the alias analysis encounters an update to the taint, e.g. the taint is on the left side of the assignment. Again consider \autoref{lst:aliasex_a}. At line 3, \code{b.str} is tainted and on the left side of the assignment. At this point, \code{b.str} is handed over to the infoflow analysis with the statement on line 3. The backwards infoflow search then follows the missed path to detect possible leaks, in this case it right away reports a leak.
 
     \paragraph{Turn Unit} 
-    We added another field to the \code{Abstraction} class called \code{turnUnit}. This is the equivalent to the \code{activationUnit} in forwards analysis. The \code{turnUnit} references the last statement for which the taint is relevant in the infoflow search. At start, it is the sink where the taint was introduced. Later on, it is set whenever we visit an assigment with a primitive or string on the left side\footnote{As mentioned ealier in \autoref{s:rules}, strings are a special case. They are saved on the heap but immutable and therefore can not alias.}. Consider the code in \autoref{lst:turnunit}. At line 5, the taint is introduced, line 3 taints \code{b.str} and sets the \code{turnUnit} to this statement. In line 2, \code{a} is found to be an alias of \code{b} and causes a handover to the alias problem. The \code{turnUnit} now stops the alias search at line 3 and prevents a false positive.
+    We added another field to the \code{Abstraction} class called \code{turnUnit}. This is the equivalent to the \code{activationUnit} in forwards analysis. The \code{turnUnit} references the last statement for which the taint is relevant in the infoflow search. At start, it is the sink where the taint was introduced. Later on, it is set whenever we visit an assigment with a primitive or string on the left side\footnote{As mentioned ealier in \autoref{s:flowfunctions}, strings are a special case. They are saved on the heap but immutable and therefore can not alias.}. Consider the code in \autoref{lst:turnunit}. In line 6 the taint is introduced, in line 4 the taint shifts to \code{b.str} and the \code{turnUnit} is set to this statement. In line 2, \code{a} is found to be an alias of \code{b} and causes a handover to the alias problem. The alias analysis stops at line 4 because it reached the \code{turnUnit}. This behavior prevents a false positive because below line 4 an assignments to aliases of \code{b} have no effect on the leaked contents. Note that the \code{turnUnit} are 8 bytes of additional data in every fact.
 
     \begin{figure}[ht]
         \centering
@@ -79,6 +79,7 @@
             \begin{lstlisting}[gobble=16]
                 void turnStmtNeeded() {
                     A a = b;
+                    // [...]
                     String str = b.str;
                     a.str = source();
                     sink(str);
@@ -121,7 +122,7 @@
 
     This rule is similiar to its forward equivalent but enforces a reversible taint wrapper. Consequently, tainted return values are also passed into the taint wrapper.
 
-    Inverse taint wrappers do have one limitation. Often tainted parameters result in a tainted base object. \code{EasyTaintWrapper} uses this pattern to provide a fast and simple taint wrapper \cite{Arzt2017PhD}. But backwards, only a tainted base object is observed. Similiar to binary operators in assignments, we can not do anything but to taint every parameter.
+    % Inverse taint wrappers do have one limitation. Often tainted parameters result in a tainted base object. \code{EasyTaintWrapper} uses this pattern to provide a fast and simple taint wrapper \cite{Arzt2017PhD}. But backwards, only a tainted base object is observed. Similiar to binary operators in assignments, we can not do anything but to taint every parameter.
 
     % \subsection{Backwards Implicit Propagation Rule}
     % Not implemented.
@@ -290,17 +291,17 @@
     \subsection{Code Optimizer: AddNOPStmts}
     Before starting the analysis, \textsc{FlowDroid} applies code optimization to the interprocedural call graph. By default, dead code elimination and within constant value propagation is performed. Those are also applied before backwards analysis but we needed another code optimizer to handle an edge case in backwards analysis.
 
-    First, take a look at \code{StatictTestCode#static2Test} in \autoref{lst:static2TestJava}. The method and entry point \code{static2Test} is static and does not have any parameters. Same is true for the source method \code{TelephonyManager#getDeviceId}. Due to the first condition, \code{static2Test} has no identity statements and because of the second  condition there are also no assign statements before the source statement in Jimple. Therefore the source statement is the first statement in the graph. 
-    Next, a detail of \textsc{FlowDroid}'s IFDS solver is important. The Return and CallToReturn flow function is only applied if a return site is available \cite{Arzt2017PhD}.
-    When searching backwards, the source statement is the last statement and thus has no return sites. Now recall \autoref{s:sourcerule}, taints flowing into sources are registered in the CallToReturn flow function. Altogether, leaks can not be found if the source statement is the first statement.
+    First, consider the \code{static2Test} test case in the \code{StatictTestCode} class of \textsc{FlowDroid} in \autoref{lst:static2TestJava}. The method and entry point for the analysis \code{static2Test} is static and does not have any parameters. Same is true for the source \code{TelephonyManager#getDeviceId}. Due to the first condition, \code{static2Test} has no identity statements and because of the second condition there are also no assign statements before the source statement in Jimple. Therefore the source statement is the first statement in the graph. 
+    Next, a detail of \textsc{FlowDroid}'s IFDS solver is important. The Return and CallToReturn flow function is only applied if a return site is available.
+    When traversing backwards, the source statement is the last statement and thus has no return sites. Now recall \autoref{s:sourcerule}, taints flowing into sources are registered in the Call To Return flow function. Altogether, leaks could not be found if the source statement is the first statement.
 
-    Moving the detection of incoming taints flows into sources from the CallToReturn to the Call flow function was not an option because by default source methods are not visited. 
-    Our solution is to just add a NOP statement in such cases. This saves us from introducing new edge cases inside the flow functions which are already complex enough. Due to the entry points being known beforehand, the overhead is negligible.
+    Moving the detection of incoming taints flows into sources from the CallToReturn to the Call flow function was not an option because by default source methods are not visited and to changing this would require multiple changes in the existing implementation and also ours. 
+    Our solution is to just add a NOP statement in such cases. Due to the entry points being known beforehand, the overhead is nearly zero.
 
     \begin{figure}[ht]
         \centering
         \begin{subfigure}[b]{\textwidth}
-            \begin{lstlisting}[gobble=12]
+            \begin{lstlisting}[gobble=16]
                 public static void static2Test() {
                     String tainted = TelephonyManager.getDeviceId();
                     ClassWithStatic static1 = new ClassWithStatic();
@@ -316,7 +317,7 @@
         \end{subfigure}
         \qquad
         \begin{subfigure}[b]{\textwidth}
-            \begin{lstlisting}[language=Jimple]
+            \begin{lstlisting}[language=Jimple, gobble=16]
                 public static void static2Test() {
                     tainted = staticinvoke <soot.jimple.infoflow.test.android.TelephonyManager: java.lang.String getDeviceId()>(); // Line 2 in (a)
 
@@ -334,8 +335,29 @@
     \end{figure}
 
     \subsection{Taint Wrappers}\label{s:taintwrapper}
-    \textsc{FlowDroid} already provides an interface \code{IReversibleTaintWrapper} for taint wrappers which also provide inversed summaries. The Summary Taint Wrapper for \textsc{StubDroid} already implements this. For the Easy Taint Wrapper we contributed the inverse implementation.
-    
+    \textsc{FlowDroid} already has an interface \code{IReversibleTaintWrapper} for taint wrappers providing inversed summaries. The Summary Taint Wrapper using StubDroid's summaries already implemented this interface. For the Easy Taint Wrapper we contributed the inverse implementation. The rules were inverted to:
+    \begin{itemize}
+        \item If the return value is tainted, taint the object.
+        \item If the base object is tainted, taint all parameters.
+    \end{itemize}
+
+    \begin{figure}[ht]
+        \centering
+        \begin{adjustbox}{max width=\columnwidth}
+            \begin{lstlisting}[gobble=16]
+                char[] tainted = source();
+                StringBuilder sb = new StringBuilder();
+                sb.append(tainted, offset, len);
+                sb.append("untainted");
+                sink(sb.toString());
+            \end{lstlisting}
+        \end{adjustbox}
+        \caption{Easy Taint Wrapper Example}
+        \label{lst:etw}
+    \end{figure}
+
+    Note that these simple rules are disadvantageous for the backward direction the more parameters a method has. Consider the code snippet in \autoref{lst:etw}, especially line 3. Forwards, tainted is the incoming taint and the Easy Taint Wrapper produces the taint set \code{\{tainted, sb\}}. Backwards, the incoming taint is \code{sb} and the taint wrapper produces four taints \code{\{sb, tainted, offset, len\}}. Luckily, most methods supported by the Easy Taint Wrapper have less than three arguments.
+
     \subsection{Native Call Handler}
     The native call handler of \textsc{FlowDroid} handles two methods:
     \begin{itemize}

@@ -9,8 +9,8 @@
 	%BCOR=5mm,%Bindekorrektur, falls notwendig
 	parskip=half-,%Absatzkennzeichnung durch Abstand vgl. KOMA-Sript
 	fontsize=11pt,%Basisschriftgröße laut Corporate Design ist mit 9pt häufig zu klein
-	IMRAD=false
-	%	logofile=example-image, %Falls die Logo Dateien nicht vorliegen
+	IMRAD=false,
+	instbox=false
 ]{tudapub}
 
 %%%%%%%%%%%%%%%%%%%
@@ -68,6 +68,7 @@
 
 \usepackage{todonotes}
 
+\usepackage{scrhack}
 \usepackage{listings}
 \definecolor{darkgreen}{rgb}{0.0, 0.6, 0.13}
 \lstset{
@@ -83,7 +84,8 @@
 	basicstyle=\ttfamily,
 	numbers=left,
 	gobble=12,
-	morekeywords={String}
+	morekeywords={String},
+	postbreak=\mbox{$\hookrightarrow$\space}
 }
 
 \lstdefinelanguage{Jimple} {
@@ -96,7 +98,7 @@
 
 %Formatierungen für Beispiele in diesem Dokument. Im Allgemeinen nicht notwendig!
 \let\file\texttt
-\newcommand{\code}[1]{\lstinline[basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true, language=]{#1}}
+\newcommand{\code}[1]{\lstinline[basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true, language=, postbreak={}]{#1}}
 \newcommand{\footnotecode}[1]{\lstinline[basicstyle=\footnotesize\selectfont\ttfamily, breaklines=true, language=]{#1}}
 \newcommand{\smallcode}[1]{\lstinline[breaklines=true]{#1}}
 \newcommand{\jimple}[1]{\lstinline[language=Jimple,basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true]{#1}}
@@ -107,13 +109,13 @@
 	author=Tim Lange
 }
 
-\title{Implementation and Evaluation of a Static Backwards Data Flow Analysis in FlowDroid}
-\subtitle{Implementierung und Evaluation einer statischen rückwärtsgerichteten Datenflussanalyse in FlowDroid}
+\title{Implementation and Evaluation of a Static Backwards Data Flow Analysis in \textsc{FlowDroid}}
+\subtitle{Implementierung und Evaluation einer statischen rückwärtsgerichteten Datenflussanalyse in \textsc{FlowDroid}}
 \author[T. Lange]{Tim Lange}%optionales Argument ist die Signatur,
 \reviewer{Dr. Steven Arzt \and Prof. Dr. Michael Waidner
 }%Gutachter
 
-\addTitleBox{\includegraphics[width=4.325cm]{sit-logo.png}}
+% \addTitleBox{\includegraphics[width=4.325cm]{sit-logo.png}}
 
 \department{inf} % Das Kürzel wird automatisch ersetzt und als Studienfach gewählt, siehe Liste der Kürzel im Dokument.
 \institute{Fraunhofer SIT}

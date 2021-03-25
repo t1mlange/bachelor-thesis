@@ -2,19 +2,24 @@
 
 \begin{document}
     \chapter{Related Work}
-    We found very little about backward-directed taint analysis in our literature research. 
+    We found very little about backward-directed taint analysis in our literature research. Most backward taint analysis are targeted at reconstructing the full path either from a trace log%
+    \footnote{\url{https://recon.cx/2013/slides/Recon2013-Richard\%20Johnson-Taint\%20Nobody\%20Got\%20Time\%20for\%20Crash\%20Analysis\%20-\%20slides.pdf}}
+    \footnote{\url{https://blog.trailofbits.com/2019/08/29/reverse-taint-analysis-using-binary-ninja/}}
+    \footnote{\url{https://github.com/scotty-kdw/ARM-Analyzer/}}
+    or a taint analysis result\cite{Ferrara2020}. 
+    We also found two taint analysis tools with a similiar approach to ours.
 
     Lerch et al.\cite{Lerch2014} contributed FlowTwist, a static taint analysis tool based on IFDS to detect confused deputy problems\footnote{A confused deputy is a legitimate program with more priviledges tricked into misusing its authority by a malicious program. Source: \url{https://en.wikipedia.org/wiki/Confused_deputy_problem}} in libraries. They identify the cause of such as a combination of an integrity and a confidentiality problem. For the integrity part, the sinks perform sensitive operations and the sources are attacker controlled while for the confidentiality part, the sinks can be read by an attacker and sources provide sensitive data. A combination of both naturally gives a centered statement. Now, the integrity sources and confidentiality sinks are way more frequent, thus they propose to solve the integrity part backwards and the confidentiality part forwards. In contrast to \textsc{FlowDroid}, FlowTwist focuses on a special case of taint analysis and the applicability is quite narrow. 
 
     Yan et al.\cite{Yan2017} proposed a vulnerability detection tool for PHP with a focus on web applications. They aim to detect typical web application vulnerabilities such as cross-site-scripting and SQL injections using backwards taint analysis. 
-    Instead of relying on reducing the problem to proven frameworks such as IFDS or IDE, they seemingly define their own data flow algorithm. The proposed algorithm traverses the basic blocks backwards and copies taints left after traversing the basic block to its predecessors. Unlike in our work and in general in data flow analysis, they do not try to reach a fixpoint, instead they just do not follow circular paths in the control-flow graph. 
+    Instead of relying on nesting the problem in proven data flow frameworks, they seemingly define their own data flow algorithm. The proposed algorithm traverses the basic blocks backwards and copies taints left after traversing a basic block to its predecessors. Probably every sound and precise analysis tries to reach a fixpoint, they instead just do not follow circular paths in the control-flow graph. 
     They also emphasize their concept of "cleans": a predefined list of sanitization methods which kill the incoming taints. 
     In \textsc{FlowDroid} the same is possible using taint wrappers and both shipped implementations support such a concept.
-    A rationale for traversing backwards, which is why we included it as related work, is not provided.
+    A rationale for traversing backwards, which is why we included it as related work, is not provided. Generally speaking, we doubt their tool is precise enough to be useful in practice.
 
-    IFDS is not the only way to formulate a taint analysis.
+    \textsc{FlowDroid} and also FlowTwist are based on IFDS. But taint analyses are not restricted to IFDS, they can be formulated also in other flow frameworks. 
 
     Synchronized pushdown systems (SPDS) by Späth et al.\cite{Spaeth2019} are an alternative to IFDS with access paths for modelling a precise context-, flow- and field-sensitive data flow analysis. Similiar to IFDS it constructs a context-free grammar representing the call stack to ensure context-sensitivity. In addition, it also modells field-sensitivity using a context-free grammar. Then it computes the acceptance state of both pushdown automaton to combine context- and field-sensitivity. This allows to represent recursive access paths such as \code{lst.next.prev.next...} without loss of precision where with IFDS and access paths, $k$-limiting is needed to ensure termination. SPDS are still an overapproximation in the case where at a statement both automaton are in acceptance state but via a different paths.
 
-    Doop \cite{Bravenboer2009} is another framework for points-to and, using P/Taint \cite{Grech2017}, also taint analysis. In contrast to others, it uses a declarative approach. Doop's frontend depends Soot to create facts and encodes them in tables. The analyses are encoded in a declarative rule set written in Datalog. These rule sets are then fed into the datalog solver Soufflé\footnote{\url{https://souffle-lang.github.io/}}.
+    Doop \cite{Bravenboer2009} is another framework for data flow analysis and, using P/Taint \cite{Grech2017}, also taint analysis. In contrast to others, it uses a declarative approach. Doop's frontend depends Soot to create facts and encodes them in tables. The analyses are encoded in a declarative rule set written in Datalog. These rule sets are then fed into the datalog solver Soufflé\footnote{\url{https://souffle-lang.github.io/}}.
 \end{document}
