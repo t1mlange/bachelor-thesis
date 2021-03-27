@@ -44,11 +44,22 @@
     Reflection6
     The reflective call site has multiple callees in the interprocedural control-flow graph. Backward all of these callees are visited, of which only one contains a source statement. Forwards, the taint is introduced in the callee at the source and just one return site needs to be processed.
 
-    Real World Apps
+    Using A More Precise Taint Wrapper
+    We noticed the overtainting in PrivateDataLeak3 is caused by the EasyTaintWrapper, thus we now compare how using the SummaryTaintWrapper lowers the edge propagations.
 
-    Configuration
-    Our test machine is equipped with four Intel Xeon E5-4650 and 1 TB of RAM. We limited the JVM to 50 GB RAM and FlowDroid on 16 threads per instance. We ran at most four instances in parallel to ensure a one-to-one mapping between CPU threads and FlowDroid threads. Note that the test machine is a shared system, but we made sure there are always enough resources for our evaluation available. Still, background services might influence the performance of a single run. To stamp out this factor, we ran each app three times. If there were outliers, we repeated the runs.
+    As we already described, PrivateDataLeak3 benefits from the more precise taint wrapper.
+
+        
+
+
     
+
+    Real World Apps
+    Configuration
+    Our test machine is equipped with four Intel Xeon E5-4650 and 1 TB of RAM. We limited the JVM to 50 GB RAM and FlowDroid on 16 threads per instance. We ran at most four instances in parallel to ensure a one-to-one mapping between CPU threads and FlowDroid threads. Note that the test machine is a shared system, but we made sure there are always enough resources for our evaluation available. Still, background services might influence the performance of a single run. To stamp out this factor, we ran each app three times. If there were outliers(Outliers are runs with at least  difference to the median run and a minimum of  seconds absolute difference.), we repeated the runs.
+
+    We also measure the memory usage of both implementations. Using the memory amount reported by the JVM turned out to be imprecise in previous research by Arzt. We borrowed the memory evaluation tool from CleanDroid which internally depends on a memory calculation tool from Twitter(https://mvnrepository.com/artifact/com.twitter.common/objectsize). Their memory evaluation tool measures the size of the exploded supergraph in 15 seconds intervalls. Because we do not want to pollute the time measure with the latency of the memory sampler, the memory measuring runs were ran independently of the time measuring runs.
+
     For this evaluation, we chose to use a non-default configuration of FlowDroid. First, we disabled static field tracking due to the global scope as described in s:complexity. Next, instead of the EasyTaintWrapper, we use the SummaryTaintWrapper, which utilizes StubDroid. StubDroid's precomputed data flow summaries are more precise than EasyTaintWrapper's simple rules. We set the timeout for the data flow analysis to 10 minutes. 
     The configuration summary is in t:realworldconfig.
 
@@ -2175,29 +2186,6 @@ currentstroke
 
 stroke,fill
 
-
-0.648703in0.548769in5.195150in3.102590in
-clip
-
-
-
-currentfill
-1.003750pt
-
-currentstroke
-
-2.127705in3.140985in
-2.138755in3.140985in2.149355in3.145375in2.157168in3.153189in
-2.164982in3.161003in2.169372in3.171602in2.169372in3.182652in
-2.169372in3.193702in2.164982in3.204301in2.157168in3.212115in
-2.149355in3.219928in2.138755in3.224319in2.127705in3.224319in
-2.116655in3.224319in2.106056in3.219928in2.098243in3.212115in
-2.090429in3.204301in2.086039in3.193702in2.086039in3.182652in
-2.086039in3.171602in2.090429in3.161003in2.098243in3.153189in
-2.106056in3.145375in2.116655in3.140985in2.127705in3.140985in
-
-stroke,fill
-
 )
 0.648703in0.548769in)5.195150in3.102590in)
 clip)
@@ -2209,15 +2197,15 @@ currentfill)
 
 currentstroke)
 )
-3.370564in3.145133in)
-3.381614in3.145133in)3.392213in3.149523in)3.400027in3.157337in)
-3.407841in3.165151in)3.412231in3.175750in)3.412231in3.186800in)
-3.412231in3.197850in)3.407841in3.208449in)3.400027in3.216262in)
-3.392213in3.224076in)3.381614in3.228466in)3.370564in3.228466in)
-3.359514in3.228466in)3.348915in3.224076in)3.341101in3.216262in)
-3.333288in3.208449in)3.328897in3.197850in)3.328897in3.186800in)
-3.328897in3.175750in)3.333288in3.165151in)3.341101in3.157337in)
-3.348915in3.149523in)3.359514in3.145133in)3.370564in3.145133in)
+2.127705in3.140985in)
+2.138755in3.140985in)2.149355in3.145375in)2.157168in3.153189in)
+2.164982in3.161003in)2.169372in3.171602in)2.169372in3.182652in)
+2.169372in3.193702in)2.164982in3.204301in)2.157168in3.212115in)
+2.149355in3.219928in)2.138755in3.224319in)2.127705in3.224319in)
+2.116655in3.224319in)2.106056in3.219928in)2.098243in3.212115in)
+2.090429in3.204301in)2.086039in3.193702in)2.086039in3.182652in)
+2.086039in3.171602in)2.090429in3.161003in)2.098243in3.153189in)
+2.106056in3.145375in)2.116655in3.140985in)2.127705in3.140985in)
 
 stroke,fill)
 
@@ -2232,15 +2220,38 @@ currentfill
 
 currentstroke
 
-5.027709in)3.136837in)
-5.038759in)3.136837in)5.049358in)3.141228in)5.057172in)3.149041in)
-5.064986in)3.156855in)5.069376in)3.167454in)5.069376in)3.178504in)
-5.069376in)3.189554in)5.064986in)3.200153in)5.057172in)3.207967in)
-5.049358in)3.215780in)5.038759in)3.220171in)5.027709in)3.220171in)
-5.016659in)3.220171in)5.006060in)3.215780in)4.998246in)3.207967in)
-4.990433in)3.200153in)4.986042in)3.189554in)4.986042in)3.178504in)
-4.986042in)3.167454in)4.990433in)3.156855in)4.998246in)3.149041in)
-5.006060in)3.141228in)5.016659in)3.136837in)5.027709in)3.136837in)
+3.370564in)3.145133in)
+3.381614in)3.145133in)3.392213in)3.149523in)3.400027in)3.157337in)
+3.407841in)3.165151in)3.412231in)3.175750in)3.412231in)3.186800in)
+3.412231in)3.197850in)3.407841in)3.208449in)3.400027in)3.216262in)
+3.392213in)3.224076in)3.381614in)3.228466in)3.370564in)3.228466in)
+3.359514in)3.228466in)3.348915in)3.224076in)3.341101in)3.216262in)
+3.333288in)3.208449in)3.328897in)3.197850in)3.328897in)3.186800in)
+3.328897in)3.175750in)3.333288in)3.165151in)3.341101in)3.157337in)
+3.348915in)3.149523in)3.359514in)3.145133in)3.370564in)3.145133in)
+
+stroke,fill
+
+
+0.648703in0.548769in5.195150in3.102590in
+clip
+
+
+
+currentfill
+1.003750pt
+
+currentstroke
+
+5.027709in3.136837in
+5.038759in3.136837in5.049358in3.141228in5.057172in3.149041in
+5.064986in3.156855in5.069376in3.167454in5.069376in3.178504in
+5.069376in3.189554in5.064986in3.200153in5.057172in3.207967in
+5.049358in3.215780in5.038759in3.220171in5.027709in3.220171in
+5.016659in3.220171in5.006060in3.215780in4.998246in3.207967in
+4.990433in3.200153in4.986042in3.189554in4.986042in3.178504in
+4.986042in3.167454in4.990433in3.156855in4.998246in3.149041in
+5.006060in3.141228in5.016659in3.136837in5.027709in3.136837in
 
 stroke,fill
 
@@ -13266,8 +13277,8 @@ currentstroke
 
 0.961364in0.500000in
 1.130455in0.500000in
-1.130455in1.075238in
-0.961364in1.075238in
+1.130455in1.119487in
+0.961364in1.119487in
 
 stroke,fill
 
@@ -13284,8 +13295,8 @@ currentstroke
 
 1.130455in0.500000in
 1.299545in0.500000in
-1.299545in0.931429in
-1.130455in0.931429in
+1.299545in1.030989in
+1.130455in1.030989in
 
 stroke,fill
 
@@ -13302,8 +13313,8 @@ currentstroke
 
 1.299545in0.500000in
 1.468636in0.500000in
-1.468636in0.547937in
-1.299545in0.547937in
+1.468636in0.544249in
+1.299545in0.544249in
 
 stroke,fill
 
@@ -13338,8 +13349,8 @@ currentstroke
 
 1.637727in0.500000in
 1.806818in0.500000in
-1.806818in0.547937in
-1.637727in0.547937in
+1.806818in0.544249in
+1.637727in0.544249in
 
 stroke,fill
 
@@ -13356,8 +13367,8 @@ currentstroke
 
 1.806818in0.500000in
 1.975909in0.500000in
-1.975909in0.547937in
-1.806818in0.547937in
+1.975909in0.544249in
+1.806818in0.544249in
 
 stroke,fill
 
@@ -13374,8 +13385,8 @@ currentstroke
 
 1.975909in0.500000in
 2.145000in0.500000in
-2.145000in0.547937in
-1.975909in0.547937in
+2.145000in0.544249in
+1.975909in0.544249in
 
 stroke,fill
 
@@ -13428,8 +13439,8 @@ currentstroke
 
 2.483182in0.500000in
 2.652273in0.500000in
-2.652273in0.547937in
-2.483182in0.547937in
+2.652273in0.544249in
+2.483182in0.544249in
 
 stroke,fill
 
@@ -13446,8 +13457,8 @@ currentstroke
 
 2.652273in0.500000in
 2.821364in0.500000in
-2.821364in0.547937in
-2.652273in0.547937in
+2.821364in0.544249in
+2.652273in0.544249in
 
 stroke,fill
 
@@ -13464,8 +13475,8 @@ currentstroke
 
 2.821364in0.500000in
 2.990455in0.500000in
-2.990455in0.691746in
-2.821364in0.691746in
+2.990455in0.721245in
+2.821364in0.721245in
 
 stroke,fill
 
@@ -13482,8 +13493,8 @@ currentstroke
 
 2.990455in0.500000in
 3.159545in0.500000in
-3.159545in1.171111in
-2.990455in1.171111in
+3.159545in1.207985in
+2.990455in1.207985in
 
 stroke,fill
 
@@ -13518,8 +13529,8 @@ currentstroke
 
 3.328636in0.500000in
 3.497727in0.500000in
-3.497727in0.691746in
-3.328636in0.691746in
+3.497727in0.676996in
+3.328636in0.676996in
 
 stroke,fill
 
@@ -13644,8 +13655,8 @@ currentstroke
 
 4.512273in0.500000in
 4.681364in0.500000in
-4.681364in0.547937in
-4.512273in0.547937in
+4.681364in0.544249in
+4.512273in0.544249in
 
 stroke,fill
 
@@ -13698,8 +13709,8 @@ currentstroke
 
 5.019545in0.500000in
 5.188636in0.500000in
-5.188636in0.595873in
-5.019545in0.595873in
+5.188636in0.588498in
+5.019545in0.588498in
 
 stroke,fill
 
@@ -13924,7 +13935,7 @@ currentmarker-0.048611in0.000000in0.000000in0.000000in
 stroke,fill
 
 
-0.750000in0.979365in
+0.750000in0.942491in
 currentmarker
 
 
@@ -13932,7 +13943,7 @@ currentmarker
 
 textcolor
 textcolor
-[x=0.513888in, y=0.931171in, left, base]10.00000012.000000
+[x=0.513888in, y=0.894296in, left, base]10.00000012.000000
 
 
 
@@ -13949,7 +13960,7 @@ currentmarker-0.048611in0.000000in0.000000in0.000000in
 stroke,fill
 
 
-0.750000in1.458730in
+0.750000in1.384982in
 currentmarker
 
 
@@ -13957,7 +13968,7 @@ currentmarker
 
 textcolor
 textcolor
-[x=0.513888in, y=1.410536in, left, base]10.00000012.000000
+[x=0.513888in, y=1.336787in, left, base]10.00000012.000000
 
 
 
@@ -13974,7 +13985,7 @@ currentmarker-0.048611in0.000000in0.000000in0.000000in
 stroke,fill
 
 
-0.750000in1.938095in
+0.750000in1.827473in
 currentmarker
 
 
@@ -13982,7 +13993,7 @@ currentmarker
 
 textcolor
 textcolor
-[x=0.513888in, y=1.889901in, left, base]10.00000012.000000
+[x=0.513888in, y=1.779278in, left, base]10.00000012.000000
 
 
 
@@ -13999,7 +14010,7 @@ currentmarker-0.048611in0.000000in0.000000in0.000000in
 stroke,fill
 
 
-0.750000in2.417460in
+0.750000in2.269963in
 currentmarker
 
 
@@ -14007,7 +14018,7 @@ currentmarker
 
 textcolor
 textcolor
-[x=0.513888in, y=2.369266in, left, base]10.00000012.000000
+[x=0.513888in, y=2.221769in, left, base]10.00000012.000000
 
 
 
@@ -14024,7 +14035,7 @@ currentmarker-0.048611in0.000000in0.000000in0.000000in
 stroke,fill
 
 
-0.750000in2.896825in
+0.750000in2.712454in
 currentmarker
 
 
@@ -14032,7 +14043,7 @@ currentmarker
 
 textcolor
 textcolor
-[x=0.513888in, y=2.848631in, left, base]10.00000012.000000
+[x=0.513888in, y=2.664260in, left, base]10.00000012.000000
 
 
 
@@ -14049,7 +14060,7 @@ currentmarker-0.048611in0.000000in0.000000in0.000000in
 stroke,fill
 
 
-0.750000in3.376190in
+0.750000in3.154945in
 currentmarker
 
 
@@ -14057,7 +14068,7 @@ currentmarker
 
 textcolor
 textcolor
-[x=0.513888in, y=3.327996in, left, base]10.00000012.000000
+[x=0.513888in, y=3.106751in, left, base]10.00000012.000000
 
 
 

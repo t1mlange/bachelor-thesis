@@ -207,7 +207,7 @@
     The reflective call site has multiple callees in the interprocedural control-flow graph. Backward all of these callees are visited, of which only one contains a source statement. Forwards, the taint is introduced in the callee at the source and just one return site needs to be processed.
 
     \subsection{Using A More Precise Taint Wrapper}
-    We noticed the overtainting in \code{PrivateDataLeak3} is caused by the Easy Taint Wrapper, thus we now compare how using the Summary Taint Wrapper lowers the edge propagations.
+    We noticed the overtainting in \code{PrivateDataLeak3} is caused by the \code{EasyTaintWrapper}, thus we now compare how using the \code{SummaryTaintWrapper} lowers the edge propagations.
 
     As we already described, \code{PrivateDataLeak3} benefits from the more precise taint wrapper.
 

@@ -1,5 +1,21 @@
 % Encoding: UTF-8
 
+@InProceedings{Titze2015,
+  author     = {Titze, D. and Schütte, J.},
+  booktitle  = {2015 {IEEE} 29th {International} {Conference} on {Advanced} {Information} {Networking} and {Applications}},
+  title      = {Apparecium: {Revealing} {Data} {Flows} in {Android} {Applications}},
+  year       = {2015},
+  month      = mar,
+  note       = {ISSN: 2332-5658},
+  pages      = {579--586},
+  abstract   = {With Android applications processing not only personal but also business-critical data, efficient and precise data flow analysis has become a major technique to detect apps handling critical data in unwanted ways. Although data flow analysis in general is a thoroughly researched topic, the event-driven lifecycle model of Android has its own challenges and practical application requires for reliable and efficient analysis techniques. In this paper we present Apparecium, a tool to reveal data flows in Android applications. Apparecium has conceptual differences to other techniques, and can be used to find arbitrary data flows inside Android applications. Details about the used techniques and the differences to existing data flow analysis tools are presented, as well as an evaluation against the data flow analysis framework Flow Droid.},
+  doi        = {10.1109/AINA.2015.239},
+  file       = {IEEE Xplore Full Text PDF:https\://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=7098024&ref=aHR0cHM6Ly9pZWVleHBsb3JlLmllZWUub3JnL2RvY3VtZW50LzcwOTgwMjQ=:application/pdf},
+  issn       = {2332-5658},
+  keywords   = {Androids, Humanoid robots, Algorithm design and analysis, Sockets, Writing, Radiation detectors, Input variables, Android, Static Data Flow Analysis},
+  shorttitle = {Apparecium},
+}
+
 @InProceedings{Ferrara2020,
   author     = {Ferrara, Pietro and Olivieri, Luca and Spoto, Fausto},
   booktitle  = {Verification, {Model} {Checking}, and {Abstract} {Interpretation}},
@@ -300,6 +316,38 @@ As a result, DOOP achieves several benefits, including full order-of-magnitude i
   booktitle = {ICSE 2021 Technical Track},
   title     = {{Sustainable Solving}: Reducing The Memory Footprint of IFDS-Based Data Flow Analyses Using Intelligent Garbage Collection},
   year      = {2021},
+}
+
+@InProceedings{Spaeth2016,
+  author     = {Spaeth, J. and Do, L. and Ali, Karim and Bodden, E.},
+  booktitle  = {{ECOOP}},
+  title      = {Boomerang: {Demand}-{Driven} {Flow}- and {Context}-{Sensitive} {Pointer} {Analysis} for {Java}},
+  year       = {2016},
+  abstract   = {Many current program analyses require highly precise pointer 
+information about small, tar- geted parts of a given program. This 
+motivates the need for demand-driven pointer analyses that compute 
+information only where required. Pointer analyses generally compute 
+points-to sets of program variables or answer boolean alias 
+queries. However, many client analyses require richer pointer 
+information. For example, taint and typestate analyses often need to 
+know the set of all aliases of a given variable under a certain 
+calling context. With most current pointer analyses, clients must 
+compute such information through repeated points-to or alias queries, increasing complexity and computation time for them. 
+ 
+This paper presents Boomerang, a demand-driven, flow-, field-, and 
+context-sensitive pointer analysis for Java programs. Boomerang 
+computes rich results that include both the possible allocation sites of a given pointer (points-to information) and all pointers that can point to those allocation sites (alias information). For increased precision and scalability, clients can query Boomerang with respect to particular calling contexts of interest. 
+ 
+Our experiments show that Boomerang is more precise than existing 
+demand-driven pointer analyses. Additionally, using Boomerang, the 
+taint analysis FlowDroid issues up to 29.4x fewer pointer queries 
+compared to using other pointer analyses that return simpler pointer 
+infor- mation. Furthermore, the search space of Boomerang can be 
+significantly reduced by requesting calling contexts from the client 
+analysis.},
+  doi        = {10.4230/LIPIcs.ECOOP.2016.22},
+  file       = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/Boomerang%3A-Demand-Driven-Flow-and-Context-Sensitive-Spaeth-Do/12cf1936871e27e985d6a8395c0b62d220e62b21:text/html},
+  shorttitle = {Boomerang},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}
