@@ -116,7 +116,7 @@
             \draw[vto, color=orange] (foo3) to[out=0, in=150] node [midway, above, sloped]{$(_2$} (bar0);
             \draw[vto, color=orange] (bar1) to[out=-90, in=45] node [midway, above, sloped]{$)_2$} (foo4);
         \end{tikzpicture}
-        \caption{Context Sensitivity}
+        \caption{Context-Sensitivity using a Context-Free Language}
         \label{tikz:context}
     \end{figure}
 
@@ -166,7 +166,7 @@
     The value of x changes every time and never repeats itself. 
     In theory, the algorithm will never observe a taint twice in line 4. 
     Because the algorithm can not reach a fixpoint, it will not terminate. 
-    In practice, most data types are bounded, but the domain is cubic in the time-complexity $O(|E| \cdot |D|^3)$ making IFDS infeasible for large domains \cite{Reps1995}.
+    In practice, every data type is bounded either by the heap or stack size, but the domain is cubic in the time-complexity $O(|E| \cdot |D|^3)$ making IFDS infeasible for large domains \cite{Reps1995}.
 
     \begin{figure}[ht]
         \centering
