@@ -526,57 +526,170 @@
 
     We chose 200 apps randomly out of a Google Playstore dump from 2021 containing over 6000 apps for our evaluation set.
     Out of 200 apps, 60 apps do not have any sources or sinks and thus, the analysis did not start.
-    For 9 apps, the analysis aborted with errors on at least one run. 
+    For 6 apps, the analysis aborted with errors on at least one run. All thrown exceptions happened outside of \textsc{FlowDroid}.
     We are left with 131 apps for which both implementations completed all runs without errors.
     The full list is appended to this work in \autoref{?}.
 
     \FloatBarrier
-    \subsection{Time Experiment}
-    
-    \begin{figure}
+    \subsection{Time Evaluation}
+    In general, the individual apps' runtime were far apart from each other. 
+    We had many apps with a single-digit analysis time and on the other side, we also found many apps that triggered a timeout or were close to. 
+    In between those extrema are only few apps.
+    It is important to keep this in mind when interpreting the results.
+
+    We first begin with an overview of the results. 
+    \autoref{t:realworldresults} shows the results including timeouts. 
+    Notably, the backward analysis had $8\%$ less time timeouts than the forward analysis. 
+    In return, it seems to be more memory hungry with $3.63\%$ more memory timeouts. 
+    We cover the memory consumption in the \hyperref[s:memex]{next subsection} and place our focus on the time for now. 
+    Interestingly, the propagated edges along the same interprocedural call-graph are of the same order of magnitude.
+    Also, the 85\textsuperscript{th} percentile runtime is nearly equal and the median is equal.  
+    However, claims based on the runtime and edges with timeouts are only possible to a limited extent because both values are highly influenced by the timeout.
+
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{l | r | r | r}
+            & \multicolumn{3}{c}{\textbf{Forward}}\\
+            \textbf{Metric} & \textbf{Avg} & \textbf{Median} & $\mathbf{P_{85}}$\\
+            \hline\hline
+            Data Flow Time & $518.93s$ & $600.0s$ & $605.1s$\\
+            \hline
+            Edge Propagations Infoflow & $34555326.97$ & $41743088.0$ & $52163969.6$\\
+            Edge Propagations Alias & $12562479.07$ & $14598571.5$ & $18638900.1$\\
+            Total Edge Propagations & $47117806.04$ & $57697027.0$ & $70602469.3$\\
+            \hline\hline
+            Memory Timeouts & \multicolumn{3}{l}{$2.99\%$}\\
+            Time Timeouts & \multicolumn{3}{l}{$60.45\%$}\\
+        \end{tabular}
+        \bigbreak
+        \begin{tabular}{l | r | r | r}
+            & \multicolumn{3}{c}{\textbf{Backward}}\\
+            \textbf{Metric} & \textbf{Avg} & \textbf{Median} & $\mathbf{P_{85}}$\\
+            \hline\hline
+            Data Flow Time & $413.19s$ & $600.0s$ & $606.0s$\\
+            \hline
+            Edge Propagations Infoflow & $13826566.90$ & $14981108.5$ & $23712802.0$\\
+            Edge Propagations Alias & $33567561.46$ & $43444060.0$ & $56773141.0$\\
+            Total Edge Propagations & $47394128.36$ & $60855935.5$ & $79405729.0$\\
+            \hline\hline
+            Memory Timeouts & \multicolumn{3}{l}{$6.62\%$}\\
+            Time Timeouts & \multicolumn{3}{l}{$52.21\%$}\\
+        \end{tabular}
+        \caption{Results With Timeouts}
+        \label{t:realworldresults}
+    \end{table}
+
+    Next, we only consider the runs without any timeouts in \autoref{t:realworldresultswithouttimeout}. 
+    This time we can still observe a relation between backward infoflow edges and forward alias edges even though to a lesser extent. 
+    More significant, it seems backward either way less aliases were on the path or the alias analysis could be stopped earlier due to a near turn unit.
+    The runtimes also represent this fact. In the 85\textsuperscript{th} percentile, the backward analysis needs $2.25$ seconds less. 
+    The median here renders useless as a comparison point because of the huge variance in the data set.
+
+    \begin{table}[ht]
+        \centering
+        \begin{tabular}{l | r | r | r}
+            & \multicolumn{3}{c}{\textbf{Forward}}\\
+            \textbf{Metric} & \textbf{Avg} & \textbf{Median} & $\mathbf{P_{85}}$\\
+            \hline\hline
+            Data Flow Time & $364.0s$ & $596.0s$ & $599.0s$\\
+            \hline
+            Edge Propagations Infoflow & $21179450.04$ & $17131840.0$ & $47411443.2$\\
+            Edge Propagations Alias & $7613696.10$ & $6557951.0$ & $16530488.8$\\
+            Total Edge Propagations & $28793146.14$ & $22416842.0$ & $63123292.8$\\            
+        \end{tabular}
+        \bigbreak
+        \begin{tabular}{l | r | r | r}
+            & \multicolumn{3}{c}{\textbf{Backward}}\\
+            \textbf{Metric} & \textbf{Avg} & \textbf{Median} & $\mathbf{P_{85}}$\\
+            \hline\hline
+            Data Flow Time & $135.75s$ & $1.5s$ & $596.75s$\\
+            \hline
+            Edge Propagations Infoflow & $5186970.23$ & $192787.0$ & $14438463.25$\\
+            Edge Propagations Alias & $11459343.68$ & $258834.5$ & $33860441.50$\\
+            Total Edge Propagations & $16646313.91$ & $451621.5$ & $62000571.75$\\
+        \end{tabular}
+        \caption{Results without Timeouts}
+        \label{t:realworldresultswithouttimeout}
+    \end{table}
+
+    Now, lets look at it in greater detail. We now compare the analysis on a per-app basis. 
+    The histogram is in \autoref{f:deltaHist}. 
+    We compiled the delta data flow time of the analyses per app, calculated as in the last section with the forward implementation being the reference: $t_{\mathit{Backward}} - t_{\mathit{Forward}}$. 
+    Hence, negative values represent that our implementation performed better. 
+    The delta on the x-axis is given is seconds and the frequency on the y-axis in number of apps. 
+    The bins always span over $50$ seconds.
+    The graph shows a large number of apps around $0$ with a slight bias towards the forward implementation. 
+    Equivalent to the distribution of the data flow times, there are only few deltas in the range from $\pm100$ to $\pm500$. 
+    More interestingly, there significant more apps around $-600$ than around $600$. 
+    Recall, the timeout is set to $600$.
+    So, our implementation terminates nearly instantanios in some cases on which the forward analysis times out.
+    Concluding, as expected, there is no general advantage for a direction. 
+    Instead, we only observe a per-app advantage in around $60\%$ of the test set while for the rest, the performance is similar.
+    In the direction-advantageous apps, we surprisingly observed a non-negligible amount of apps at the maximum possible delta.  
+
+    \begin{figure}[ht]
         \centering
         \resizebox{0.75\columnwidth}{!}{
             \input{figs/deltaHist.pgf}
         }
         \caption{Histogram of the Delta Data Flow Time}
+        \label{f:deltaHist}
     \end{figure}
 
-    \begin{table}[ht]
-        \centering
-        \begin{tabular}{l | r | r}
-            \textbf{Metric} & \textbf{Forwards} & \textbf{Backwards}\\
-            \hline\hline
-            Average Runtime & $518.93s$ & $408.97s$\\
-            Median Runtime & $600.0s$ & $600.0s$\\
-            85\textsuperscript{th} Percentile & $605.1s$ & $606.2s$\\
-            \hline
-            Average Abstractions Infoflow & $34555327$ & $13702123$\\
-            Average Abstractions Alias & $12562479$ & $33447121$\\
-            Average Total Abstractions & $47117806$ & $47149244$\\
-            \hline
-            Memory Timeouts & $2.99\%$ & $6.77\%$\\
-            Time Timeouts & $60.45\%$ & $51.88\%$\\            
-        \end{tabular}
-        \caption{Results}
-        \label{t:realworldresults}
-    \end{table}
+    To take advantage of the direction choice, we now investigate the correlating conditions for the advantageous direction. 
+    Most straightforward would be a correlation between the difference of source and sink count and the data flow time. 
+    In \autoref{f:dfratio} are two graphs with the ratio of sources and sinks ($\mathit{Sinks} - \mathit{Sources}$) on the x-axis and the data flow time in seconds on the y-axis.
+    The left graph is always the forward implementation and the right graph is our implementation. 
+    Blue dots represent apps without timeout, orange a time timeout and red a memory timeout. 
+    Intuitively, a negative ratio should put our implementation in a disadvantage. The graphs show no correlation between the ratio and the runtime, neither forward nor backward. 
+    We also included the data flow time by sources and sinks in \autoref{f:dfsources} and \autoref{f:dfsinks}. 
+    Forward, the number of sinks and backward the number of sources should not influence the runtime and as expected, they do not. 
+    We can confirm Arzt's evaluation\cite{Arzt2017PhD} as there is no correlation between sources and the forward runtime in our app set. 
+    Also, infered from this observation, we justifiably did not expect a correlation between sinks and backward runtime either. 
 
-    \begin{table}[ht]
-        \centering
-        \begin{tabular}{l | r | r}
-            \textbf{Metric} & \textbf{Forwards} & \textbf{Backwards}\\
-            \hline\hline
-            Average Runtime & $364.0s$ & $127.33s$\\
-            Median Runtime & $596.0s$ & $1.0s$\\
-            85\textsuperscript{th} Percentile & $599.0s$ & $584.8s$\\
-            \hline
-            Average Abstractions Infoflow & $7744724$ & $2048023$\\
-            Average Abstractions Alias & $2784113$ & $4480848$\\
-            Average Total Abstractions & $10528837$ & $6528871$\\            
-        \end{tabular}
-        \caption{Results without Timeouts}
-        \label{t:realworldresultswithouttimeout}
-    \end{table}
+    Even though Arzt evaluation also showed no correlation between the code size \cite{Arzt2017PhD}, we do for completeness also compare the runtime to the number of statements, methods and classes. 
+    Note that these refer to the Jimple intermediate representation and not Java. 
+    \autoref{f:dftocodesize} includes all the graphs. 
+    The arragement and notation is the same as before with the x-axis swapped out. 
+    All graphs look similar with the majority of dots are in the left half of the graph.
+    As per initial observation, the dots can be divided in two groups:
+    those that are close to the ten minute mark and those which terminate nearly instantly. 
+    The distribution of the dots inside the groups is approximately the same.
+    Again, we can not observe a correlation.
+
+    At last, we compare the number of edges in the exploded supergraph, also referred to taint propagations in \autoref{s:complexity}. 
+    The graphs in \autoref{f:dfedges} show the edge count in comparison to the runtime. 
+    In both graphs, the correlation between taint propagations and runtime is visible, especially in the right graph between $0$ and $3 \cdot 10^7$. 
+    The timeouts start in the backward graph after roughly $3 \cdot 10^7$ propagations.
+    Forward, the threshold for timeouts is around $2 \cdot 10^7$ edge propagations, ealier than backward.
+
+    To conclude, our backward analysis is efficient enough to be an alternative to the existing implementation. 
+    We even found that it performed slightly better on our app set. 
+    Our evaluation confirms that there is no correlation between an a-prioi known parameter and the runtime of \textsc{FlowDroid} - even in the backward direction. 
+    Furthermore, we did not find any a-prioi known parameter to decide the favorable direction either. 
+    The only parameter which correlates with the runtime is the edges in the exploded supergraph. 
+    Now, these have shown that our implementation is capable of analysing roughly $10^7$ more edges than the existing implementation in ten minutes. Though, the sample size of 200 apps is too small to generalize statements.
+
+    \begin{figure}[ht]
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_dataflow-edges.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_dataflow-edges.pgf}
+                }
+            \end{subfigure}
+        \end{subfigure}
+        \caption{Data Flow Time in Comparison to Edge Count}
+        \label{f:dfedges}
+    \end{figure}
 
     \begin{figure}
         \centering
@@ -595,6 +708,8 @@
                     \input{figs/bw_dataflow-sources.pgf}
                 }
             \end{subfigure}
+            \caption{Sources}
+            \label{f:dfsources}
         \end{subfigure}
         \bigbreak
         \begin{subfigure}[b]{\textwidth}
@@ -612,6 +727,8 @@
                     \input{figs/bw_dataflow-sinks.pgf}
                 }
             \end{subfigure}
+            \caption{Sinks}
+            \label{f:dfsinks}
         \end{subfigure}
         \bigbreak
         \begin{subfigure}[b]{\textwidth}
@@ -619,19 +736,21 @@
             \begin{subfigure}[]{0.45\textwidth}
                 \centering
                 \resizebox{\columnwidth}{!}{
-                    \input{figs/fw_dataflow-edges.pgf}
+                    \input{figs/fw_dataflow-ssratio.pgf}
                 }
             \end{subfigure}
             \qquad
             \begin{subfigure}[]{0.45\textwidth}
                 \centering
                 \resizebox{\columnwidth}{!}{
-                    \input{figs/bw_dataflow-edges.pgf}
+                    \input{figs/bw_dataflow-ssratio.pgf}
                 }
             \end{subfigure}
+            \caption{Ratio}
+            \label{f:dfratio}
         \end{subfigure}
-        \caption{Data Flow Time in Comparison to Source, Sink and Edge Count}
-        \label{s:dftoss}
+        \caption{Data Flow Time in Comparison to Sources, Sinks and the Ratio of Those}
+        \label{f:dftoss}
     \end{figure}
 
     \begin{figure}
@@ -651,6 +770,7 @@
                     \input{figs/bw_dataflow-statements.pgf}
                 }
             \end{subfigure}
+            \caption{Statements}
         \end{subfigure}
         \bigbreak
         \begin{subfigure}[b]{\textwidth}
@@ -668,6 +788,7 @@
                     \input{figs/bw_dataflow-methods.pgf}
                 }
             \end{subfigure}
+            \caption{Methods}
         \end{subfigure}
         \bigbreak
         \begin{subfigure}[b]{\textwidth}
@@ -685,13 +806,155 @@
                     \input{figs/bw_dataflow-classes.pgf}
                 }
             \end{subfigure}
+            \caption{Classes}
         \end{subfigure}
         \caption{Data Flow Time in Comparison to Code Size}
         \label{f:dftocodesize}
     \end{figure}
 
+    \FloatBarrier
+    \subsection{Memory Evaluation}\label{s:memex}
 
-    \subsection{Memory Experiment}
+
+    \begin{figure}[ht]
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_maxmem-edges.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_maxmem-edges.pgf}
+                }
+            \end{subfigure}
+        \end{subfigure}
+        \caption{Maximum Memory Consumption in comparison to the Edge Count}
+        \label{f:maxmemedges}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_maxmem-sources.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_maxmem-sources.pgf}
+                }
+            \end{subfigure}
+            \caption{Sources}
+        \end{subfigure}
+        \bigbreak
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_maxmem-sinks.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_maxmem-sinks.pgf}
+                }
+            \end{subfigure}
+        \end{subfigure}
+        \caption{Sinks}
+        \bigbreak
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_maxmem-ssratio.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_maxmem-ssratio.pgf}
+                }
+            \end{subfigure}
+            \caption{Ratio}
+        \end{subfigure}
+        \caption{Maximum Memory Consumption in Comparison to Source, Sink and Edge Count}
+        \label{s:maxmemtoss}
+    \end{figure}
+
+    \begin{figure}
+        \centering
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_maxmem-statements.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_maxmem-statements.pgf}
+                }
+            \end{subfigure}
+            \caption{Statements}
+        \end{subfigure}
+        \bigbreak
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_maxmem-methods.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_maxmem-methods.pgf}
+                }
+            \end{subfigure}
+            \caption{Methods}
+        \end{subfigure}
+        \bigbreak
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_maxmem-classes.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_maxmem-classes.pgf}
+                }
+            \end{subfigure}
+            \caption{Classes}
+        \end{subfigure}
+        \caption{Maximum Memory Consumption in Comparison to Code Size}
+        \label{f:maxmemtocodesize}
+    \end{figure}
+    
     Basically the answer to RQ1: Is the backwards search efficient enough to perform analysis on real world apps?
 
 
