@@ -75,13 +75,13 @@
     Consider the example in tikz:context. 
     After the first call to bar, the sequence is , which is in valid. 
     Now, there are multiple return edges from bar but only  is in matched. 
-    Thus, the  edge is taken. 
-    With the context-free language, this is also called meet-over-all-valid-paths (MOVP). MOVP is more precise but as sound as before (). 
+    Thus, only the  edge is taken. 
+    MOP with this context-free language is also called meet-over-all-valid-paths (MOVP). MOVP increases the precision but is as sound as before (). 
     Still, the valid paths are an overapproximation because they include paths never taken at runtime, called infeasible paths.
 
     
                 
-        Context Sensitivity
+        Context-Sensitivity using a Context-Free Language
             
     
     To propagate facts over statements, we need to define rules on how the data flow changes when observing a statement. 
@@ -127,7 +127,7 @@
     The value of x changes every time and never repeats itself. 
     In theory, the algorithm will never observe a taint twice in line 4. 
     Because the algorithm can not reach a fixpoint, it will not terminate. 
-    In practice, most data types are bounded, but the domain is cubic in the time-complexity  making IFDS infeasible for large domains.
+    In practice, every data type is bounded either by the heap or stack size, but the domain is cubic in the time-complexity  making IFDS infeasible for large domains.
 
     
                 [b]0.45

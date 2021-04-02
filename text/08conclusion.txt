@@ -1,2 +1,8 @@
 
     Conclusion
+
+    Future work    
+        Größere Eval für ein genaueres Bild?
+        Voller Support für alle Features in FlowDroid?
+        Identifizieren von Anwendungsfällen wo eine bessere Suchrichtung existiert?
+    

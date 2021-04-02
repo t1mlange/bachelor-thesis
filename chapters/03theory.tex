@@ -42,8 +42,8 @@
     The Call Flow function and subsequently Return and Call To Return Flow function apply whenever a statement contains an \code{InvokeExpr}.
     For call statements without an assignment, we have statements of the structure $o.m(a_0, ..., a_n)$ with $n \in \mathbb{N}$. $a_i$ denotes the $i$-th argument, $p_i$ the $i$-th parameter and $c$ the class instance of the callee's base object.
 
-    When we encounter a tainted argument in the caller, the taint needs to go through the callee. Java uses pass-by-value, so the arguments are copied into the callee. Thus, for primitives, the value is copied and pushed on the stack. For reference types, the pointer to the object is pushed on the stack. In the second case, if only the base reference is tainted but nothing more ($k=0$ and no wildcard), the callee can only access and overwrite the reference saved in the parameter on the stack but not change the object's data on the heap. \todo{besser formulieren}
-    We know the update that tainted the primitive or reference without field dereferences can not be inside the callee due to the backward direction. 
+    When we encounter a tainted argument in the caller, the taint needs to go through the callee. Java uses pass-by-value, so the arguments are copied into the callee. Thus, for primitives, the value is copied and pushed on the stack. For reference types, the pointer to the object is pushed on the stack. In the second case, if only the base reference is tainted but nothing more ($k=0$ and no wildcard), the callee can only access and overwrite the reference saved in the parameter on the stack but is not able to change the reference in the callee.
+    We know an update that tainted the primitive or reference without field dereferences can not be inside the callee due to the backward direction. 
     This property becomes apparent when we get specific to Java's types. Primitives do not have fields and strings are immutable\footnote{The special handling of strings results in transparent fields, e.g. we can treat strings as if they were primitives in this case.}. Consider the example in \autoref{lst:primret}. On the left, we use the built-in String type. In line 2, \code{str} is copied into \code{callee}. After this statement, both \code{str} hold the value \code{42} but point to another memory location\footnote{The JVM might only set a copy-on-write flag on \footnotecode{str} in \footnotecode{callee} and point it to the identical location as \footnotecode{str} in \footnotecode{main} to save memory. At least right before the update happens, it is guaranteed that the variable points to a different location.}. Thus, \code{main} carries on with the original value of \code{str} no matter what \code{callee} writes to \code{str}. In contrast, on the right, the callee can update the field on the heap. Therefore, the taint needs to be propagated into the callee to find the leak. Conclusively, $k$ needs to be greater than $0$.
 
     \begin{figure}[t]
@@ -147,9 +147,9 @@
     Like in Call and Return Flow, we also kill taints that do not match any of these rules.
     
     \section{Runtime of the Data Flow Analysis}\label{s:complexity}
-    IFDS has a worst-case time complexity of $O(|E| \cdot |D|^3)$. $|E|$ is the number of observed edges in the control-flow graph and $|D|$ is the number of tainted variables observed by the IFDS analysis. Concluding, it highly depends on the choice of sources and sinks and the analyzed app. 
+    IFDS has a worst-case time complexity of $O(|E| \cdot |D|^3)$. $|E|$ is the number of observed edges in the control-flow graph and $|D|$ is the number of tainted variables observed by the IFDS analysis. Concluding, the complexity highly depends on the choice of sources and sinks and the analyzed app. 
     Therefore it is not possible to make a general statement about a better analysis direction. 
-    Nevertheless, what we can do is discuss certain cases where one direction is favorable. We decide favorably based on the number of taint propagations, the observed edges in the exploded supergraph. They correlate to the runtime and depend on two factors: taints' lifetime and the number of taints. We explain how the analysis direction influences both factors in the following paragraphs.
+    Nevertheless, what we can do is discuss certain cases where one direction is favorable. We decide favorably based on the number of taint propagations, i.e. the exploded supergraph's observed edges. They correlate to the runtime and depend on two factors: taints' lifetime and the number of taints. In the following paragraphs, we show examples where the analysis direction influences both factors. After that, we discuss clues suitable for an apriori decision on the direction.
 
     \begin{figure}[ht]
         \centering
@@ -182,13 +182,14 @@
     Forwards, a tainted parameter is mapped into the callee and later on returned to the caller resulting in three possible summaries  $s1 \rightarrow \mathit\{\mathit{retVal}, s1\}$, $s2 \rightarrow \mathit\{\mathit{retVal}, s2\}$ or $s3 \rightarrow \mathit\{\mathit{retVal}, s3\}$.
     Such cases favor forward analysis.
 
-    In contrast, a strict right-to-left flow favors backward analysis as taints are killed more often due to a stronger overwrite rule. 
+    In contrast, a strict right-to-left flow favors backward analysis as taints are killed more often due to a stricter overwrite rule. 
     In \autoref{tikz:rtol} is such a right-to-left flow displayed. 
     Forward, the right-hand side is always kept alive because it still holds the tainted value below the statement and could be leaked. 
     When traversing a right-to-left flow backward, the left side is always killed. 
-    A visited statement is the update responsible for tainting, leading to a branching factor of 1 and a shorter lifetime per taint. 
+    A visited statement is the update responsible for tainting, leading to a branching factor of 1 and a shorter lifetime per taint.\\
+    A prominent real-world example of an right-to-left order are Java's \code{StringBuilder}. The implementations of \code{append()} and \code{insert()} return the base object to allow for easy chaining of multiple calls. Soot does not reuse the local variables when translating JVM bytecode to Jimple. As the Java compiler internally optimizes every string concatenation into a \code{StringBuilder}, this advantage is present in nearly every program. Also, programs with serialization to a text-based format such as JSON should heavily favor the backward analysis.
 
-    \begin{figure}[t]
+    \begin{figure}[tbp]
         \centering
         \begin{subfigure}[b]{0.45\textwidth}
             \centering
@@ -225,7 +226,7 @@
                 \draw[vto] (b3) -- (c4);
                 \draw[vto] (c4) -- (c5);
             \end{tikzpicture}
-            \caption{Forwards}
+            \caption{Forward}
             \label{tikz:rtol_a}
         \end{subfigure}
         \qquad
@@ -258,19 +259,54 @@
                 \draw[vto] (c4) -- (b3);
                 \draw[vto] (b3) -- (a2);
             \end{tikzpicture}      
-            \caption{Backwards}
+            \caption{Backward}
             \label{tikz:rtol_b}  
         \end{subfigure}
         \caption{Right-to-Left Order}
         \label{tikz:rtol}
     \end{figure}
 
+    \begin{figure}[tbp]
+        \centering
+        \begin{subfigure}[b]{\textwidth}
+            \begin{lstlisting}[gobble=16]
+                StringBuilder sb = new StringBuilder();
+                sb = sb.append("DeviceID: ").append(id).append("\n IMEI: ")
+                    .append(imei).append("\n ISMI: ").append(imsi);
+            \end{lstlisting}
+            \caption{Java}
+        \end{subfigure}
+        \qquad
+        \begin{subfigure}[b]{\textwidth}
+            \begin{lstlisting}[language=Jimple, gobble=16]
+                $stack9 = new java.lang.StringBuilder;
+                specialinvoke $stack9.<java.lang.StringBuilder: void <init>()>();
+                $stack10 = virtualinvoke $stack9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("My device id is ");
+                $stack11 = virtualinvoke $stack10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>($stack6);
+                $stack12 = virtualinvoke $stack11.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(",my IMEI is ");
+                $stack13 = virtualinvoke $stack12.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($stack7);
+                $stack14 = virtualinvoke $stack13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and my IMSI is ");
+                $stack15 = virtualinvoke $stack14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>($stack8);       
+            \end{lstlisting}
+            \caption{Jimple}
+        \end{subfigure}
+        \caption{StringBuilder example}
+        \label{lst:stringbuilder}
+    \end{figure}
+
     We already briefly mentioned the global scope of static field taints in the \hyperref[s:rules]{last section}. Hence, unless the static taint is overwritten, it traverses the whole interprocedural control-flow graph. \textsc{FlowDroid} already applies an optimization and looks ahead to skip methods in which the static field is not used. Still, the longer lifetime stays an issue \cite{Arzt2017PhD}.
 
-    Now, we discussed the complexity based on the taint propagations. Though the taint propagations are only known after the analysis, it would be beneficial to decide which direction is the best before analyzing an app. An obvious choice for a clue would be the ratio of sources and sinks. If one is much less than the other, we could argue less taints to start with should also lower the taint propagations. 
-    Likewise, Lerch et al. claim in their work that a magnificent smaller amount of sinks than sources are advantageous for a backward-directed search \cite{Lerch2014}. 
-    Sadly, it is not as easy to generalize the statement to less starting taints means less runtime. Arzt's evaluation of \textsc{FlowDroid} has shown no correlation between the number of sources and the runtime in \textsc{FlowDroid}\cite{Arzt2017PhD}. This result is probably owed to the unpredictable taint's lifetime balancing out the initial advantage.
-    As a part of this work, we evaluate whether it is possible to decide the favorable analysis direction in \code{FlowDroid} on the same app in \autoref{s:realworld}.
+    We discussed the complexity based on the taint propagations. 
+    However, they are only known after the analysis. 
+    Now, it would be beneficial to decide which direction is the best before analyzing an app. 
+    An obvious choice for a clue would be the ratio of sources and sinks. 
+    If one is much less than the other, we could argue less taints to start with should also lower the taint propagations. 
+    Sadly, it is not as easy to generalize the statement to less starting taints means less runtime. 
+    Arzt's evaluation of \textsc{FlowDroid} has shown no correlation between the number of sources and the runtime in \textsc{FlowDroid}\cite{Arzt2017PhD}. 
+    This result is probably owed to the unpredictable taint's lifetime balancing out the initial advantage.
+    As a part of this work, we evaluate whether it is possible to decide the favorable analysis direction in \textsc{FlowDroid} on the same app in \autoref{s:realworld}.\\
+    Even though the starting taints possibly do not correlate with the runtime, whenever there is a tiny number of sinks but hundreds of sources, the backward analysis should perform better.
+    Likewise, Lerch et al. claim in their work that a magnificent smaller amount of sinks than sources are advantageous for a backward-directed search \cite{Lerch2014}.
 
     In general, we can not predict the lifetime of taints before actually analyzing the app. 
     However, in special cases of application, this might be naturally given. 

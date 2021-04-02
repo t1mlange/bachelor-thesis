@@ -240,12 +240,8 @@
     \code{tainted} is the incoming taint and the \code{EasyTaintWrapper} produces the taint set \code{\{tainted, sb\}}. Backward, the incoming taint is \code{sb} and the taint wrapper produces four taints \code{\{sb, tainted, offset, len\}}. Luckily, most methods supported by the \code{EasyTaintWrapper} have less than three arguments.
 
     \subsection{Native Call Handler}
-    The native call handler of \textsc{FlowDroid} handles two methods:
-    \begin{itemize}
-        \item \code{System#arraycopy}: If the first parameter is tainted, taint the second parameter.
-        \item \code{reflect.Array#newArray}: If the length is tainted, propagate it over the statement.
-    \end{itemize}
-    We adapted the existing implementation and only reversed the logic of \code{System#arraycopy} to reflect the analysis direction.
+    The native call handler of \textsc{FlowDroid} handles two methods: \code{System#arraycopy} and \code{reflect.Array#newArray}.
+    The handling of \code{System#arraycopy} is direction-dependent. Thus, we adapted the existing implementation and reversed the logic of \code{System#arraycopy} to reflect the analysis direction.
 
     \subsection{Code Optimizer: AddNOPStmts}
     Before starting the analysis, \textsc{FlowDroid} applies code optimization to the interprocedural call graph. By default, dead code elimination and within constant value propagation is performed. Those are also applied before backward analysis,but we needed another code optimizer to handle an edge case in backward analysis.

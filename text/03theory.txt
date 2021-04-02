@@ -121,9 +121,9 @@
             
     Like in Call and Return Flow, we also kill taints that do not match any of these rules.
     
-    Runtime of the Data Flow Analysis    IFDS has a worst-case time complexity of .  is the number of observed edges in the control-flow graph and  is the number of tainted variables observed by the IFDS analysis. Concluding, it highly depends on the choice of sources and sinks and the analyzed app. 
+    Runtime of the Data Flow Analysis    IFDS has a worst-case time complexity of .  is the number of observed edges in the control-flow graph and  is the number of tainted variables observed by the IFDS analysis. Concluding, the complexity highly depends on the choice of sources and sinks and the analyzed app. 
     Therefore it is not possible to make a general statement about a better analysis direction. 
-    Nevertheless, what we can do is discuss certain cases where one direction is favorable. We decide favorably based on the number of taint propagations, the observed edges in the exploded supergraph. They correlate to the runtime and depend on two factors: taints' lifetime and the number of taints. We explain how the analysis direction influences both factors in the following paragraphs.
+    Nevertheless, what we can do is discuss certain cases where one direction is favorable. We decide favorably based on the number of taint propagations, i.e. the observed edges in the exploded supergraph. They correlate to the runtime and depend on two factors: taints' lifetime and the number of taints. In the following paragraphs, we show examples where the analysis direction influences both factors. After that we discuss clues suitable for a a-priori decision on the direction.
 
     
                 max width=
@@ -170,10 +170,18 @@
             
     We already briefly mentioned the global scope of static field taints in the [s:rules]last section. Hence, unless the static taint is overwritten, it traverses the whole interprocedural control-flow graph. FlowDroid already applies an optimization and looks ahead to skip methods in which the static field is not used. Still, the longer lifetime stays an issue.
 
-    Now, we discussed the complexity based on the taint propagations. Though the taint propagations are only known after the analysis, it would be beneficial to decide which direction is the best before analyzing an app. An obvious choice for a clue would be the ratio of sources and sinks. If one is much less than the other, we could argue less taints to start with should also lower the taint propagations. 
-    Likewise, Lerch et al. claim in their work that a magnificent smaller amount of sinks than sources are advantageous for a backward-directed search. 
-    Sadly, it is not as easy to generalize the statement to less starting taints means less runtime. Arzt's evaluation of FlowDroid has shown no correlation between the number of sources and the runtime in FlowDroid. This result is probably owed to the unpredictable taint's lifetime balancing out the initial advantage.
+    We discussed the complexity based on the taint propagations. 
+    However, they are only known after the analysis. 
+    Now, it would be beneficial to decide which direction is the best before analyzing an app. 
+    An obvious choice for a clue would be the ratio of sources and sinks. 
+    If one is much less than the other, we could argue less taints to start with should also lower the taint propagations. 
+    Sadly, it is not as easy to generalize the statement to less starting taints means less runtime. 
+    Arzt's evaluation of FlowDroid has shown no correlation between the number of sources and the runtime in FlowDroid. 
+    This result is probably owed to the unpredictable taint's lifetime balancing out the initial advantage.
     As a part of this work, we evaluate whether it is possible to decide the favorable analysis direction in FlowDroid on the same app in s:realworld.
+
+    Even though the starting taints possibly not correlate with the runtime, whenever there is a really small number of sinks but hundreds of sources the backward analysis should perform better.
+    Likewise, Lerch et al. claim in their work that a magnificent smaller amount of sinks than sources are advantageous for a backward-directed search.
 
     In general, we can not predict the lifetime of taints before actually analyzing the app. 
     However, in special cases of application, this might be naturally given. 

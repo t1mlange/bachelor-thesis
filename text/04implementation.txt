@@ -188,11 +188,8 @@
     tainted is the incoming taint and the EasyTaintWrapper produces the taint set tainted, sb. Backward, the incoming taint is sb and the taint wrapper produces four taints sb, tainted, offset, len. Luckily, most methods supported by the EasyTaintWrapper have less than three arguments.
 
     Native Call Handler
-    The native call handler of FlowDroid handles two methods:
-    
-        System#arraycopy: If the first parameter is tainted, taint the second parameter.
-        reflect.Array#newArray: If the length is tainted, propagate it over the statement.
-        We adapted the existing implementation and only reversed the logic of System#arraycopy to reflect the analysis direction.
+    The native call handler of FlowDroid handles two methods: System#arraycopy and reflect.Array#newArray.
+    The the handling of System#arraycopy is direction-dependent. Thus, we adapted the existing implementation and reversed the logic of System#arraycopy to reflect the analysis direction.
 
     Code Optimizer: AddNOPStmts
     Before starting the analysis, FlowDroid applies code optimization to the interprocedural call graph. By default, dead code elimination and within constant value propagation is performed. Those are also applied before backward analysis,but we needed another code optimizer to handle an edge case in backward analysis.

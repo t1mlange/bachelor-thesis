@@ -83,12 +83,12 @@
     To achieve context-sensitivity, Reps et al. proposed a context-free grammar (c.f. \autoref{lst:cfl}). 
     Each call site gets a unique index, outgoing call edges are labeled with $(_i$ and incoming return edges are labeled with $)_i$. 
     \textit{matched} ensures the correct return edge is taken and \textit{valid} models a partially balanced path, e.g., after a call for which the return is still pending.
-    A path between two nodes is called valid iff the sequence of labeled edges is a string in \textit{valid} \cite{Reps1995}. 
+    A path between two nodes is called \textit{valid} if the sequence of labeled edges is a string in \textit{valid} \cite{Reps1995}. 
     Consider the example in \autoref{tikz:context}. 
     After the first call to \code{bar}, the sequence is $(_1$, which is in \textit{valid}. 
     Now, there are multiple return edges from \code{bar} but only $)_1$ is in \textit{matched}. 
-    Thus, the $)_1$ edge is taken. 
-    With the context-free language, this is also called meet-over-all-valid-paths (MOVP). MOVP is more precise but as sound as before ($\mathit{MOVP} \sqsubseteq \mathit{MOP}$). 
+    Thus, only the $)_1$ edge is taken. 
+    MOP with this context-free language is also called meet-over-all-valid-paths (MOVP). MOVP increases the precision but is as sound as before ($\mathit{MOVP} \sqsubseteq \mathit{MOP}$). 
     Still, the valid paths are an overapproximation because they include paths never taken at runtime, called infeasible paths.
 
     \begin{figure}[ht]
@@ -379,5 +379,5 @@
     The second feature is taint wrappers. 
     They allow defining rules for methods, e.g., from a commonly used feature such as StringBuilder, which allows the taint analysis to skip the method and apply a summary \cite{Arzt2014}. 
     StubDroid, an extension to FlowDroid by Arzt et al., allows precomputing summaries using \textsc{FlowDroid} and serializes them in an XML format for tool-independent use. 
-    These summaries are handy for real-world applications where often third-party libraries are used \cite{Arzt2017PhD}.
+    These summaries are handy for real-world applications where often third-party libraries are used \cite{Arzt2016}.
 \end{document}

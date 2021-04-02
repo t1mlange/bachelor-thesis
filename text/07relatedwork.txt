@@ -7,11 +7,13 @@
     (https://github.com/scotty-kdw/ARM-Analyzer/ (visited on 03/26/2021)) which is closer to the path builder of FlowDroid than our taint analysis.
     Besides those, we also found two taint analysis tools with a similar approach to ours.
 
-    Lerch et al. contributed FlowTwist, a static taint analysis tool based on IFDS to detect confused deputy problemsin libraries.
+    Lerch et al. contributed FlowTwist, a static taint analysis tool based on IFDS to detect confused deputy problems in libraries.
     A confused deputy is a legitimate program with more privileges tricked into misusing its authority by a malicious program.  They identify the cause of such as a combination of an integrity and confidentiality problem. 
-    For the integrity part, the sinks perform sensitive operations and the sources are attacker-controlledIn the confidentiality part, the sinks can be read by an attacker and sources provide sensitive data. 
+    For the integrity part, the sinks perform sensitive operations and the sources are attacker-controlled. 
+    In the confidentiality part, an attacker can read the sinks and sources provide sensitive data.
     A combination of both naturally gives a centered statement. 
-    Now, the integrity sources and confidentiality sinks are way more frequent. Thus they propose to solve the integrity part backward and the confidentiality part forward. 
+    Now, the integrity sources and confidentiality sinks are way more frequent. 
+    Thus they propose to solve the integrity part backward and the confidentiality part forward. 
     In contrast to FlowDroid, FlowTwist focuses on a specific taint analysis case and the applicability is relatively narrow. 
 
     Yan et al. proposed a vulnerability detection tool for PHP with a focus on web applications. They aim to detect typical web application vulnerabilities such as cross-site scripting and SQL injections using backward taint analysis. 
@@ -24,7 +26,7 @@
 
     Synchronized pushdown systems (SPDS) by Späth et al. are an alternative to IFDS with access paths for modeling a precise context-, flow- and field-sensitive data flow analysis. 
     Similar to IFDS, a context-free grammar ensures the context-sensitivity. 
-    In addition, In addition, another context-free grammar model the field-sensitivity.
+    In addition, another context-free grammar model the field-sensitivity.
     Contrary to access paths, this does not increase the domain and needs no -limiting to be fast enough in practice. 
     Then it computes the acceptance state of both pushdown automata to combine context- and field-sensitivity. 
     Now, in general, an automaton with two stacks is undecidable. The separation of the problems into two reachability problems and later combining the results is decidable. However, if both automata are in an acceptance state via different paths, the algorithm overapproximates the solution. 

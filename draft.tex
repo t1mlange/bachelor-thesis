@@ -1,3 +1,5 @@
+
+\PassOptionsToPackage{table}{xcolor}
 \documentclass[
 	english,
 	ruledheaders=section,%Ebene bis zu der die Überschriften mit Linien abgetrennt werden, vgl. DEMO-TUDaPub
@@ -21,6 +23,7 @@
 \usepackage[autostyle]{csquotes}% Anführungszeichen vereinfacht
 
 \usepackage[scaled=.8]{beramono} % fixed to big \code
+
 
 % Falls mit pdflatex kompiliert wird, wird microtype automatisch geladen, in diesem Fall muss diese Zeile entfernt werden, und falls weiter Optionen hinzugefügt werden sollen, muss dies über
 % \PassOptionsToPackage{Optionen}{microtype}
@@ -48,6 +51,7 @@
 %\usepackage{array}     % Basispaket für Tabellenkonfiguration, wird von den folgenden automatisch geladen
 \usepackage{tabularx}   % Tabellen, die sich automatisch der Breite anpassen
 \usepackage{longtable} % Mehrseitige Tabellen
+\usepackage{multirow}
 % \usepackage{xltabular} % Mehrseitige Tabellen mit anpassarer Breite
 % \usepackage{booktabs}   % Verbesserte Möglichkeiten für Tabellenlayout über horizontale Linien
 \usepackage{adjustbox}
@@ -56,7 +60,7 @@
 %%%%%%%%%%%%%%%%%%%
 \usepackage{mathtools} % erweiterte Fassung von amsmath
 \usepackage{amssymb}   % erweiterter Zeichensatz
-%\usepackage{siunitx}   % Einheiten
+% \usepackage{siunitx}   % Einheiten
 \makeatletter
 \providecommand{\bigsqcap}{%
   \mathop{%
