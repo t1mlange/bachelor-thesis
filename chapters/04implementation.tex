@@ -145,8 +145,47 @@
     \subsection{Backwards Wrapper Propagation Rule}
     The implementation of this rule is similar to the existing implementation. A tainted returned value also needs to be passed into the taint wrapper because of the backward direction. The rule calls \code{getInverseTaints()} and thus requires the taint wrapper to implement the \code{IReversibleTaintWrapper} interface .
 
-    % \subsection{Backwards Implicit Propagation Rule}
-    % Not implemented.
+    \subsection{Backwards Implicit Propagation Rule}
+    Flows which are influenced by a condition are called implicit flows. A common example is a password check. Such a method could return a boolean signifying the password is correct or not. Without implicit flows, the taint analysis would be unable to find the path between the password input and the output action. The semantics of implicit flows in \textsc{FlowDroid} are that every update flowing into a sink or a sink call inside a conditional branch, even in transitive callees, are considered as a leak.
+    
+    The existing forward-directed implementation derives a wildcard and propagates it until the conditional branch is left again at the postdominator. This behavior does not scale well because the semantics demand tainting every update and following every call in conditionals leading to many unneccessary taints never reaching a sink.
+    
+    Backward, the branching factor of a conditional should be lower. However, it is not that easy to reconstruct the conditional branches while traversing the exploded supergraph. 
+    Consider the code in \autoref{lst:impflow}. 
+    We expect from the analysis to find the path from line 2 to line 10. 
+    First of all, starting at the sink it is unknown whether a conditional influenced the call to the \code{transitiveSink()} method. 
+    Also, assuming we created a taint representing the sink call, consider the return edge into \code{foo()}. 
+    The edge is already inside a conditional branch, thus the dominator is per-definition line 4. 
+    We are unable to use the dominator as a indication whether a taint enters a conditional in such cases.
+    Both of those challenges are not a data-flow problem but rather a control-flow graph reachability problem. We extended the backward interprocedural control-flow graph with two methods:
+    \begin{itemize}
+        \item \code{List<Unit> getConditionalBranchesInterprocedural(Unit unit)}
+        \item \code{Unit getConditionalBranchIntraprocedural(Unit unit)}
+    \end{itemize}
+    The first one is used for sink calls. It traverses the interprocedural graph using a worklist algorithm to find all possible reachable conditional statements. We then use those found conditionals to derive sink taints with the correct conditional dominator.
+    The second one is used at return edges and returns the conditional statement if the call site is inside a conditional else \code{null}. 
+    
+    \begin{figure}[tbp]
+        \centering
+        \begin{subfigure}[b]{0.45\textwidth}
+            \centering
+            \begin{lstlisting}[gobble=16]
+                void foo() {
+                    int tainted = source();
+                    if (tainted == 42) {
+                        x = 0;
+                        transitiveSink();
+                    }
+                }
+
+                void transitiveSink() {
+                    sink();
+                }
+            \end{lstlisting}
+        \end{subfigure}
+        \caption{Implicit Flow Challenges}
+        \label{lst:impflow}
+    \end{figure}
 
     \subsection{Backwards Strong Update Rule}
     Until now, we always assumed that a taint is only affected if the variable occurs in a statement. 

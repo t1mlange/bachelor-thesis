@@ -1014,4 +1014,85 @@
 
 
     % Basically the answer to RQ2: Can we find a pre-analysis known parameter to decide which analysis is more efficient?
+
+    \FloatBarrier
+    \section{x}
+    \begin{figure}[tbp]
+        \centering
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_dataflow-edges.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_dataflow-edges.pgf}
+                }
+            \end{subfigure}
+            \caption{Total Edges}
+        \end{subfigure}
+        \bigbreak
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_dataflow-iedges.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_dataflow-iedges.pgf}
+                }
+            \end{subfigure}
+            \caption{Infoflow Edges}
+        \end{subfigure}
+        \bigbreak
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_dataflow-aedges.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_dataflow-aedges.pgf}
+                }
+            \end{subfigure}
+            \caption{Alias Edges}
+        \end{subfigure}
+        \caption{Data Flow Time to Edge Count}
+        % \label{f:maxmemtoss}
+    \end{figure}
+
+    \begin{figure}[tbp]
+        \begin{subfigure}[b]{\textwidth}
+            \centering
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/fw_time-mem-correl.pgf}
+                }
+            \end{subfigure}
+            \qquad
+            \begin{subfigure}[]{0.45\textwidth}
+                \centering
+                \resizebox{\columnwidth}{!}{
+                    \input{figs/bw_time-mem-correl.pgf}
+                }
+            \end{subfigure}
+            \caption{Max Mem to Runtime}
+        \end{subfigure}
+    \end{figure}
 \end{document}
