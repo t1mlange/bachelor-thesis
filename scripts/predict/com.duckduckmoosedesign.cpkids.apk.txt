@@ -1,0 +1,17 @@
+{
+"Forward": [
+{
+"Type": "Source",
+"Method": "<com.duckduckmoosedesign.framework.CrossPromoView: void LaunchApp(java.lang.String)>",
+"Stmt": "$r11 = virtualinvoke $r6.<android.content.pm.PackageManager: java.util.List queryIntentActivities(android.content.Intent,int)>($r10, 0)",
+"Propagations": 19,
+"Caller": 0,
+"Callee": 6,
+"Runtime": 29,
+"InSets": 113,
+"OutSets": 123,
+},
+],
+"Backward": [
+]
+}

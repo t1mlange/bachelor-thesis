@@ -1,0 +1,50 @@
+{
+"Forward": [
+{
+"Type": "Source",
+"Method": "<me.leolin.shortcutbadger.ShortcutBadger: boolean initBadger(android.content.Context)>",
+"Stmt": "$r7 = virtualinvoke $r2.<android.content.pm.PackageManager: java.util.List queryIntentActivities(android.content.Intent,int)>($r4, 65536)",
+"Propagations": 80,
+"Caller": 0,
+"Callee": 6,
+"Runtime": 91,
+"InSets": 329,
+"OutSets": 327,
+},
+{
+"Type": "Source",
+"Method": "<me.leolin.shortcutbadger.util.BroadcastHelper: boolean canResolveBroadcast(android.content.Context,android.content.Intent)>",
+"Stmt": "$r3 = virtualinvoke $r2.<android.content.pm.PackageManager: java.util.List queryBroadcastReceivers(android.content.Intent,int)>($r0, 0)",
+"Propagations": 5,
+"Caller": 0,
+"Callee": 1,
+"Runtime": 13,
+"InSets": 8,
+"OutSets": 10,
+},
+],
+"Backward": [
+{
+"Type": "Sink",
+"Method": "<universal.tools.notifications.Manager$1: android.graphics.Bitmap doInBackground(java.lang.String[])>",
+"Stmt": "virtualinvoke $r7.<java.net.URLConnection: void connect()>()",
+"Propagations": 8,
+"Caller": 0,
+"Callee": 3,
+"Runtime": 23,
+"InSets": 8,
+"OutSets": 8,
+},
+{
+"Type": "Sink",
+"Method": "<universal.tools.notifications.Manager$1: android.graphics.Bitmap doInBackground(java.lang.String[])>",
+"Stmt": "$r7 = virtualinvoke $r2.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Propagations": 6,
+"Caller": 0,
+"Callee": 1,
+"Runtime": 19,
+"InSets": 6,
+"OutSets": 6,
+},
+]
+}

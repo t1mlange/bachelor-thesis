@@ -1,0 +1,39 @@
+{
+"Forward": [
+{
+"Type": "Source",
+"Method": "<me.leolin.shortcutbadger.util.BroadcastHelper: boolean canResolveBroadcast(android.content.Context,android.content.Intent)>",
+"Stmt": "$r3 = virtualinvoke $r2.<android.content.pm.PackageManager: java.util.List queryBroadcastReceivers(android.content.Intent,int)>($r1, 0)",
+"Propagations": 5,
+"Caller": 0,
+"Callee": 1,
+"Runtime": 10,
+"InSets": 8,
+"OutSets": 10,
+},
+],
+"Backward": [
+{
+"Type": "Sink",
+"Method": "<com.adobe.phonegap.push.FCMService: android.graphics.Bitmap getBitmapFromURL(java.lang.String)>",
+"Stmt": "virtualinvoke r5.<java.net.HttpURLConnection: void connect()>()",
+"Propagations": 7,
+"Caller": 0,
+"Callee": 3,
+"Runtime": 11,
+"InSets": 7,
+"OutSets": 7,
+},
+{
+"Type": "Sink",
+"Method": "<com.adobe.phonegap.push.FCMService: android.graphics.Bitmap getBitmapFromURL(java.lang.String)>",
+"Stmt": "$r4 = virtualinvoke r3.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Propagations": 3,
+"Caller": 0,
+"Callee": 0,
+"Runtime": 8,
+"InSets": 3,
+"OutSets": 3,
+},
+]
+}

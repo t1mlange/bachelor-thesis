@@ -1,0 +1,14 @@
+{
+"Method": "<io.branch.referral.BranchViewHandler$loadBranchViewTask: java.lang.Boolean a()>",
+"Stmt": "$r7 = virtualinvoke $r4.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "40",
+"Calls": "10",
+"Callers": "1",
+},
+{
+"Method": "<io.branch.referral.BranchViewHandler$loadBranchViewTask: java.lang.Boolean a()>",
+"Stmt": "virtualinvoke $r8.<java.net.HttpURLConnection: void connect()>()",
+"Units": "40",
+"Calls": "10",
+"Callers": "1",
+},

@@ -1,0 +1,17 @@
+{
+"Forward": [
+{
+"Type": "Source",
+"Method": "<androidx.core.app.n$d: boolean handleMessage(android.os.Message)>",
+"Stmt": "$r16 = virtualinvoke $r14.<android.content.pm.PackageManager: java.util.List queryIntentServices(android.content.Intent,int)>($r15, 0)",
+"Propagations": 241,
+"Caller": 0,
+"Callee": 52,
+"Runtime": 243,
+"InSets": 951,
+"OutSets": 942,
+},
+],
+"Backward": [
+]
+}

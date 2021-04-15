@@ -1,0 +1,17 @@
+{
+"Forward": [
+{
+"Type": "Source",
+"Method": "<com.storytoys.UtopiaGL.GooglePlayExpansionIAP.util.IabHelper: void startSetup(com.storytoys.UtopiaGL.GooglePlayExpansionIAP.util.IabHelper$OnIabSetupFinishedListener)>",
+"Stmt": "$r7 = virtualinvoke $r6.<android.content.pm.PackageManager: java.util.List queryIntentServices(android.content.Intent,int)>(r2, 0)",
+"Propagations": 11,
+"Caller": 0,
+"Callee": 1,
+"Runtime": 17,
+"InSets": 21,
+"OutSets": 23,
+},
+],
+"Backward": [
+]
+}

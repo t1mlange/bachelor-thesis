@@ -144,6 +144,9 @@
 
     \subsection{Backwards Wrapper Propagation Rule}
     The implementation of this rule is similar to the existing implementation. A tainted returned value also needs to be passed into the taint wrapper because of the backward direction. The rule calls \code{getInverseTaints()} and thus requires the taint wrapper to implement the \code{IReversibleTaintWrapper} interface .
+    
+    Additionally, we added an optimization to the taint wrapper rule. Recall \autoref{s:complexity} where we explained our backward implementation benefits from a right-to-left order. However, the StringBuilder can alias and the alias search offsets the advantage. We use the observation that Jimple does not reuse the local variables when compiled from Java bytecode and all locals pointing to the same StringBuilder except one are not reused either. Thus, we apply a preanalysis searching for base object uses below. Only if the preanalysis finds an use, the alias analysis is used. The preanalysis is cheaper than the alias analysis and based on our observations, it should rarely find an use.
+
 
     \subsection{Backwards Implicit Propagation Rule}
     Flows which are influenced by a condition are called implicit flows. A common example is a password check. Such a method could return a boolean signifying the password is correct or not. Without implicit flows, the taint analysis would be unable to find the path between the password input and the output action. The semantics of implicit flows in \textsc{FlowDroid} are that every update flowing into a sink or a sink call inside a conditional branch, even in transitive callees, are considered as a leak.

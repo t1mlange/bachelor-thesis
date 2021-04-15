@@ -1,0 +1,21 @@
+{
+"Method": "<com.unity3d.services.core.request.WebRequest: java.net.HttpURLConnection getHttpUrlConnectionWithHeaders()>",
+"Stmt": "$r3 = virtualinvoke $r1.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "115",
+"Calls": "52",
+"Callers": "1",
+},
+{
+"Method": "<com.unity3d.services.core.request.WebRequest: java.net.HttpURLConnection getHttpUrlConnectionWithHeaders()>",
+"Stmt": "$r3 = virtualinvoke $r1.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "115",
+"Calls": "52",
+"Callers": "1",
+},
+{
+"Method": "<com.unity3d.services.core.request.WebRequest: java.net.HttpURLConnection getHttpUrlConnectionWithHeaders()>",
+"Stmt": "virtualinvoke $r21.<java.net.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>($r2, $r13)",
+"Units": "115",
+"Calls": "52",
+"Callers": "1",
+},

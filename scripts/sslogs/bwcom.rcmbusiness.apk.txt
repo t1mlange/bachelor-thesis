@@ -1,0 +1,14 @@
+{
+"Method": "<com.rcmbusiness.MyFirebaseMessagingService: android.graphics.Bitmap a(java.lang.String)>",
+"Stmt": "$r3 = virtualinvoke $r2.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "19",
+"Calls": "5",
+"Callers": "1",
+},
+{
+"Method": "<com.rcmbusiness.MyFirebaseMessagingService: android.graphics.Bitmap a(java.lang.String)>",
+"Stmt": "virtualinvoke $r4.<java.net.HttpURLConnection: void connect()>()",
+"Units": "19",
+"Calls": "5",
+"Callers": "1",
+},

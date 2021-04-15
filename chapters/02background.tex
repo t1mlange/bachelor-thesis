@@ -12,9 +12,10 @@
     In the field of compilers, there is a distinction between static and dynamic. 
     Static generally refers to something that is decided at compile-time, while dynamic refers to runtime decisions \cite{Aho1986}. 
     The same distinction is also present for analyses. 
-    Dynamic analysis observes the program's run behavior, while static analysis works on a representation of the code. 
+    Dynamic analysis observes the program's runtime behavior, while static analysis works on a representation of the code. 
     Both have different tradeoffs. 
-    Achieving good code coverage is hard in dynamic analysis and it is hard only to traverse the actually taken paths in static analysis \cite{Arzt2017PhD}.
+    Achieving good code coverage is a challenge in dynamic analysis. 
+    In contrast, a static analysis often can not infer runtime values and conditions, hence follows paths never taken at runtime, also called \textit{infeasible paths} \cite{Arzt2017PhD}.
     Thus the dynamic analysis is an underapproximation and static analysis is an overapproximation. 
     In the following, we only consider static analysis.
 
@@ -27,9 +28,10 @@
     Compilers use it to apply optimizations, others use it for software verification and it is also used for reverse-engineering \cite{Khedker2009}. 
     A special kind of data flow analysis is taint analysis, which concepts might be familiar from code reviews. 
     In taint analysis, the goal is to determine whether a particular variables' information contents flow through the program to another variable. 
-    Variables that contain such valuable information are \textit{tainted}. 
+    Variables that contain valuable information are \textit{tainted}. 
     This valuable information has to come from somewhere, the so-called \textit{sources}. 
-    Sources can be any expression but are often methods and their returned values are considered tainted. 
+    Sources can be any expression but are often methods.
+    Values produced from sources are considered tainted. 
     On the other end, \textit{sinks} leak valuable information. 
     A data flow between a source and a sink is called a \textit{leak} \cite{Arzt2017PhD}. 
     For example, to detect apps tracking the user using taint analysis, sources could be methods returning a unique identifier and sinks could be methods that sent out data to the internet. 
@@ -52,6 +54,13 @@
     For a must analysis, the fact must hold on all paths to this statement, while a may analysis only guarantees the fact holds on one path. 
     The decision of which kind fits depends on the type of data flow analysis. 
     Taint analyses like \textsc{FlowDroid} are based on the may analysis \cite{Arzt2017PhD}.
+
+    The analysis direction of a data flow analysis is also decided by the problem to be solved. 
+    A live variables analysis computes whether a variable is read before written in the future to pontentialy eliminate dead assignments. 
+    The problem is naturally solved by a backward pass. 
+    On the other hand, a reaching definitions analysis finds out if a definition reaches a statement without a intermediate assignment which is certainly solved by a forward pass.
+    Additionally, there are also data flow analyses such as program slicing\footnotemark{} and taint analysis for the direction is a design-choice.
+    \footnotetext{Program slicing identifies a slice, a subset of the programs statements, which influence a statement (backward pass) or are influenced by a statement (forward pass).}
     
     \section{IFDS}\label{s:bigifds}
     \subsection{Original Definition}\label{s:ifds}
@@ -88,8 +97,8 @@
     After the first call to \code{bar}, the sequence is $(_1$, which is in \textit{valid}. 
     Now, there are multiple return edges from \code{bar} but only $)_1$ is in \textit{matched}. 
     Thus, only the $)_1$ edge is taken. 
-    MOP with this context-free language is also called meet-over-all-valid-paths (MOVP). MOVP increases the precision but is as sound as before ($\mathit{MOVP} \sqsubseteq \mathit{MOP}$). 
-    Still, the valid paths are an overapproximation because they include paths never taken at runtime, called infeasible paths.
+    MOP with this context-free language is also called meet-over-all-valid-paths (MOVP). MOVP increases the precision but does not compromise soundness ($\mathit{MOVP} \sqsubseteq \mathit{MOP}$). 
+    Still, the valid paths are an overapproximation because they also contain infeasible paths.
 
     \begin{figure}[ht]
         \centering
@@ -227,13 +236,13 @@
     Only the observed facts must adhere to the ascending-chain condition over the flow functions when using the on-demand supergraph \cite{Bodden2012}.
     
     Also, the original IFDS definition ignores the type structure of the programming language. 
-    It can be used to kill facts due to impossible casts. 
+    Type information can be used to kill facts due to impossible casts. 
     Also, facts with the same variable but different types can be merged with the superclass as its new type \cite{Naeem2010}.
 
     Furthermore, the original definition starts the IFDS algorithm at the entry point of the interprocedural call-graph. 
     As described in \autoref{s:ifds}, a flow function can derive an initial fact from the zero fact whenever needed. 
     If the methods where initial facts will be introduced are known a priori, the supergraph can be traversed without applying flow functions until such a method is found on the path. 
-    This optimization introduces unbalanced problems where a method return but no corresponding call site is found, which can be solved by a small extension to the tabulation algorithm. 
+    This optimization introduces unbalanced problems where a method returns but no corresponding call site is found, which can be solved by a small extension to the tabulation algorithm. 
     Lerch et al. first described the extension \cite{Lerch2015} and it is also present in \textsc{FlowDroid} \cite{Arzt2017PhD}.
 
     Another optimization is possible if the merge operator is set union thanks to the $A \subseteq A \cup B$ property of set union. 
@@ -370,7 +379,7 @@
     \end{figure}
     \footnotetext{Taken from \url{https://developer.android.com/guide/components/activities/activity-lifecycle}.}
 
-    \textsc{FlowDroid} inherits flow- and context-sensitivity from IFDS and the object- and field-sensitivity from symbolic access paths. To provide precise results even with aliases in use, \textsc{FlowDroid} contains, besides the taint analysis, another IFDS problem to resolve all encountered aliases on-demand. The two IFDS analyses are intertwined to maintain flow- and context-sensitivity between both analyses.\cite{Arzt2014}.
+    \textsc{FlowDroid} inherits flow- and context-sensitivity from IFDS and the object- and field-sensitivity from symbolic access paths. To provide precise results even with aliases in use, \textsc{FlowDroid} comprises an alais analysis. The alias analysis is encoded as another IFDS problem and resolves all encountered aliases on-demand. The two IFDS analyses are intertwined to maintain flow- and context-sensitivity between both analyses\cite{Arzt2014}.
 
     The implementation of \textsc{FlowDroid} is modular, easily extensible and offers many additional features. 
     Two of them are noteworthy for this work: native call handler and taint wrappers. 
@@ -379,5 +388,5 @@
     The second feature is taint wrappers. 
     They allow defining rules for methods, e.g., from a commonly used feature such as StringBuilder, which allows the taint analysis to skip the method and apply a summary \cite{Arzt2014}. 
     StubDroid, an extension to FlowDroid by Arzt et al., allows precomputing summaries using \textsc{FlowDroid} and serializes them in an XML format for tool-independent use. 
-    These summaries are handy for real-world applications where often third-party libraries are used \cite{Arzt2016}.
+    These summaries are handy for real-world applications where third-party libraries are often used \cite{Arzt2016}.
 \end{document}

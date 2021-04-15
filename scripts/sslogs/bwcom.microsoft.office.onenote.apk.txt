@@ -1,0 +1,14 @@
+{
+"Method": "<com.microsoft.tokenshare.RemoteTokenShareConfiguration$RefreshTask: void run()>",
+"Stmt": "$r7 = virtualinvoke $r6.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "167",
+"Calls": "64",
+"Callers": "1",
+},
+{
+"Method": "<com.microsoft.tokenshare.RemoteTokenShareConfiguration$RefreshTask: void run()>",
+"Stmt": "virtualinvoke $r8.<java.net.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>("If-Modified-Since", $r10)",
+"Units": "167",
+"Calls": "64",
+"Callers": "1",
+},

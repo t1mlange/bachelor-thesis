@@ -1,0 +1,17 @@
+{
+"Forward": [
+{
+"Type": "Source",
+"Method": "<com.anjlab.android.iab.v3.BillingProcessor: boolean isIabServiceAvailable(android.content.Context)>",
+"Stmt": "$r3 = virtualinvoke $r1.<android.content.pm.PackageManager: java.util.List queryIntentServices(android.content.Intent,int)>($r2, 0)",
+"Propagations": 5,
+"Caller": 0,
+"Callee": 1,
+"Runtime": 13,
+"InSets": 8,
+"OutSets": 10,
+},
+],
+"Backward": [
+]
+}

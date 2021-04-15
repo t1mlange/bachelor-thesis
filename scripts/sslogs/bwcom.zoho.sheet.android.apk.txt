@@ -1,0 +1,14 @@
+{
+"Method": "<com.zoho.accounts.clientframework.NetworkingUtil: com.zoho.accounts.clientframework.NetworkingUtil$Response connectTo(java.lang.String,java.lang.String,java.util.Map,boolean)>",
+"Stmt": "$r6 = virtualinvoke $r5.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "83",
+"Calls": "37",
+"Callers": "2",
+},
+{
+"Method": "<com.zoho.accounts.clientframework.NetworkingUtil: com.zoho.accounts.clientframework.NetworkingUtil$Response connectTo(java.lang.String,java.lang.String,java.util.Map,boolean)>",
+"Stmt": "virtualinvoke $r7.<java.net.HttpURLConnection: void connect()>()",
+"Units": "83",
+"Calls": "37",
+"Callers": "2",
+},

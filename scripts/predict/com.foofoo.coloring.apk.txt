@@ -1,0 +1,28 @@
+{
+"Forward": [
+{
+"Type": "Source",
+"Method": "<com.distriqt.extension.inappbilling.activities.ProductViewActivity: void onCreate(android.os.Bundle)>",
+"Stmt": "$r10 = virtualinvoke $r9.<android.content.pm.PackageManager: java.util.List queryIntentActivities(android.content.Intent,int)>($r4, 0)",
+"Propagations": 36,
+"Caller": 0,
+"Callee": 10,
+"Runtime": 101,
+"InSets": 268,
+"OutSets": 274,
+},
+{
+"Type": "Source",
+"Method": "<com.distriqt.extension.inappbilling.activities.ProductViewActivity: void onCreate(android.os.Bundle)>",
+"Stmt": "$r10 = virtualinvoke $r9.<android.content.pm.PackageManager: java.util.List queryIntentActivities(android.content.Intent,int)>($r4, 0)",
+"Propagations": 35,
+"Caller": 0,
+"Callee": 10,
+"Runtime": 102,
+"InSets": 257,
+"OutSets": 263,
+},
+],
+"Backward": [
+]
+}

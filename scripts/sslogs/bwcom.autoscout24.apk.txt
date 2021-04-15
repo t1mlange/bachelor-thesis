@@ -1,0 +1,14 @@
+{
+"Method": "<com.optimizely.ab.android.event_handler.c$a: java.lang.Boolean a()>",
+"Stmt": "virtualinvoke $r8.<java.net.HttpURLConnection: void setRequestProperty(java.lang.String,java.lang.String)>("Content-Type", "application/json")",
+"Units": "103",
+"Calls": "41",
+"Callers": "1",
+},
+{
+"Method": "<com.optimizely.ab.android.shared.c: java.net.HttpURLConnection b(java.net.URL)>",
+"Stmt": "$r1 = virtualinvoke $r3.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "10",
+"Calls": "3",
+"Callers": "1",
+},

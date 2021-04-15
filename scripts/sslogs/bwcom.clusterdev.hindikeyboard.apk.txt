@@ -1,0 +1,28 @@
+{
+"Method": "<com.airbnb.lottie.v.c: com.airbnb.lottie.l c()>",
+"Stmt": "$r4 = virtualinvoke $r3.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "63",
+"Calls": "46",
+"Callers": "1",
+},
+{
+"Method": "<com.airbnb.lottie.v.c: com.airbnb.lottie.l c()>",
+"Stmt": "virtualinvoke $r6.<java.net.HttpURLConnection: void connect()>()",
+"Units": "63",
+"Calls": "46",
+"Callers": "1",
+},
+{
+"Method": "<com.example.android.softkeyboard.Helpers.FireBaseNotificationHelper: android.graphics.Bitmap u(java.lang.String)>",
+"Stmt": "$r3 = virtualinvoke $r2.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "16",
+"Calls": "6",
+"Callers": "1",
+},
+{
+"Method": "<com.example.android.softkeyboard.Helpers.FireBaseNotificationHelper: android.graphics.Bitmap u(java.lang.String)>",
+"Stmt": "virtualinvoke $r4.<java.net.HttpURLConnection: void connect()>()",
+"Units": "16",
+"Calls": "6",
+"Callers": "1",
+},

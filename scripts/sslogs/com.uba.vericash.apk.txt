@@ -1,0 +1,14 @@
+{
+"Method": "<me.leolin.shortcutbadger.ShortcutBadger: boolean initBadger(android.content.Context)>",
+"Stmt": "$r7 = virtualinvoke $r2.<android.content.pm.PackageManager: java.util.List queryIntentActivities(android.content.Intent,int)>($r4, 65536)",
+"Units": "80",
+"Calls": "29",
+"Callers": "2",
+},
+{
+"Method": "<me.leolin.shortcutbadger.util.BroadcastHelper: boolean canResolveBroadcast(android.content.Context,android.content.Intent)>",
+"Stmt": "$r3 = virtualinvoke $r2.<android.content.pm.PackageManager: java.util.List queryBroadcastReceivers(android.content.Intent,int)>($r0, 0)",
+"Units": "9",
+"Calls": "0",
+"Callers": "2",
+},

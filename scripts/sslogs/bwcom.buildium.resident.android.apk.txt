@@ -1,0 +1,14 @@
+{
+"Method": "<com.airbnb.lottie.t.c: com.airbnb.lottie.k e()>",
+"Stmt": "$r4 = virtualinvoke $r3.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "102",
+"Calls": "48",
+"Callers": "1",
+},
+{
+"Method": "<com.airbnb.lottie.t.c: com.airbnb.lottie.k e()>",
+"Stmt": "virtualinvoke $r5.<java.net.HttpURLConnection: void connect()>()",
+"Units": "102",
+"Calls": "48",
+"Callers": "1",
+},

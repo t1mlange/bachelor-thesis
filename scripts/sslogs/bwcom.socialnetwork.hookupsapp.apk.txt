@@ -1,0 +1,28 @@
+{
+"Method": "<com.socialnetwork.hookupapp.google.fcm.FcmFirebaseMessagingService$1: void run()>",
+"Stmt": "$r5 = virtualinvoke $r2.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "33",
+"Calls": "6",
+"Callers": "3",
+},
+{
+"Method": "<com.socialnetwork.hookupapp.google.fcm.FcmFirebaseMessagingService$1: void run()>",
+"Stmt": "virtualinvoke $r6.<java.net.HttpURLConnection: void connect()>()",
+"Units": "33",
+"Calls": "6",
+"Callers": "3",
+},
+{
+"Method": "<com.socialnetwork.hookupapp.videoplay.SurfaceVideoViewCreator$MyAsyncTask: java.lang.String a(java.lang.String[])>",
+"Stmt": "$r5 = virtualinvoke $r4.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "62",
+"Calls": "23",
+"Callers": "1",
+},
+{
+"Method": "<com.socialnetwork.hookupapp.videoplay.SurfaceVideoViewCreator$MyAsyncTask: java.lang.String a(java.lang.String[])>",
+"Stmt": "virtualinvoke $r6.<java.net.HttpURLConnection: void connect()>()",
+"Units": "62",
+"Calls": "23",
+"Callers": "1",
+},

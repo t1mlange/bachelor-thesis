@@ -1,0 +1,14 @@
+{
+"Method": "<f.a.a.x.b: f.a.a.x.d a(java.lang.String)>",
+"Stmt": "$r1 = virtualinvoke $r3.<java.net.URL: java.net.URLConnection openConnection()>()",
+"Units": "11",
+"Calls": "3",
+"Callers": "1",
+},
+{
+"Method": "<f.a.a.x.b: f.a.a.x.d a(java.lang.String)>",
+"Stmt": "virtualinvoke $r4.<java.net.HttpURLConnection: void connect()>()",
+"Units": "11",
+"Calls": "3",
+"Callers": "1",
+},

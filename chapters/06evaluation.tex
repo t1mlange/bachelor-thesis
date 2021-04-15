@@ -31,40 +31,41 @@
     Hence, negative values signify the backward analysis performed better. 
     The full results are in \autoref{t:droidbenchevaluation}.
 
-    In general, both implementations have similar average edge propagation counts. 
-    There are not many test cases where both perform identically; instead, dependent on the specific test case, the relative difference is between $-1$ and $1$. 
+    On average, our implementation needs more edge propagations to finish the analysis. 
+    If we look at it on a per test basis, there are not many test cases where both perform identically.
+    Instead, dependent on the specific test case, the relative difference is between $-1$ and $1$. 
     So, the expected behavior from \autoref{s:complexity} occurred: it highly depends on the analyzed app.
     However, we did not expect cases that let the backward edge propagations explode up to a factor of $10 000\%$, as seen in \code{LifecycleTest#BroadcastReceiverLifecycle3} and others. 
     In contrast, the existing forward implementation only at most a relative difference of $100\%$.
 
     \footnotesize
-    \newcommand{\tsubEight}[1]{\hiderowcolors\multicolumn{9}{c}{#1}\\\showrowcolors\hline}
+    \newcommand{\tsubEight}[1]{\hiderowcolors\rowcolor{gray!50}\multicolumn{9}{c}{#1}\\\showrowcolors\hline}
     \rowcolors{2}{gray!25}{white}
     \begin{longtable}{l | r | r | r | r | r | r | r | r}
-        \centering
-        & \multicolumn{2}{c|}{\textbf{Forwards}} & \multicolumn{2}{c|}{\textbf{Backwards}} & \multicolumn{4}{c}{\textbf{Difference}}\\
-        \textbf{App Name} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A}& \textbf{Total} & \textbf{Relative}\\
-        \hline\hline
+        \rowcolor{gray!50}& \multicolumn{2}{c|}{\cellcolor{gray!50}{\textbf{Forwards}}} & \multicolumn{2}{c|}{\textbf{Backwards}} & \multicolumn{4}{c}{\textbf{Difference}}\\
+        \rowcolor{gray!50}\multirow{-2}{*}{\cellcolor{gray!50}\textbf{App Name}} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A}& \textbf{Total} & \textbf{Relative}\\
+        \hline
+        \hline
         \endhead
         \tsubEight{AliasingTest}
         FlowSensitivity1 & $175$ & $72$ & $39$ & $4$ & $-136$ & $-68$ & $-204$ & $-0.83$\\
-        Merge1 & $94$ & $44$ & $61$ & $9$ & $-33$ & $-35$ & $-68$ & $-0.49$\\
+        Merge1 & $137$ & $65$ & $89$ & $47$ & $-48$ & $-18$ & $-66$ & $-0.33$\\
         SimpleAliasing1 & $35$ & $13$ & $20$ & $3$ & $-15$ & $-10$ & $-25$ & $-0.52$\\
         StrongUpdate1 & $30$ & $13$ & $11$ & $3$ & $-19$ & $-10$ & $-29$ & $-0.67$\\
         \hline
         \tsubEight{AndroidSpecificTest}
-        ApplicationModeling1 & $235$ & $103$ & $851$ & $1208$ & $616$ & $1105$ & $1721$ & $5.09$\\
+        ApplicationModeling1 & $212$ & $96$ & $851$ & $1208$ & $639$ & $1112$ & $1751$ & $5.69$\\
         DirectLeak1 & $3$ & $0$ & $4$ & $0$ & $1$ & $0$ & $1$ & $0.33$\\
         InactiveActivity & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
         Library2 & $5$ & $0$ & $6$ & $0$ & $1$ & $0$ & $1$ & $0.2$\\
         LogNoLeak & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
         Obfuscation1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
-        Parcel1 & $144$ & $15$ & $66$ & $68$ & $-78$ & $53$ & $-25$ & $-0.16$\\
-        PrivateDataLeak1 & $410$ & $110$ & $599$ & $835$ & $189$ & $725$ & $914$ & $1.76$\\
-        PrivateDataLeak2 & $15$ & $0$ & $5$ & $6$ & $-10$ & $6$ & $-4$ & $-0.27$\\
-        PrivateDataLeak3 & $17$ & $2$ & $212$ & $143$ & $195$ & $141$ & $336$ & $17.68$\\
-        runPublicAPIField1 & $89$ & $1$ & $62$ & $31$ & $-27$ & $30$ & $3$ & $0.03$\\
-        runPublicAPIField2 & $5$ & $0$ & $11$ & $1$ & $6$ & $1$ & $7$ & $1.4$\\
+        Parcel1 & $144$ & $15$ & $86$ & $93$ & $-58$ & $78$ & $20$ & $0.13$\\
+        PrivateDataLeak1 & $410$ & $110$ & $608$ & $766$ & $198$ & $656$ & $854$ & $1.64$\\
+        PrivateDataLeak2 & $15$ & $0$ & $5$ & $3$ & $-10$ & $3$ & $-7$ & $-0.47$\\
+        PrivateDataLeak3 & $17$ & $2$ & $210$ & $140$ & $193$ & $138$ & $331$ & $17.42$\\
+        runPublicAPIField1 & $89$ & $1$ & $43$ & $0$ & $-46$ & $-1$ & $-47$ & $-0.52$\\
+        runPublicAPIField2 & $5$ & $0$ & $11$ & $0$ & $6$ & $0$ & $6$ & $1.2$\\
         runView1 & $71$ & $50$ & $69$ & $0$ & $-2$ & $-50$ & $-52$ & $-0.43$\\
         \hline
         \tsubEight{ArrayAndListTest}
@@ -72,40 +73,40 @@
         ArrayAccess2 & $16$ & $4$ & $12$ & $0$ & $-4$ & $-4$ & $-8$ & $-0.4$\\
         ArrayAccess3 & $77$ & $34$ & $51$ & $100$ & $-26$ & $66$ & $40$ & $0.36$\\
         ArrayAccess4 & $164$ & $84$ & $42$ & $21$ & $-122$ & $-63$ & $-185$ & $-0.75$\\
-        ArrayAccess5 & $75$ & $5$ & $67$ & $63$ & $-8$ & $58$ & $50$ & $0.62$\\
+        ArrayAccess5 & $75$ & $5$ & $34$ & $23$ & $-41$ & $18$ & $-23$ & $-0.29$\\
         ArrayCopy1 & $18$ & $2$ & $9$ & $2$ & $-9$ & $0$ & $-9$ & $-0.45$\\
-        ArrayToString1 & $10$ & $1$ & $6$ & $1$ & $-4$ & $0$ & $-4$ & $-0.36$\\
+        ArrayToString1 & $10$ & $1$ & $6$ & $0$ & $-4$ & $-1$ & $-5$ & $-0.45$\\
         HashMapAccess1 & $22$ & $5$ & $15$ & $1$ & $-7$ & $-4$ & $-11$ & $-0.41$\\
         ListAccess1 & $85$ & $9$ & $60$ & $97$ & $-25$ & $88$ & $63$ & $0.67$\\
         MultidimensionalArray1 & $29$ & $3$ & $16$ & $23$ & $-13$ & $20$ & $7$ & $0.22$\\
         \hline
         \tsubEight{CallbackTest}
-        AnonymousClass1 & $152$ & $0$ & $208$ & $1$ & $56$ & $1$ & $57$ & $0.38$\\
+        AnonymousClass1 & $152$ & $0$ & $208$ & $0$ & $56$ & $0$ & $56$ & $0.37$\\
         Button1 & $58$ & $39$ & $43$ & $0$ & $-15$ & $-39$ & $-54$ & $-0.56$\\
-        Button2 & $454$ & $66$ & $155$ & $257$ & $-299$ & $191$ & $-108$ & $-0.21$\\
-        Button3 & $355$ & $89$ & $109$ & $408$ & $-246$ & $319$ & $73$ & $0.16$\\
+        Button2 & $444$ & $66$ & $155$ & $254$ & $-289$ & $188$ & $-101$ & $-0.2$\\
+        Button3 & $360$ & $89$ & $109$ & $408$ & $-251$ & $319$ & $68$ & $0.15$\\
         Button4 & $58$ & $39$ & $43$ & $0$ & $-15$ & $-39$ & $-54$ & $-0.56$\\
-        Button5 & $80$ & $40$ & $6$ & $6$ & $-74$ & $-34$ & $-108$ & $-0.9$\\
-        LocationLeak1 & $617$ & $222$ & $260$ & $300$ & $-357$ & $78$ & $-279$ & $-0.33$\\
-        LocationLeak2 & $212$ & $121$ & $152$ & $2$ & $-60$ & $-119$ & $-179$ & $-0.54$\\
-        LocationLeak3 & $259$ & $73$ & $104$ & $117$ & $-155$ & $44$ & $-111$ & $-0.33$\\
+        Button5 & $80$ & $40$ & $6$ & $3$ & $-74$ & $-37$ & $-111$ & $-0.93$\\
+        LocationLeak1 & $617$ & $222$ & $260$ & $298$ & $-357$ & $76$ & $-281$ & $-0.33$\\
+        LocationLeak2 & $212$ & $121$ & $152$ & $0$ & $-60$ & $-121$ & $-181$ & $-0.54$\\
+        LocationLeak3 & $220$ & $73$ & $104$ & $115$ & $-116$ & $42$ & $-74$ & $-0.25$\\
         MethodOverride1 & $3$ & $0$ & $2$ & $0$ & $-1$ & $0$ & $-1$ & $-0.33$\\
-        MultiHandlers1 & $17$ & $0$ & $145$ & $151$ & $128$ & $151$ & $279$ & $16.41$\\
-        Ordering1 & $456$ & $151$ & $44$ & $2$ & $-412$ & $-149$ & $-561$ & $-0.92$\\
-        RegisterGlobal1 & $207$ & $103$ & $49$ & $0$ & $-158$ & $-103$ & $-261$ & $-0.84$\\
+        MultiHandlers1 & $17$ & $0$ & $145$ & $149$ & $128$ & $149$ & $277$ & $16.29$\\
+        Ordering1 & $456$ & $151$ & $44$ & $0$ & $-412$ & $-151$ & $-563$ & $-0.93$\\
+        RegisterGlobal1 & $291$ & $162$ & $49$ & $0$ & $-242$ & $-162$ & $-404$ & $-0.89$\\
         RegisterGlobal2 & $52$ & $37$ & $43$ & $0$ & $-9$ & $-37$ & $-46$ & $-0.52$\\
-        Unregister1 & $11$ & $0$ & $9$ & $1$ & $-2$ & $1$ & $-1$ & $-0.09$\\
+        Unregister1 & $11$ & $0$ & $9$ & $0$ & $-2$ & $0$ & $-2$ & $-0.18$\\
         \hline
         \tsubEight{EmulatorDetectionTest}
-        Battery1 & $7$ & $0$ & $43$ & $15$ & $36$ & $15$ & $51$ & $7.29$\\
+        Battery1 & $7$ & $0$ & $39$ & $15$ & $32$ & $15$ & $47$ & $6.71$\\
         Bluetooth1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
         Build1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
-        Contacts1 & $52$ & $0$ & $210$ & $19$ & $158$ & $19$ & $177$ & $3.4$\\
+        Contacts1 & $53$ & $0$ & $200$ & $19$ & $147$ & $19$ & $166$ & $3.13$\\
         ContentProvider1 & $13$ & $0$ & $8$ & $0$ & $-5$ & $0$ & $-5$ & $-0.38$\\
         DeviceId1 & $15$ & $0$ & $6$ & $0$ & $-9$ & $0$ & $-9$ & $-0.6$\\
         File1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
-        IMEI1 & $129$ & $0$ & $140$ & $34$ & $11$ & $34$ & $45$ & $0.35$\\
-        IP1 & $4$ & $0$ & $29$ & $1$ & $25$ & $1$ & $26$ & $6.5$\\
+        IMEI1 & $137$ & $0$ & $422$ & $1$ & $285$ & $1$ & $286$ & $2.09$\\
+        IP1 & $4$ & $0$ & $29$ & $0$ & $25$ & $0$ & $25$ & $6.25$\\
         PI1 & $6$ & $0$ & $4$ & $0$ & $-2$ & $0$ & $-2$ & $-0.33$\\
         PlayStore1 & $158$ & $0$ & $8$ & $0$ & $-150$ & $0$ & $-150$ & $-0.95$\\
         PlayStore2 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
@@ -127,54 +128,61 @@
         Exceptions1 & $16$ & $0$ & $13$ & $0$ & $-3$ & $0$ & $-3$ & $-0.19$\\
         Exceptions2 & $22$ & $0$ & $13$ & $0$ & $-9$ & $0$ & $-9$ & $-0.41$\\
         Exceptions3 & $18$ & $0$ & $11$ & $0$ & $-7$ & $0$ & $-7$ & $-0.39$\\
-        Exceptions4 & $20$ & $1$ & $22$ & $1$ & $2$ & $0$ & $2$ & $0.1$\\
-        Exceptions5 & $13$ & $1$ & $16$ & $1$ & $3$ & $0$ & $3$ & $0.21$\\
-        Exceptions6 & $77$ & $12$ & $23$ & $0$ & $-54$ & $-12$ & $-66$ & $-0.74$\\
+        Exceptions4 & $21$ & $1$ & $22$ & $0$ & $1$ & $-1$ & $0$ & $0.0$\\
+        Exceptions5 & $13$ & $1$ & $16$ & $0$ & $3$ & $-1$ & $2$ & $0.14$\\
+        Exceptions6 & $78$ & $12$ & $23$ & $0$ & $-55$ & $-12$ & $-67$ & $-0.74$\\
         Exceptions7 & $71$ & $12$ & $6$ & $0$ & $-65$ & $-12$ & $-77$ & $-0.93$\\
-        FactoryMethods1 & $40$ & $0$ & $14$ & $2$ & $-26$ & $2$ & $-24$ & $-0.6$\\
-        Loop1 & $93$ & $2$ & $46$ & $7$ & $-47$ & $5$ & $-42$ & $-0.44$\\
-        Loop2 & $123$ & $2$ & $74$ & $14$ & $-49$ & $12$ & $-37$ & $-0.3$\\
+        FactoryMethods1 & $40$ & $0$ & $14$ & $0$ & $-26$ & $0$ & $-26$ & $-0.65$\\
+        Loop1 & $93$ & $2$ & $51$ & $0$ & $-42$ & $-2$ & $-44$ & $-0.46$\\
+        Loop2 & $123$ & $2$ & $79$ & $0$ & $-44$ & $-2$ & $-46$ & $-0.37$\\
         Serialization1 & $50$ & $4$ & $22$ & $29$ & $-28$ & $25$ & $-3$ & $-0.06$\\
         SourceCodeSpecific1 & $16$ & $0$ & $45$ & $7$ & $29$ & $7$ & $36$ & $2.25$\\
         StartProcessWithSecret1 & $29$ & $8$ & $17$ & $3$ & $-12$ & $-5$ & $-17$ & $-0.46$\\
-        StaticInitialization1 & $-$ & $-$ & $9$ & $0$ & $-$ & $-$ & $-$ & $-$\\
+        StaticInitialization1 & $26$ & $27$ & $9$ & $0$ & $-17$ & $-27$ & $-44$ & $-0.83$\\
         StaticInitialization2 & $57$ & $29$ & $86$ & $0$ & $29$ & $-29$ & $0$ & $0.0$\\
         StaticInitialization3 & $35$ & $9$ & $5$ & $0$ & $-30$ & $-9$ & $-39$ & $-0.89$\\
-        StringFormatter1 & $16$ & $1$ & $10$ & $1$ & $-6$ & $0$ & $-6$ & $-0.35$\\
-        StringPatternMatching1 & $23$ & $1$ & $8$ & $6$ & $-15$ & $5$ & $-10$ & $-0.42$\\
-        StringToCharArray1 & $91$ & $4$ & $42$ & $6$ & $-49$ & $2$ & $-47$ & $-0.49$\\
-        StringToOutputStream1 & $26$ & $3$ & $30$ & $3$ & $4$ & $0$ & $4$ & $0.14$\\
+        StringFormatter1 & $16$ & $1$ & $10$ & $0$ & $-6$ & $-1$ & $-7$ & $-0.41$\\
+        StringPatternMatching1 & $23$ & $1$ & $8$ & $4$ & $-15$ & $3$ & $-12$ & $-0.5$\\
+        StringToCharArray1 & $91$ & $4$ & $47$ & $0$ & $-44$ & $-4$ & $-48$ & $-0.51$\\
+        StringToOutputStream1 & $26$ & $3$ & $25$ & $1$ & $-1$ & $-2$ & $-3$ & $-0.1$\\
         UnreachableCode & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
         VirtualDispatch1 & $128$ & $31$ & $88$ & $28$ & $-40$ & $-3$ & $-43$ & $-0.27$\\
         VirtualDispatch2 & $7$ & $0$ & $12$ & $0$ & $5$ & $0$ & $5$ & $0.71$\\
         VirtualDispatch3 & $8$ & $0$ & $6$ & $0$ & $-2$ & $0$ & $-2$ & $-0.25$\\
         VirtualDispatch4 & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
         \hline
+        \tsubEight{ImplicitFlowTest}
+        ImplicitFlow1 & $1823$ & $144$ & $3315$ & $11$ & $1492$ & $-133$ & $1359$ & $0.69$\\
+        ImplicitFlow2 & $146$ & $63$ & $991$ & $3$ & $845$ & $-60$ & $785$ & $3.76$\\
+        ImplicitFlow3 & $148$ & $50$ & $1023$ & $20$ & $875$ & $-30$ & $845$ & $4.27$\\
+        ImplicitFlow4 & $67$ & $0$ & $1864$ & $12$ & $1797$ & $12$ & $1809$ & $27.0$\\
+        ImplicitFlow6 & $18$ & $0$ & $112$ & $0$ & $94$ & $0$ & $94$ & $5.22$\\
+        \hline
         \tsubEight{LifecycleTest}
-        ActivityEventSequence1 & $58$ & $35$ & $73$ & $0$ & $15$ & $-35$ & $-20$ & $-0.22$\\
+        ActivityEventSequence1 & $58$ & $35$ & $72$ & $0$ & $14$ & $-35$ & $-21$ & $-0.23$\\
         ActivityEventSequence2 & $32$ & $24$ & $77$ & $0$ & $45$ & $-24$ & $21$ & $0.38$\\
-        ActivityEventSequence3 & $233$ & $116$ & $156$ & $1$ & $-77$ & $-115$ & $-192$ & $-0.55$\\
+        ActivityEventSequence3 & $209$ & $116$ & $156$ & $0$ & $-53$ & $-116$ & $-169$ & $-0.52$\\
         ActivityLifecycle1 & $99$ & $72$ & $156$ & $7$ & $57$ & $-65$ & $-8$ & $-0.05$\\
         ActivityLifecycle2 & $47$ & $34$ & $33$ & $0$ & $-14$ & $-34$ & $-48$ & $-0.59$\\
         ActivityLifecycle3 & $65$ & $31$ & $28$ & $0$ & $-37$ & $-31$ & $-68$ & $-0.71$\\
         ActivityLifecycle4 & $49$ & $33$ & $14$ & $0$ & $-35$ & $-33$ & $-68$ & $-0.83$\\
-        ActivitySavedState1 & $20$ & $0$ & $7$ & $1$ & $-13$ & $1$ & $-12$ & $-0.6$\\
+        ActivitySavedState1 & $20$ & $0$ & $7$ & $0$ & $-13$ & $0$ & $-13$ & $-0.65$\\
         ApplicationLifecycle1 & $37$ & $10$ & $82$ & $0$ & $45$ & $-10$ & $35$ & $0.74$\\
         ApplicationLifecycle2 & $86$ & $17$ & $94$ & $155$ & $8$ & $138$ & $146$ & $1.42$\\
         ApplicationLifecycle3 & $32$ & $12$ & $21$ & $0$ & $-11$ & $-12$ & $-23$ & $-0.52$\\
-        AsynchronousEventOrdering1 & $51$ & $31$ & $16$ & $0$ & $-35$ & $-31$ & $-66$ & $-0.8$\\
+        AsynchronousEventOrdering1 & $58$ & $31$ & $16$ & $0$ & $-42$ & $-31$ & $-73$ & $-0.82$\\
         BroadcastReceiverLifecycle1 & $4$ & $0$ & $4$ & $0$ & $0$ & $0$ & $0$ & $0.0$\\
         BroadcastReceiverLifecycle2 & $109$ & $44$ & $248$ & $114$ & $139$ & $70$ & $209$ & $1.37$\\
         BroadcastReceiverLifecycle3 & $3$ & $0$ & $195$ & $110$ & $192$ & $110$ & $302$ & $100.67$\\
         EventOrdering1 & $61$ & $29$ & $30$ & $0$ & $-31$ & $-29$ & $-60$ & $-0.67$\\
         FragmentLifecycle1 & $187$ & $127$ & $90$ & $0$ & $-97$ & $-127$ & $-224$ & $-0.71$\\
         FragmentLifecycle2 & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$ & $-$\\
-        ServiceEventSequence1 & $53$ & $20$ & $152$ & $34$ & $99$ & $14$ & $113$ & $1.55$\\
-        ServiceEventSequence2 & $64$ & $21$ & $389$ & $220$ & $325$ & $199$ & $524$ & $6.16$\\
+        ServiceEventSequence1 & $53$ & $20$ & $124$ & $34$ & $71$ & $14$ & $85$ & $1.16$\\
+        ServiceEventSequence2 & $105$ & $49$ & $389$ & $220$ & $284$ & $171$ & $455$ & $2.95$\\
         ServiceEventSequence3 & $46$ & $12$ & $275$ & $151$ & $229$ & $139$ & $368$ & $6.34$\\
         ServiceLifecycle1 & $119$ & $44$ & $42$ & $0$ & $-77$ & $-44$ & $-121$ & $-0.74$\\
         ServiceLifecycle2 & $68$ & $20$ & $89$ & $21$ & $21$ & $1$ & $22$ & $0.25$\\
-        SharedPreferenceChanged1 & $13$ & $0$ & $20$ & $1$ & $7$ & $1$ & $8$ & $0.62$\\
+        SharedPreferenceChanged1 & $13$ & $0$ & $11$ & $0$ & $-2$ & $0$ & $-2$ & $-0.15$\\
         \hline
         \tsubEight{ReflectionTest}
         Reflection1 & $15$ & $5$ & $8$ & $0$ & $-7$ & $-5$ & $-12$ & $-0.6$\\
@@ -196,7 +204,8 @@
         TimerTask1 & $203$ & $28$ & $32$ & $33$ & $-171$ & $5$ & $-166$ & $-0.72$\\
         \hline\hline
         \hiderowcolors
-        $\varnothing$ Propagations & $70.74$ & $21.42$ & $61.94$ & $41.54$ & $-8.8$ & $20.11$ & $11.32$ & $1.41$\\
+        $\varnothing$ Propagations & $85.46$ & $23.41$ & $117.64$ & $38.6$ & $32.19$ & $15.19$ & $47.37$ & $1.61$\\
+        $\varnothing$ without Implicit & $70.61$ & $22.46$ & $60.56$ & $40.1$ & $-10.05$ & $17.63$ & $7.59$ & $1.34$\\
         \caption{DroidBench Performance Evaluation Results}
         \label{t:droidbenchevaluation}
     \end{longtable}
@@ -232,7 +241,9 @@
     \paragraph{Reflection6}
     The reflective call site has multiple callees in the interprocedural control-flow graph. 
     Backward all of these callees are visited, of which only one contains a source statement. 
-    Forwards, the taint is introduced in the callee at the source and just one return site needs to be processed.
+    Forward, the taint is introduced in the callee at the source and just one return site needs to be processed.
+
+    Summarized, our implementation suffers mostly from additional sinks.
 
     \subsection{Using A More Precise Taint Wrapper}
     We noticed the overtainting in \code{PrivateDataLeak3} is caused by the \code{EasyTaintWrapper}.
@@ -244,9 +255,8 @@
     \footnotesize
     \rowcolors{2}{gray!25}{white}
     \begin{longtable}{l | r | r | r | r | r | r | r | r}
-        \centering
-        & \multicolumn{2}{c|}{\textbf{EasyTW}} & \multicolumn{2}{c|}{\textbf{SummaryTW}} & \multicolumn{4}{c}{\textbf{Difference}}\\
-        \textbf{App Name} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A}& \textbf{Total} & \textbf{Relative}\\
+        \rowcolor{gray!50} & \multicolumn{2}{c|}{\textbf{EasyTW}} & \multicolumn{2}{c|}{\textbf{SummaryTW}} & \multicolumn{4}{c}{\textbf{Difference}}\\
+        \rowcolor{gray!50}\multirow{-2}{*}{\textbf{App Name}} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A}& \textbf{Total} & \textbf{Relative}\\
         \hline\hline
         \endhead
         \tsubEight{AliasingTest}
@@ -433,10 +443,11 @@
     The call graph generation was limited to 180 seconds and the call-graphs were serialized before, so every run was on the same call-graph. 
     The configuration summary is in \autoref{t:realworldconfig}.
 
-    \begin{table}[ht]
+    \begin{table}[tbp]
         \centering
+        \rowcolors{2}{gray!25}{white}
         \begin{tabular}{l | l}
-            \textbf{Option} & \textbf{Value}\\
+            \rowcolor{gray!50}\textbf{Option} & \textbf{Value}\\
             \hline\hline
             Array Size Tainting & disabled\\
             Inspect Sources \& Sinks & disabled\\
@@ -458,10 +469,11 @@
     Their extracted list of sources and sinks contains roughly $2.17$ times more sources than sinks.
     The list of sources and sinks used in this evaluation is in \autoref{t:realworldsources} and \autoref{t:realworldsinks}.
 
-    \begin{table}[ht]
+    \begin{table}[tbp]
         \centering
+        \rowcolors{2}{gray!25}{white}
         \begin{tabular}{l | l}
-            \textbf{Class} & \textbf{Method}\\
+            \rowcolor{gray!50}\textbf{Class} & \textbf{Method}\\
             \hline\hline
             java.net.URL & set()\\
             & openConnection()\\
@@ -486,9 +498,10 @@
 
     \begin{table}[ht]
         \centering
+        \rowcolors{2}{gray!25}{white}
         \begin{tabular}{l | l}
-            \textbf{Class} & \textbf{Method}\\
-            \hline\hline
+            \rowcolor{gray!50}\textbf{Class} & \textbf{Method}\\
+            \hline
             android.location.Location & getLatitude()\\
             & getLongitude()\\
             \hline

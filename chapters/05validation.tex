@@ -63,10 +63,10 @@
     
     Our backward-directed implementation yields nearly the same result as the existing forward implementation, with one missed leak more than the baseline. We achieve a F1 measure of $0.89$ equally to the baseline.
 
-    \begin{longtable}{l | l | l}% begin droidbench
+    \begin{longtable}{l | l | l}
         \textbf{App Name} & \textbf{Forwards} & \textbf{Backwards}\\
         \hline\hline
-        \endhead
+        \endhead % begin droidbench
         \tsub{Aliasing}
         FlowSensitivity1 & &\\
         Merge1 & \fp & \fp\\
@@ -110,7 +110,7 @@
         ContentProvider1 & \tp \tp & \tp \tp\\
         DeviceId1 & \tp & \tp\\
         File1 & \tp & \tp\\
-        IMEI1 & \tp \tp & \fn \fn\\
+        IMEI1 & \tp \tp & \tp \tp\\
         IP1 & \tp & \tp\\
         PI1 & \tp & \tp\\
         PlayStore1 & \tp \tp & \tp \tp\\
@@ -202,6 +202,13 @@
         VirtualDispatch3 & \fp & \fp\\
         VirtualDispatch4 & &\\
         \hline
+        \tsub{Implicit Flows}
+        ImplicitFlow1 & \tp & \tp\\
+        ImplicitFlow2 & \tp \tp & \tp \tp\\
+        ImplicitFlow3 & \tp \tp & \tp \tp\\
+        ImplicitFlow4 & \fn & \fn\\
+        ImplicitFlow5 & & \\
+        \hline
         \tsub{Miscellaneous Android-Specific}
         ApplicationModeling1 & \tp & \tp\\
         DirectLeak1 & \tp & \tp\\
@@ -236,11 +243,11 @@
         Looper1 & \tp & \tp\\
         TimerTask1 & \tp & \tp\\
         \hline\hline  % end droidbench
-        \tp &$ 103 $&$ 102 $\\
-        \fp &$ 13 $&$ 13 $\\
-        \fn &$ 12 $&$ 13 $\\
-        Precision & $ 88.79 \%$ & $ 88.7 \%$\\
-        Recall & $ 89.57 \% $ & $ 88.7 \%$\\
+        \tp &$ 108 $&$ 109 $\\
+        \fp &$ 14 $&$ 14 $\\
+        \fn &$ 13 $&$ 12 $\\
+        Precision & $ 88.52 \%$ & $ 88.62 \%$\\
+        Recall & $ 89.26 \% $ & $ 90.08 \%$\\
         F1 measure & $ 0.89 $ & $ 0.89 $\\
         \caption{DroidBench Validation Results}
         \label{t:droidbenchvalidation}

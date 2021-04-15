@@ -12,16 +12,18 @@ with open("/home/tim/Projects/bachelor-thesis/chapters/05validation.tex") as f:
     found = False
     for index in [0,1]:
         for line in lines:
-            if "begin{longtable}{l | l | l}% begin droidbench" in line:
+            if "% begin droidbench" in line:
                 found = True
                 continue
             if "% end droidbench" in line:
+                found = False
                 break
             if "%" in line or (not "&" in line):
                 continue
+            if not found:
+                continue
             
             splitted = line.split("&")
-            
             for seq in splitted[index+1].split():
                 if "\\tp" in seq:
                     tp[index] += 1
@@ -33,6 +35,7 @@ with open("/home/tim/Projects/bachelor-thesis/chapters/05validation.tex") as f:
         p[index] = tp[index] / (tp[index] + fp[index])
         r[index] = tp[index] / (tp[index] + fn[index])
         f1[index] = 2*p[index]*r[index] / (p[index] + r[index])
+
 
     print("\\tp &$", tp[0], "$&$", tp[1], "$\\\\")
     print("\\fp &$", fp[0], "$&$", fp[1], "$\\\\")

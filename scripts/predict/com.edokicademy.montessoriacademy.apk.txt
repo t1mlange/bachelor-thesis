@@ -1,0 +1,17 @@
+{
+"Forward": [
+{
+"Type": "Source",
+"Method": "<com.huawei.hms.utils.HMSPackageManager: android.util.Pair b()>",
+"Stmt": "$r4 = virtualinvoke $r2.<android.content.pm.PackageManager: java.util.List queryIntentServices(android.content.Intent,int)>($r3, 128)",
+"Propagations": 89,
+"Caller": 3,
+"Callee": 51,
+"Runtime": 713,
+"InSets": 949,
+"OutSets": 950,
+},
+],
+"Backward": [
+]
+}
