@@ -1,13 +1,13 @@
 import itertools
 
-# filenames = [
-#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easybw.txt",
-#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/sumbw.txt",
-#     ]
 filenames = [
-    "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easyfw.txt",
     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easybw.txt",
+    "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/sumbw.txt",
     ]
+# filenames = [
+#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easyfw.txt",
+#     "/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/easybw.txt",
+#     ]
 dic = {}
 
 class TestResult:
@@ -56,6 +56,9 @@ for i, fname in enumerate(filenames):
                     dic[category][name] = TestResult(name, -1, -1)
                 dic[category][name].setEdges(infoflow, alias)
 
+with open("/home/tim/Projects/bachelor-thesis/scripts/droidbench_data/equalss.txt") as f:
+    equalSourcesSinks = f.read()
+
 string = ""
 summary = [0,0,0,0,0,0,0,0]
 count = 0
@@ -63,7 +66,7 @@ for k, v in dic.items():
     string += "\\hline\n\\tsubEight{%s}\n" % k
     for k2, v2 in sorted(v.items()):
         string += v2.toString()
-        if v2.totalDiff != "-" and not "Implicit" in k2 and not "IMEI" in k2: #and k2 != "Serialization1"
+        if v2.totalDiff != "-" and not "Implicit" in k2 and not "IMEI" in k2 and k2 != "Serialization1":
             summary[0] += v2.infoflowFw
             summary[1] += v2.aliasFw
             summary[2] += v2.infoflowBw
