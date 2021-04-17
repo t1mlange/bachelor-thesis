@@ -15,7 +15,7 @@
     Dynamic analysis observes the program's runtime behavior, while static analysis works on a representation of the code. 
     Both have different tradeoffs. 
     Achieving good code coverage is a challenge in dynamic analysis. 
-    In contrast, a static analysis often can not infer runtime values and conditions, hence follows paths never taken at runtime, also called \textit{infeasible paths} \cite{Arzt2017PhD}.
+    In contrast, a static analysis often can not infer runtime properties, hence follows paths never taken at runtime, also called \textit{infeasible paths} \cite{Arzt2017PhD}.
     Thus the dynamic analysis is an underapproximation and static analysis is an overapproximation. 
     In the following, we only consider static analysis.
 
@@ -57,10 +57,11 @@
 
     The analysis direction of a data flow analysis is also decided by the problem to be solved. 
     A live variables analysis computes whether a variable is read before written in the future to pontentialy eliminate dead assignments. 
-    The problem is naturally solved by a backward pass. 
+    The problem is traditionally solved by a backward pass. 
     On the other hand, a reaching definitions analysis finds out if a definition reaches a statement without a intermediate assignment which is certainly solved by a forward pass.
-    Additionally, there are also data flow analyses such as program slicing\footnotemark{} and taint analysis for the direction is a design-choice.
-    \footnotetext{Program slicing identifies a slice, a subset of the programs statements, which influence a statement (backward pass) or are influenced by a statement (forward pass).}
+    Additionally, there are also data flow analyses for which the direction is a design-choice.
+    For example, program slicing identifies a slice, a subset of the programs statements, which influence a statement (backward pass) or are influenced by a statement (forward pass).
+    Taint analysis on the other hand can be solved in both directions with the same results \cite{Khedker2009}.
     
     \section{IFDS}\label{s:bigifds}
     \subsection{Original Definition}\label{s:ifds}
@@ -155,7 +156,7 @@
     So, the proposed tabulation algorithm for solving the realizable path problem is a dynamic algorithm \cite{Reps1995}. 
 
     % Fix point
-    Eventually, there are no facts to propagate anymore and the analysis will terminate.
+    Eventually, the worklist is empty as there are no facts to propagate anymore and the analysis will terminate.
     There are two ways for a fact to be not propagated further.
     Either a flow function killed the fact or the same fact was already observed at a statement, meaning the IFDS analysis reached a fixpoint \cite{Reps1995}.
 
@@ -314,8 +315,9 @@
     In \autoref{lst:jvmstack} is an example of a simple code snippet translated to Java bytecode. 
     Simple expressions such as \code{c = a + b} translate into multiple statements and there is no fixed length of an expression in the bytecode. 
     The analysis would also have to reconstruct the expressions ad-hoc. 
-    Furthermore, Java bytecode has over 200 possible instructions\footnote{\url{https://docs.oracle.com/javase/specs/jvms/se8/html/}}, which need to be considered and only knows primitive types and references. 
+    Furthermore, Java bytecode has over 200 possible instructions\footnotemark{}, which need to be considered and only knows primitive types and references. 
     Concluding, stack-based IRs are suitable for just-in-time interpretation but inconvenient for data flow analysis \cite{Valleerai2004}.
+    \footnotetext{Source: \url{https://docs.oracle.com/javase/specs/jvms/se8/html/} (visited on 17.04.2021)}
 
     \begin{figure}[ht]
         \centering
@@ -362,22 +364,23 @@
 
     \section{FlowDroid}\label{s:flowdroid}
     \textsc{FlowDroid} is a precise context-, flow-, object- and field-sensitive static taint analysis tool for Android apps\cite{Arzt2014}. 
-    Since its initial release in 2014, it is actively maintained and gained traction in research and academia\footnote{\url{https://github.com/secure-software-engineering/FlowDroid}}. 
+    Since its initial release in 2014, it is actively maintained and gained traction in research and academia\footnotemark{}. 
     It is based on Soot, a Java optimization framework, which later has been extended for static analysis \cite{Lam2011}. 
     Soot provides the call graph and the conversion from Java and Dalvik bytecode to Jimple, the intermediate representation of choice for \textsc{FlowDroid} \cite{Arzt2017PhD}.
+    \footnotetext{Source: \url{https://github.com/secure-software-engineering/FlowDroid} (visited on 17.04.2021)}
 
     Androids activity-lifecycle concept does not have a single entry point; instead, multiple callbacks are a possible entry point. 
     Also, an Android app can contain multiple components and register callbacks in various of Android's standard libraries. 
     \textsc{FlowDroid} models the entire Android lifecycle to be precise and generates a dummy main method to provide a single entry point for the call graph generation. 
     \cite{Arzt2014}.
 
-    \begin{figure}[ht]
+    \begin{figure}[tbp]
         \centering
-        \includegraphics[width=0.4\textwidth]{figs/activity_lifecycle.png}
+        \includegraphics[width=0.35\textwidth]{figs/activity_lifecycle.png}
         \caption{Activity Lifecycle\protect\footnotemark}
         \label{f:activity}
     \end{figure}
-    \footnotetext{Taken from \url{https://developer.android.com/guide/components/activities/activity-lifecycle}.}
+    \footnotetext{Source: \url{https://developer.android.com/guide/components/activities/activity-lifecycle} (visited on 17.04.2021)}
 
     \textsc{FlowDroid} inherits flow- and context-sensitivity from IFDS and the object- and field-sensitivity from symbolic access paths. To provide precise results even with aliases in use, \textsc{FlowDroid} comprises an alais analysis. The alias analysis is encoded as another IFDS problem and resolves all encountered aliases on-demand. The two IFDS analyses are intertwined to maintain flow- and context-sensitivity between both analyses\cite{Arzt2014}.
 

@@ -30,7 +30,7 @@
 
     Note that pointer analysis itself is a non-distributive problem \cite{Arzt2017PhD, Spaeth2016}. Nonetheless, the alias analysis is encoded in IFDS and we just accept the possibly imprecise results due to the overapproximation. Not using the intertwined alias analysis is too imprecise and the cases of overapproximation are rare in practice \cite{Arzt2017PhD}.
 
-    \begin{figure}[ht]
+    \begin{figure}[tbp]
         \centering
         \begin{subfigure}[b]{0.45\textwidth}
             \centering
@@ -70,7 +70,7 @@
     
     The alias analysis searches for missed updates. If the analysis found an update, e.g., the taint is on the left side of the assignment, the analysis injects an edge to the statement with the taint into the main analysis' worklist. Consider again \autoref{lst:aliasex_a}. In line 3, the alias analysis encounters the tainted \code{b.str} on the left side. At this point, \code{b.str} gets handed back to the main analysis, following the missed update to find a possible leak. In this case, the leak happens right away.
 
-    \begin{figure}[ht]
+    \begin{figure}[tbp]
         \centering
         \begin{adjustbox}{max width=\columnwidth}
             \begin{lstlisting}[gobble=16]
@@ -89,7 +89,7 @@
     \paragraph{Maintaining Flow Sensitivity}
     Arzt solved this in the existing forward implementation using an activation unit. This statement marks the update at which the alias gets tainted and can leak at sinks. This concept does not work for our backward implementation as the alias analysis traverses forward where a write to a variable means a leak. Thus we introduce the turn unit. The turn unit holds the last non-aliasing assignment. When a taint reaches its turn unit in the aliasing analysis, the analysis kills the taint. Consider \autoref{lst:turnunit}. The introduced taint \code{str} in line 6 also has line 6 as a turn unit. In line 4, a non-aliasing assignment happens. In line 2, the alias analysis starts for \code{a.str}. Without the turn unit, the taint would pass line 3. Further in line 5, the taint is handed to the main analysis. The main analysis then reports a leak. With the turn unit, the alias analysis kills the taint in line 4, preventing the false positive. 
     
-    \begin{figure}[ht]
+    \begin{figure}[tbp]
         \centering
         \begin{adjustbox}{max width=\columnwidth}
             \begin{lstlisting}[gobble=16]
@@ -208,7 +208,7 @@
     SPARK, which default call graph algorithm in \code{FlowDroid}, overapproximates the \code{<clinit>} behavior. It adds an edge to \code{<clinit>} at each statement containing a \code{StaticFieldRef}, \code{StaticInvokeExpr} or \code{NewExpr}
     \footnote{\url{https://github.com/soot-oss/soot/blob/59931576784b910a7d38f81910b7313aa2feafea/src/main/java/soot/jimple/toolkits/callgraph/OnFlyCallGraphBuilder.java\#L969}}.
    
-    \begin{figure}[ht]
+    \begin{figure}[tbp]
         \centering
         \begin{subfigure}[b]{0.45\textwidth}
             \centering
@@ -263,7 +263,7 @@
         \item If the base object is tainted, taint all parameters.
     \end{itemize}
 
-    \begin{figure}[ht]
+    \begin{figure}[tbp]
         \centering
         \begin{adjustbox}{max width=\columnwidth}
             \begin{lstlisting}[gobble=16]
@@ -295,7 +295,7 @@
     Moving the detection of incoming taints flows into sources from the CallToReturn to the Call flow function was not an option because by default source methods are not visited and changing this would require multiple changes in the existing implementation and also ours. 
     Our solution is to add a NOP statement in such cases before the analysis. Due to the entry points being known beforehand, the overhead is nearly zero.
 
-    \begin{figure}[ht]
+    \begin{figure}[tbp]
         \centering
         \begin{subfigure}[b]{\textwidth}
             \begin{lstlisting}[gobble=16]

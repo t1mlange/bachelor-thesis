@@ -50,13 +50,22 @@
     In addition, another context-free grammar model the field-sensitivity.
     Contrary to access paths, this does not increase the domain and needs no $k$-limiting to be fast enough in practice. 
     Then it computes the acceptance state of both pushdown automata to combine context- and field-sensitivity. 
-    Now, in general, an automaton with two stacks is undecidable. The separation of the problems into two reachability problems and later combining the results is decidable. However, if both automata are in an acceptance state via different paths, the algorithm overapproximates the solution. 
+    Now, in general, an automaton with two stacks is undecidable. 
+    The separation of the problems into two reachability problems and later combining the results is decidable. 
+    However, if both automata are in an acceptance state via different paths, the algorithm overapproximates the solution. 
     Their results look promising with a performance close to access paths with $k=1$.
     Also, they could not observe the overapproximation in practice when performing typestate analysis.\\
     CogniCrypt \cite{Krueger2017} finds misuses of cryptographic APIs based on rules written in a domain-specific language.
     Internally, it also consists of a taint analysis and is based on SPDS.
-    CodeShield\footnote{\url{https://codeshield.io/}} is a propietary taint analysis for cloud applications to detect vulnerabilities and is also based on IFDS.
-    The only open-source general purpose taint analysis based on SPDS we found is SWAN\footnote{\url{https://github.com/themaplelab/swan}}. It is targeted at the SWIFT programming language but still in heavy development.
+    CodeShield\footnote{\url{https://codeshield.io/}} is a propietary taint analysis for cloud applications to detect vulnerabilities and also based on SPDS.
+    The only open-source general purpose taint analysis based on SPDS we found is SWAN\footnote{\url{https://github.com/themaplelab/swan}}. 
+    It targets the Swift programming language but is still in heavy development and not ready-to-use.
 
-    Doop\cite{Bravenboer2009} is a framework initially for pointer analysis. In contrast to all others, it uses a declarative approach. Doop's frontend depends on Soot to create facts and encodes them in tables. The analyses are a declarative rule set written in Datalog. These rule sets are then fed into the datalog solver Soufflé\footnote{\url{https://souffle-lang.github.io/}}. P/Taint\cite{Grech2017} extends Doop with a taint analysis. Doop is flow-insensitive and, thus, P/Taint as well.
+    Doop\cite{Bravenboer2009} is a framework initially for pointer analysis. 
+    In contrast to all others, it uses a declarative approach. 
+    Doop's frontend depends on Soot to create facts and encodes them in tables. 
+    The analyses are a declarative rule set written in Datalog. 
+    These rule sets are then fed into the datalog solver Soufflé\footnote{\url{https://souffle-lang.github.io/}}. 
+    P/Taint\cite{Grech2017} extends Doop with a taint analysis. 
+    Doop is flow-insensitive and, thus, P/Taint as well.
 \end{document}

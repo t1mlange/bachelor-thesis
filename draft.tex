@@ -24,7 +24,6 @@
 
 \usepackage[scaled=.8]{beramono} % fixed to big \code
 
-
 % Falls mit pdflatex kompiliert wird, wird microtype automatisch geladen, in diesem Fall muss diese Zeile entfernt werden, und falls weiter Optionen hinzugefügt werden sollen, muss dies über
 % \PassOptionsToPackage{Optionen}{microtype}
 % vor \documentclass hinzugefügt werden.
@@ -52,6 +51,8 @@
 \usepackage{tabularx}   % Tabellen, die sich automatisch der Breite anpassen
 \usepackage{longtable} % Mehrseitige Tabellen
 \usepackage{multirow}
+\newcommand{\lline}[1]{\hline\multicolumn{#1}{c}{}\\[-1.3em]\hline}
+
 % \usepackage{xltabular} % Mehrseitige Tabellen mit anpassarer Breite
 % \usepackage{booktabs}   % Verbesserte Möglichkeiten für Tabellenlayout über horizontale Linien
 \usepackage{adjustbox}
@@ -121,10 +122,10 @@
 \title{Implementation and Evaluation of a Static Backwards Data Flow Analysis in \textsc{FlowDroid}}
 \subtitle{Implementierung und Evaluation einer statischen rückwärtsgerichteten Datenflussanalyse in \textsc{FlowDroid}}
 \author[T. Lange]{Tim Lange}%optionales Argument ist die Signatur,
-\reviewer{Dr. Steven Arzt \and Prof. Dr. Michael Waidner
+\reviewer{Prof. Dr. Michael Waidner \and Dr. Steven Arzt
 }%Gutachter
 
-% \addTitleBox{\includegraphics[width=4.325cm]{sit-logo.png}}
+\addTitleBox{\includegraphics[width=4.325cm]{sit-logo.png}}
 
 \department{inf} % Das Kürzel wird automatisch ersetzt und als Studienfach gewählt, siehe Liste der Kürzel im Dokument.
 \institute{Fraunhofer SIT}
@@ -159,10 +160,13 @@ Bei einer Thesis des Fachbereichs Architektur entspricht die eingereichte elektr
 \subfile{chapters/07relatedwork.tex}
 \subfile{chapters/08conclusion.tex}
 
-\printbibliography[
-	heading=bibintoc,
-	title={Bibliography}
-]
+{
+	\emergencystretch=0.1em
+	\printbibliography[
+		heading=bibintoc,
+		title={Bibliography}
+	]
+}
 
 \subfile{chapters/09appendix.tex}
 
