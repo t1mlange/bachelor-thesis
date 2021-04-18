@@ -4,41 +4,41 @@
 
 \begin{document}
     \chapter{Performance Evaluation}
-    In the last chapter, we have shown that our implementation has the necessary soundness to be viable and yields the expected results. 
+    In the last chapter, we have shown that our implementation has the necessary soundness to be viable and yields the expected results.
     We now evaluate our implementation against the existing implementation in \textsc{FlowDroid}.
-    
-    \section{DroidBench}
-    We already introduced \textsc{Droidbench} in \autoref{s:droidbenchvalidation} to validate the soundness of our backward-directed implementation. 
-    In this section, we focus on the performance in comparison to the existing forward-directed implementation in \textsc{FlowDroid}. 
 
-    DroidBench has the advantage that all apps are crafted explicitly for benchmarking taint analysis. 
-    So, most tests only contain a single-figure number of sources and sinks. 
-    Also, the number of sources and sinks are often equal or differ by one to test whether the tool can differentiate something. 
+    \section{DroidBench}
+    We already introduced \textsc{Droidbench} in \autoref{s:droidbenchvalidation} to validate the soundness of our backward-directed implementation.
+    In this section, we focus on the performance in comparison to the existing forward-directed implementation in \textsc{FlowDroid}.
+
+    DroidBench has the advantage that all apps are crafted explicitly for benchmarking taint analysis.
+    So, most tests only contain a single-figure number of sources and sinks.
+    Also, the number of sources and sinks are often equal or differ by one to test whether the tool can differentiate something.
     These simplify the comparison between both analysis directions as neither one has an initial disadvantage.
 
-    Most test cases are small enough to be analyzed in sub-two seconds on an average four-core desktop CPU from 2012. 
-    Our test environment is not isolated, so background tasks and the process scheduler can affect the runtime. 
-    The short runtime, together with the variance of the unisolated testing environment, render the runtime unusable as a comparison point. 
-    In contrast, edge propagations are deterministic\footnotemark{} and correlate with the runtime. 
+    Most test cases are small enough to be analyzed in sub-two seconds on an average four-core desktop CPU from 2012.
+    Our test environment is not isolated, so background tasks and the process scheduler can affect the runtime.
+    The short runtime, together with the variance of the unisolated testing environment, render the runtime unusable as a comparison point.
+    In contrast, edge propagations are deterministic\footnotemark{} and correlate with the runtime.
     \footnotetext{This is only true if there are enough resources. \textsc{FlowDroid} tries to gracefully terminate when running low on memory.
-    Also, timeouts result in a non-reproducible number of edge propagations.} 
+    Also, timeouts result in a non-reproducible number of edge propagations.}
     Thus, we only use the number of propagations to compare both implementations.
 
     The configuration is the same as described in \autoref{s:droidbenchconfig}.
 
     \subsection{Results}
-    The full results are listed in \autoref{t:droidbenchevaluation}. 
-    When rows only contain hyphens, the IFDS analysis did not start, e.g., because no sink is in the reachable code. 
-    \#I denotes the number of edge propagations inside the infoflow analysis and \#A the number of edge propagations inside the alias analysis. 
-    We calculated the absolute difference with the existing implementation as the reference: $\mathit{Result}_{\mathit{B}} - \mathit{Result}_{\mathit{F}}$. 
-    The relative difference is calculated similar: $\frac{\mathit{TotalDifference}}{|\mathit{\#I_\mathit{F} + \#A_\mathit{F}}|}$. 
-    Hence, negative values signify the backward analysis performed better. 
+    The full results are listed in \autoref{t:droidbenchevaluation}.
+    When rows only contain hyphens, the IFDS analysis did not start, e.g., because no sink is in the reachable code.
+    \#I denotes the number of edge propagations inside the infoflow analysis and \#A the number of edge propagations inside the alias analysis.
+    We calculated the absolute difference with the existing implementation as the reference: $\mathit{Result}_{\mathit{B}} - \mathit{Result}_{\mathit{F}}$.
+    The relative difference is calculated similar: $\frac{\mathit{TotalDifference}}{|\mathit{\#I_\mathit{F} + \#A_\mathit{F}}|}$.
+    Hence, negative values signify the backward analysis performed better.
 
     On average, our implementation needs more edge propagations to finish the analysis.
     Even though for explicit flows the backward analysis needs less propagations in the infoflow analysis, it then suffers from more encountered aliases.
     If we look at it on a per test basis, there are not many test cases where both perform identically.
     Instead, dependent on the specific test case, the relative difference is between $-1$ and $1$.
-    However, we did not expect cases that let the edge propagations of our implementation explode up to a factor of $100$, as seen in \code{LifecycleTest#BroadcastReceiverLifecycle3}. 
+    However, we did not expect cases that let the edge propagations of our implementation explode up to a factor of $100$, as seen in \code{LifecycleTest#BroadcastReceiverLifecycle3}.
     In contrast, the existing forward implementation only at most a relative difference of $-0.95$.
 
     \footnotesize
@@ -212,35 +212,35 @@
     \normalsize
 
     \subsection{Result Explanation}
-    We define tests with a relative difference greater than $10$ as worth investigating. 
+    We define tests with a relative difference greater than $10$ as worth investigating.
     In the following, we explain why our implementation performed worse than expected.
 
-    \paragraph{PrivateDataLeak3} 
-    This test contains two sinks and one source. 
-    The tainted data is written to a file, later read from the file and then leaked. 
-    \textsc{FlowDroid} does not support tracking taints over files, so it only finds a leak from source to file write but misses the leak from file read to send SMS. 
-    Due to EasyTaintWrapper's simplicity, overtainting happens in the backward direction. When \code{FileInputStream fis = openFileInput("out.txt");} is called with \code{fis} tainted, EasyTaintWrapper also taints the base object - the \code{MainActivity} in this case. 
-    As the \code{MainActivity} has an enormous scope, the taint has a long lifetime and many other taints could derive from this taint. 
+    \paragraph{PrivateDataLeak3}
+    This test contains two sinks and one source.
+    The tainted data is written to a file, later read from the file and then leaked.
+    \textsc{FlowDroid} does not support tracking taints over files, so it only finds a leak from source to file write but misses the leak from file read to send SMS.
+    Due to EasyTaintWrapper's simplicity, overtainting happens in the backward direction. When \code{FileInputStream fis = openFileInput("out.txt");} is called with \code{fis} tainted, EasyTaintWrapper also taints the base object - the \code{MainActivity} in this case.
+    As the \code{MainActivity} has an enormous scope, the taint has a long lifetime and many other taints could derive from this taint.
     This taint explains the relative difference of $17.68$.
-    Using the more precise SummaryTaintWrapper, the edges reduce to $(51, 16)$ and a relative difference of $2.53$, which is more reasonable. 
-    It is still higher because of the second sink. 
+    Using the more precise SummaryTaintWrapper, the edges reduce to $(51, 16)$ and a relative difference of $2.53$, which is more reasonable.
+    It is still higher because of the second sink.
 
     \paragraph{MultiHandlers1}
-    Two \code{LocationListener}s are registered in different activities. 
+    Two \code{LocationListener}s are registered in different activities.
     In both activities, an instance field is a parameter of a sink.
-    So there are two possible paths where something could be leaked. 
+    So there are two possible paths where something could be leaked.
     The LocationListener does not call any source on the first path, while the second path has an empty setter method killing the taint.
     For the first path, the backward analysis has to propagate the taint into the \code{LocationListener} to notice that this is a dead-end while the forward's search does not even start there.
     For the second path, the backward analysis seems to suffer because it starts at an instance field taint with a larger scope than a local variable.
 
     \paragraph{BroadcastReceiverLifecycle3}
-    The test contains five sinks but only one source. 
-    If we only consider the leak path, both implementations perform equally. 
+    The test contains five sinks but only one source.
+    If we only consider the leak path, both implementations perform equally.
     The four other sinks are responsible for the overhead on edge propagations.
-    
+
     \paragraph{Reflection6}
-    The reflective call site has multiple possible callees in the interprocedural control-flow graph. 
-    Backward all of these callees are visited, of which only one contains a source statement. 
+    The reflective call site has multiple possible callees in the interprocedural control-flow graph.
+    Backward all of these callees are visited, of which only one contains a source statement.
     Forward, the taint is introduced in the callee at the source and just one return site needs to be processed.
 
     \paragraph{A Note On Implicit Flows}
@@ -250,22 +250,22 @@
     This semantic forces us to derive an empty taint for every conditional that is theoretically reachable from a sink.
     Beyond, we also taint the base object without any fields at every sink to detect a possible conditional object instantiation.
     Even in simple test cases such as ImplicitFlow4 this results in 10 additional taints per sink.
-    Important to note is also that the prior computation of reachable conditionals is not represented in the edge propagations. 
+    Important to note is also that the prior computation of reachable conditionals is not represented in the edge propagations.
     We thus conclude that it is probably better to live without a backward-directed implicit data flow analysis.
 
     \subsection{Using A More Precise Taint Wrapper}
     We noticed the overtainting in \code{PrivateDataLeak3} is caused by the \code{EasyTaintWrapper}.
     Thus, we now look how using the \code{SummaryTaintWrapper} influences the edge propagations.
-    The full results are in \autoref{t:droidbenchevaluation_sum}. 
+    The full results are in \autoref{t:droidbenchevaluation_sum}.
     In the table, we take the \code{EasyTaintWrapper} as the reference and compare it against the \code{SummaryTaintWrapper} on our implementation.
     The structure of the table is as in the last subsection.
-    
-    As we already described, \code{PrivateDataLeak3} benefits from the more precise taint wrapper. 
-    Similarily, many other test cases also benefit. 
+
+    As we already described, \code{PrivateDataLeak3} benefits from the more precise taint wrapper.
+    Similarily, many other test cases also benefit.
     Others, especially Serialization1 have more edge propagations because the \code{SummaryTaintWrapper} has a summary for a method which the \code{EasyTaintWrapper} does not handle\footnotemark{} resulting in a premature kill of a taint.
     \footnotetext{The \footnotecode{EasyTaintWrapper} contains a list of supported classes. Every method from those classes is excluded from the analysis, regardless of the method being in the list of the handled methods.}
-    Even with Serialization1 included in the average, the \code{SummaryTaintWrapper} needs less total edge propagations. 
-    Excluding it also equals out the relative difference. 
+    Even with Serialization1 included in the average, the \code{SummaryTaintWrapper} needs less total edge propagations.
+    Excluding it also equals out the relative difference.
     Altogether, the \code{SummaryTaintWrapper} should be the default choice for real-world applications because it is more precise without compromising on the edge propagations.
 
     \footnotesize
@@ -433,29 +433,29 @@
     \section{Real World Apps}\label{s:realworld}
 
     \subsection{Configuration}
-    Our test machine is equipped with four Intel Xeon E5-4650 and 1 TB of RAM. 
-    We limited the JVM to 50 GB RAM and \textsc{FlowDroid} on 16 threads per instance. 
-    We ran at most four instances in parallel to ensure a one-to-one mapping between CPU threads and \textsc{FlowDroid} threads. 
-    Note that the test machine is a shared system, but we made sure there are always enough resources for our evaluation available. 
+    Our test machine is equipped with four Intel Xeon E5-4650 and 1 TB of RAM.
+    We limited the JVM to 50 GB RAM and \textsc{FlowDroid} on 16 threads per instance.
+    We ran at most four instances in parallel to ensure a one-to-one mapping between CPU threads and \textsc{FlowDroid} threads.
+    Note that the test machine is a shared system, but we made sure there are always enough resources for our evaluation available.
     Still, background services might influence the performance of a single run. To stamp out this factor, we ran each app three times with a distance of time\footnotemark.
     \footnotetext{The time distance between each run is at least the elapsed time from the analysis of the remaining 199 apps.}
-    If there were outliers\footnotemark{}, we repeated the run. 
+    If there were outliers\footnotemark{}, we repeated the run.
     \footnote{Outliers are runs with at least $25\%$ difference to the median run and a minimum of $5$ seconds absolute difference.}
     Some runs did not comply to our outlier norm even after we ran them multiple times, but this only concers 7 runs being well below the 2\% mark.
 
-    We also measured the memory usage of both implementations. 
-    Using the memory amount reported by the JVM is not precise because the JVM prefers to take up free memory before running the garbage collector \cite{Arzt2017PhD}. 
-    We borrowed the memory evaluation tool from CleanDroid, which internally depends on a memory calculation tool from Twitter\footnote{\url{https://mvnrepository.com/artifact/com.twitter.common/objectsize} (visited on 18.04.2021)}. 
-    The memory evaluation tool measures the size of the exploded supergraph in 15 seconds intervals \cite{Arzt2021}. 
-    Because we do not want to pollute the measured data flow time with the memory evaluation tool's latency, the memory measuring runs were run independently of the time measuring runs. 
+    We also measured the memory usage of both implementations.
+    Using the memory amount reported by the JVM is not precise because the JVM prefers to take up free memory before running the garbage collector \cite{Arzt2017PhD}.
+    We borrowed the memory evaluation tool from CleanDroid, which internally depends on a memory calculation tool from Twitter\footnote{\url{https://mvnrepository.com/artifact/com.twitter.common/objectsize} (visited on 18.04.2021)}.
+    The memory evaluation tool measures the size of the exploded supergraph in 15 seconds intervals \cite{Arzt2021}.
+    Because we do not want to pollute the measured data flow time with the memory evaluation tool's latency, the memory measuring runs were run independently of the time measuring runs.
     The memory sampling also takes up memory and because our test system has enough memory available, we bumped the maximum heap size up to 100GB, effectively eliminating memory timeouts.
 
-    For this evaluation, we chose to use a non-default configuration of \textsc{FlowDroid}. 
-    First, we disabled static field tracking due to the global scope as described in \autoref{s:complexity}. 
+    For this evaluation, we chose to use a non-default configuration of \textsc{FlowDroid}.
+    First, we disabled static field tracking due to the global scope as described in \autoref{s:complexity}.
     Next, instead of the \code{EasyTaintWrapper}, we use the \code{SummaryTaintWrapper}, which utilizes StubDroid.
     We set the timeout for the data flow analysis to 10 minutes\footnotemark{}.
     \footnotetext{A timeout in FlowDroid prevents processing new edges but lets the solver finish the current edge propagation. Thus, some apps may have a data flow time of above 600 seconds.}
-    The call graph generation was limited to 180 seconds and the call-graphs were serialized before, so every run was on the same call-graph. 
+    The call graph generation was limited to 180 seconds and the call-graphs were serialized before, so every run was on the same call-graph.
     The configuration summary is in \autoref{t:realworldconfig}.
 
     \begin{table}[tbp]
@@ -474,12 +474,12 @@
         \caption{Real World Apps Configuration}
         \label{t:realworldconfig}
     \end{table}
-    
+
     We did not use the full sources and sinks list included in \textsc{FlowDroid} because such would result in hundreds of sources and sinks per app and probably a long runtime.
-    Instead, we chose to analyze which sensitive and possibly user-identifying data is sent out to the internet. 
-    As we want to compare the forwards and backward implementation, it is also essential to not put one at a disadvantage. 
-    We opted for a 2:1 ratio of sources to sinks. 
-    This decision is based on the results of SuSi, to find sources and sinks in the Android framework automatically \cite{Rasthofer2014}. 
+    Instead, we chose to analyze which sensitive and possibly user-identifying data is sent out to the internet.
+    As we want to compare the forwards and backward implementation, it is also essential to not put one at a disadvantage.
+    We opted for a 2:1 ratio of sources to sinks.
+    This decision is based on the results of SuSi, to find sources and sinks in the Android framework automatically \cite{Rasthofer2014}.
     Their extracted list of sources and sinks contains roughly $2.17$ times more sources than sinks.
     The list of sources and sinks used in this evaluation is in \autoref{t:realworldsources} and \autoref{t:realworldsinks}.
 
@@ -562,23 +562,23 @@
 
     \FloatBarrier
     \subsection{Time Evaluation}
-    In general, the individual apps' runtimes were far apart from each other. 
-    We had many apps with a single-digit analysis time and on the other side, we also found many apps that triggered a timeout or were close to triggering one. 
+    In general, the individual apps' runtimes were far apart from each other.
+    We had many apps with a single-digit analysis time and on the other side, we also found many apps that triggered a timeout or were close to triggering one.
     In between those extrema are only a few apps.
     Recall that we set a soft limit on the runtime at 600 seconds.
     The reference forward runs have a standard deviation of $209$ seconds and the runs of our implementation has $277$ seconds standard deviation.
     It is important to keep this in mind when interpreting the results.
 
-    We first begin with an overview of the results. 
-    \autoref{t:realworldresults} shows the results, including timeouts. 
-    Notably, the backward analysis had $8\%$ less time timeouts than the forward analysis. 
-    In return, it seems a bit more memory-hungry with $3.63\%$ more memory timeouts. 
+    We first begin with an overview of the results.
+    \autoref{t:realworldresults} shows the results, including timeouts.
+    Notably, the backward analysis had $8\%$ less time timeouts than the forward analysis.
+    In return, it seems a bit more memory-hungry with $3.63\%$ more memory timeouts.
     We conducted a t-test to check the significance of those differences with the null hypothesis of equal average expected values.
-    The p-value for the memory timeouts is $0.156$, thus being insignificant. 
+    The p-value for the memory timeouts is $0.156$, thus being insignificant.
     A t-test over the runtime yielded a p-value of $0.00036$, meaning the advantage for our implementation is significant.
-    We cover the memory consumption extensively in the \hyperref[s:memex]{next subsection} and focus on the time for now. 
+    We cover the memory consumption extensively in the \hyperref[s:memex]{next subsection} and focus on the time for now.
     Interestingly, the propagated edges along the same interprocedural call-graph are of the same order of magnitude.
-    Also, the 85\textsuperscript{th} percentile runtime is nearly equal and the median is equal.  
+    Also, the 85\textsuperscript{th} percentile runtime is nearly equal and the median is equal.
     However, claims based on the runtime and edges with timeouts are only possible to a limited extent because the timeout highly influences both values.
 
     \begin{table}[tbp]
@@ -594,7 +594,7 @@
             Total Edge Propagations & $47117806.04$ & $57697027.00$ & $70602469.30$\\
             \hline
             Memory Timeouts & \multicolumn{3}{r}{$2.99\%$}\\
-            Time Timeouts & \multicolumn{3}{r}{$60.45\%$}\\            
+            Time Timeouts & \multicolumn{3}{r}{$60.45\%$}\\
             \multicolumn{4}{c}{}\\
             & \multicolumn{3}{c}{\textbf{Backward}}\\
             \textbf{Metric} & \textbf{Avg} & \textbf{Median} & $\mathbf{P_{85}}$\\
@@ -612,10 +612,10 @@
         \label{t:realworldresults}
     \end{table}
 
-    Next, we only consider the runs without any timeouts in \autoref{t:realworldresultswithouttimeout}. 
-    This time we can still observe a relation between backward infoflow edges and forward alias edges even though to a lesser extent. 
+    Next, we only consider the runs without any timeouts in \autoref{t:realworldresultswithouttimeout}.
+    This time we can still observe a relation between backward infoflow edges and forward alias edges even though to a lesser extent.
     More significant, backward needed way less forward propagations either because fewer aliases were on the path or the alias analysis could be stopped earlier due to a near turn unit.
-    The runtimes also represent this fact. In the 85\textsuperscript{th} percentile, both analyses are more close than the average suggest, with the backward analysis needing $2.25$ seconds less. 
+    The runtimes also represent this fact. In the 85\textsuperscript{th} percentile, both analyses are more close than the average suggest, with the backward analysis needing $2.25$ seconds less.
     The median here renders useless as a comparison point because of the huge variance in the data set.
 
     \begin{table}[tbp]
@@ -628,7 +628,7 @@
             \hline
             Edge Propagations Infoflow & $21179450.04$ & $17131840.00$ & $47411443.20$\\
             Edge Propagations Alias & $7613696.10$ & $6557951.00$ & $16530488.80$\\
-            Total Edge Propagations & $28793146.14$ & $22416842.00$ & $63123292.80$\\                  
+            Total Edge Propagations & $28793146.14$ & $22416842.00$ & $63123292.80$\\
             \multicolumn{4}{c}{}\\
             & \multicolumn{3}{c}{\textbf{Backward}}\\
             \textbf{Metric} & \textbf{Avg} & \textbf{Median} & $\mathbf{P_{85}}$\\
@@ -637,7 +637,7 @@
             \hline
             Edge Propagations Infoflow & $5186970.23$ & $192787.00$ & $14438463.25$\\
             Edge Propagations Alias & $11459343.68$ & $258834.50$ & $33860441.50$\\
-            Total Edge Propagations & $16646313.91$ & $451621.50$ & $62000571.75$\\            
+            Total Edge Propagations & $16646313.91$ & $451621.50$ & $62000571.75$\\
         \end{tabular}
         \caption{Results without Timeouts}
         \label{t:realworldresultswithouttimeout}
@@ -646,20 +646,20 @@
     A knowledgeable reader might have noticed the results in \autoref{t:realworldresults} are worse than in previous publications where \textsc{FlowDroid} was evaluated \cite{Arzt2017PhD, Arzt2021}.
     We want to emphasize that none of our changes did influence the reference runs in a bad way as we used the upstream version without a single line changed to conduct the first run\footnotemark{}.
     \footnotetext{We found some exceptions in the upstream project while evaluating, so after the first run we switched to our version with the fixes included. This did not change the results we got.}
-    The existing implementation suffers as ours, so we suspect it partly depends on an unfortunatly drawn app set and further development in the call-graph generation leading to more possible edges. 
+    The existing implementation suffers as ours, so we suspect it partly depends on an unfortunatly drawn app set and further development in the call-graph generation leading to more possible edges.
 
-    With that out of the way, let us look at the results in greater detail. We now compare the analysis on a per-app basis. 
-    The histogram is in \autoref{f:deltaHist}. 
-    We compiled the delta data flow time of the analyses per app, calculated as in the last section with the forward implementation being the reference: $t_{\mathit{Backward}} - t_{\mathit{Forward}}$. 
-    Hence, negative values represent that our implementation performed better. 
-    The delta on the x-axis is given in seconds and the frequency on the y-axis in number of apps. 
+    With that out of the way, let us look at the results in greater detail. We now compare the analysis on a per-app basis.
+    The histogram is in \autoref{f:deltaHist}.
+    We compiled the delta data flow time of the analyses per app, calculated as in the last section with the forward implementation being the reference: $t_{\mathit{Backward}} - t_{\mathit{Forward}}$.
+    Hence, negative values represent that our implementation performed better.
+    The delta on the x-axis is given in seconds and the frequency on the y-axis in number of apps.
     The bins always span over $50$ seconds.
-    The graph shows a large number of apps around $0$ with a slight bias towards the forward implementation. 
-    Equivalent to the distribution of the data flow times, there are only few deltas in the range from $\pm100$ to $\pm500$. 
-    More interestingly, there are significantly more apps around $-600$ than around $600$. 
+    The graph shows a large number of apps around $0$ with a slight bias towards the forward implementation.
+    Equivalent to the distribution of the data flow times, there are only few deltas in the range from $\pm100$ to $\pm500$.
+    More interestingly, there are significantly more apps around $-600$ than around $600$.
     Recall, the timeout is set to $600s$.
     So, our implementation terminates nearly instantaneous in some cases on which the forward analysis times out.
-    As expected, there is no general advantage for a direction. 
+    As expected, there is no general advantage for a direction.
     Instead, we observe a per-app advantage in around $60\%$ of the test set, while for the rest, the performance is similar.
 
     \begin{figure}[tbp]
@@ -671,17 +671,17 @@
         \label{f:deltaHist}
     \end{figure}
 
-    We confirmed that the right direction choice can speed up the analysis by a magnificent amount. To take advantage of the favorable direction, we now investigate the correlating conditions for the advantageous direction. 
-    Most straightforward would be a correlation between the difference of source and sink count and the data flow time. 
+    We confirmed that the right direction choice can speed up the analysis by a magnificent amount. To take advantage of the favorable direction, we now investigate the correlating conditions for the advantageous direction.
+    Most straightforward would be a correlation between the difference of source and sink count and the data flow time.
     In \autoref{f:dfratio} are two graphs with the ratio of sources and sinks ($\frac{\mathit{Sinks} - \mathit{Sources}}{\mathit{Sources}}$) on the x-axis and the data flow time in seconds on the y-axis.
-    The left graph is always the forward implementation and the right graph is our implementation. 
-    Blue dots represent apps without a timeout, orange a time timeout and red a memory timeout. 
-    Intuitively, a negative ratio should put our implementation at an advantage. The graphs show no correlation between the ratio and the runtime, neither forward nor backward. 
-    We also included the forward data flow time by sources and the backward data flow time by sinks in \autoref{f:dfsources} and \autoref{f:dfsinks}. 
-    The number of sinks backward and the number of sources forward do not influence the runtime. 
+    The left graph is always the forward implementation and the right graph is our implementation.
+    Blue dots represent apps without a timeout, orange a time timeout and red a memory timeout.
+    Intuitively, a negative ratio should put our implementation at an advantage. The graphs show no correlation between the ratio and the runtime, neither forward nor backward.
+    We also included the forward data flow time by sources and the backward data flow time by sinks in \autoref{f:dfsources} and \autoref{f:dfsinks}.
+    The number of sinks backward and the number of sources forward do not influence the runtime.
     So we can confirm Arzt's evaluation\cite{Arzt2017PhD} as there is no correlation between sources and the forward runtime in our app set.
     Parallel to this observation, the sink count does not influence the backward runtime.
-    The sink count for forward and the source count for backward can not influence the runtime they have no influence on the edge propagations. 
+    The sink count for forward and the source count for backward can not influence the runtime they have no influence on the edge propagations.
 
 
     \begin{figure}[tbp]
@@ -732,10 +732,10 @@
         \label{f:dftoss}
     \end{figure}
 
-    Even though Arzt's evaluation also showed no correlation between the code size \cite{Arzt2017PhD}, we do for completeness also compare the runtime to the number of statements, methods and classes. 
-    Note that these refer to the Jimple intermediate representation and not Java. 
-    \autoref{f:dftocodesize} includes all graphs with the existing implementation being on the left side and our implementation on the right side. 
-    The notation are the same as before, with the x-axis swapped out. 
+    Even though Arzt's evaluation also showed no correlation between the code size \cite{Arzt2017PhD}, we do for completeness also compare the runtime to the number of statements, methods and classes.
+    Note that these refer to the Jimple intermediate representation and not Java.
+    \autoref{f:dftocodesize} includes all graphs with the existing implementation being on the left side and our implementation on the right side.
+    The notation are the same as before, with the x-axis swapped out.
     The number of statements is uniformly distributed with some outliers.
     If we consider our data as two linear data sets with a structural break between the two groups, the linear regressions have a slope of close to 0.
     Resulting, the number of statements, methods and classes do not have an impact on the runtime.
@@ -800,12 +800,12 @@
     \end{figure}
 
     Because the above mentioned parameters do not influence the runtime, we did further investigate to find a parameter to decide the favorable direction.
-    First, we looked the methods containing sources and sinks. 
+    First, we looked the methods containing sources and sinks.
     We counted the number of statements of the method, call statements and callers of the method and compared these numbers between sources and sinks.
     A advantage in those did not result in a faster analysis.
     Next, we implemented a fast intraprocedural taint analysis. It omits access paths and aliasing.
     Method calls are overapproximated in a similar fashion to the \code{EasyTaintWrapper}.
-    We then counted the taints flowing into the callees and callers. 
+    We then counted the taints flowing into the callees and callers.
     Also, we did count the number of taints in the method.
     The drawback is that this only works when the state explosion happens inside the first method and this is not the case in the app set.
     Again, we could not find any resilient correlation.
@@ -815,7 +815,7 @@
     Note that the edges in the exploded supergraph are only known after the analysis, making them useless for predictions.
     In \autoref{f:dfedgestotal} we plot the edge count on the x-axis to the data flow time on the y-axis.
     In both graphs, we observe a linear correlation for the apps with a runtime below 500 seconds.
-    Then there is a structural break and after that the apps time out. 
+    Then there is a structural break and after that the apps time out.
     Because a linear regression does not really fit well for our diverse data set, we decided to fit a function using the least squares method. We achieved a $r^2$ measure of greater than $0.9$ for four degree polynomials and above.
     However, the good fitting curve seems overfitted to us because the apps not being close to timeouts have a good fitting linear correlation.
     When we look at the point where the structural break happens, we notice that backward the timeouts start after roughly $3 \cdot 10^7$ propagations.
@@ -826,8 +826,8 @@
     This gives a possible explanation linked to the ratio of infoflow and alias edges.
     The alias flow functions are way simpler and thus, should also cost less to compute.
     The backward analysis has a ratio biased toward the alias edges which could explain the higher edge count possible in ten minutes.
-    Why the structural break happens could not be conclusively clarified in this work, so it is also hard to finally reason whether this also holds without such a structural break. 
-    
+    Why the structural break happens could not be conclusively clarified in this work, so it is also hard to finally reason whether this also holds without such a structural break.
+
     \begin{figure}[tbp]
         \begin{subfigure}[b]{\textwidth}
             \centering
@@ -889,10 +889,10 @@
         \label{f:dfedges}
     \end{figure}
 
-    To conclude, our backward analysis is efficient enough to be an alternative to the existing implementation. 
-    We even found that it performed slightly better on our app set. 
-    Our evaluation shows that there is no correlation between an apriori known parameter and the runtime of \textsc{FlowDroid} - in both directions. 
-    Furthermore, we did not find any apriori known parameter to decide the favorable direction either. 
+    To conclude, our backward analysis is efficient enough to be an alternative to the existing implementation.
+    We even found that it performed slightly better on our app set.
+    Our evaluation shows that there is no correlation between an apriori known parameter and the runtime of \textsc{FlowDroid} - in both directions.
+    Furthermore, we did not find any apriori known parameter to decide the favorable direction either.
     The edge propagations have shown that our implementation can analyze roughly $10^7$ more edges than the existing implementation in ten minutes. Though, the sample size of 200 apps is too small to generalize statements and our data was rather challenging to interpret with a large standard deviation.
 
     \FloatBarrier
@@ -921,26 +921,26 @@
         \label{t:memres}
     \end{table}
 
-    \autoref{t:memres} shows an overview of the results from the memory evaluation.  
+    \autoref{t:memres} shows an overview of the results from the memory evaluation.
     Note that we only measured the memory usage of the edges in the exploded supergraph and not of the full program.
     And unlike the time measurements, the memory consumption is much more distributed across
-    The measurements with timeouts show similar values for both directions. 
+    The measurements with timeouts show similar values for both directions.
     Though, maximum measurements with timeouts are not really meaningful.
-    Without timeouts it is a different story. 
-    Our implementation has the advantage in all values. 
+    Without timeouts it is a different story.
+    Our implementation has the advantage in all values.
     The average maximum memory consumption of our implementation is $4.6GB$ lower than the existing one. The backward analysis also needs about $5.7GB$ less memory in the 85\textsuperscript{th} percentile.
-    
+
     % In the time evaluation, we observed that our implementation has more memory timeouts, but the result overview showed the backward analysis needs less memory on average.
     % A manual look at those runs which had a memory timeout only backward revealed a larger exploded supergraph.
     % We argue that the memory timeouts are connected with the $10^7$ more propagations in ten minutes. If the forward analysis had more time to run, it would also trigger the memory timeout.
 
-    Next, we look at the memory consumption difference per app in \autoref{f:memHist}. 
-    The x-axis shows the delta maximum memory consumption in megabytes and the y-axis the frequency. 
+    Next, we look at the memory consumption difference per app in \autoref{f:memHist}.
+    The x-axis shows the delta maximum memory consumption in megabytes and the y-axis the frequency.
     Each bin is $1GB$ wide.
-    The delta is calculated with forward as the refrence: $m_{\mathit{Backward}}-m_{\mathit{Forward}}$. 
+    The delta is calculated with forward as the refrence: $m_{\mathit{Backward}}-m_{\mathit{Forward}}$.
     Again, we see a gathering around $0$. Otherwise, the histogram has a more uniform distribution than its \hyperref[f:deltaHist]{time counterpart}.
-    Still, there is a slight bias towards the backward analysis. 
-    Because we only measured the exploded supergraph, there is a linear correlation between edges and memory usage (c.f. \autoref{f:maxmemedges}). 
+    Still, there is a slight bias towards the backward analysis.
+    Because we only measured the exploded supergraph, there is a linear correlation between edges and memory usage (c.f. \autoref{f:maxmemedges}).
     Likewise, we observed a correlation between time and edges. Thus, this bias could be related to the faster backward analysis on the app set. We looked at this by comparing the sign of the delta data flow time with the sign of the delta memory consumption. 48 apps had different signs, with 23 being negligibly close to 0. Hence, the claim is true for 109 of 134 apps.
 
     \begin{figure}[tbp]
@@ -952,12 +952,12 @@
         \label{f:memHist}
     \end{figure}
 
-    Also beneficial for the real-world usage of \textsc{FlowDroid} would be to estimate the memory consumption to utilize the available resources efficiently. 
-    In \autoref{f:maxmemtoss}, we contrast the memory consumption with the number of sources, sinks and the ratio of both. \autoref{f:maxmemtocodesize} shows the memory consumption in contrast to the statement, method and class count. 
+    Also beneficial for the real-world usage of \textsc{FlowDroid} would be to estimate the memory consumption to utilize the available resources efficiently.
+    In \autoref{f:maxmemtoss}, we contrast the memory consumption with the number of sources, sinks and the ratio of both. \autoref{f:maxmemtocodesize} shows the memory consumption in contrast to the statement, method and class count.
     The arrangement and legend are the same as in the time evaluation.
     Unlike in the time evaluation, there is only one cluster of dots: those terminating nearly instantaneous. Otherwise, the dots seem to be randomly distributed. All graphs indicate no correlation.
 
-    To conclude, our backward analysis performed a bit better in the time evaluation, which is also reflected in the memory consumption. Again, the results show that the observed edges are way more important for memory consumption than the code size or the sources and sinks. It is not possible to estimate the memory consumption prior nor which analysis direction will use less memory. 
+    To conclude, our backward analysis performed a bit better in the time evaluation, which is also reflected in the memory consumption. Again, the results show that the observed edges are way more important for memory consumption than the code size or the sources and sinks. It is not possible to estimate the memory consumption prior nor which analysis direction will use less memory.
 
     \begin{figure}[tbp]
         \begin{subfigure}[b]{\textwidth}
@@ -1097,7 +1097,7 @@
         \caption{Maximum Memory Consumption in Comparison to Code Size}
         \label{f:maxmemtocodesize}
     \end{figure}
-    
+
     % Basically the answer to RQ1: Is the backwards search efficient enough to perform analysis on real world apps?
 
     % Basically the answer to RQ2: Can we find a pre-analysis known parameter to decide which analysis is more efficient?
