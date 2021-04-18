@@ -56,12 +56,12 @@
     Taint analyses like \textsc{FlowDroid} are based on the may analysis \cite{Arzt2017PhD}.
 
     The analysis direction of a data flow analysis is also decided by the problem to be solved. 
-    A live variables analysis computes whether a variable is read before written in the future to pontentialy eliminate dead assignments. 
-    The problem is traditionally solved by a backward pass. 
-    On the other hand, a reaching definitions analysis finds out if a definition reaches a statement without a intermediate assignment which is certainly solved by a forward pass.
-    Additionally, there are also data flow analyses for which the direction is a design-choice.
-    For example, program slicing identifies a slice, a subset of the programs statements, which influence a statement (backward pass) or are influenced by a statement (forward pass).
-    Taint analysis on the other hand can be solved in both directions with the same results \cite{Khedker2009}.
+    A live variables analysis computes whether a variable is read before written in the future to eliminate potential dead assignments. 
+    A backward pass traditionally solves the problem. 
+    On the other hand, a reaching definitions analysis finds out if a definition reaches a statement without an intermediate assignment, usually solved by a forward pass.
+    Additionally, there are also data flow analyses for which the direction is a design choice.
+    For example, program slicing identifies a slice, a subset of the program's statements, which influence a statement (backward pass) or are influenced by a statement (forward pass).
+    Taint analysis, on the other hand, can be solved in both directions with the same results \cite{Khedker2009}.
     
     \section{IFDS}\label{s:bigifds}
     \subsection{Original Definition}\label{s:ifds}
@@ -166,7 +166,7 @@
     \paragraph{Distributive} The flow function must be distributive over the merge operator. 
     Formally, $f(x \sqcap y) = f(x) \sqcap f(y)$ must hold at any time. 
     Informally speaking, it does not matter whether facts get merged before or after applying the flow functions. 
-    Distributiveness is essential for the correctness of IFDS, because only if the flow functions are distributive the maximum fixed point (MFP) equals MOP and MFP is computable in polynomial time \cite{Khedker2009,Reps1995}.
+    Distributiveness is essential for the correctness of IFDS because only if the flow functions are distributive, the maximum fixed point (MFP) equals MOP and MFP is computable in polynomial time \cite{Khedker2009,Reps1995}.
 
     \paragraph{Finite} Another restriction is that the set of data flow facts has to be finite. 
     Let us go by a counterexample of what IFDS is not capable of: Answering "Which value is stored in variable x at statement s?".
@@ -233,7 +233,7 @@
     That also removes the restriction on a small domain. 
     Now IFDS is also feasible if the domain's encountered subset is small enough \cite{Naeem2010}.
     The restrictions on the domain set can be loosened even more. 
-    Bodden suggests in-practice, the domain can be infinite. 
+    Bodden suggests the domain can be infinite in practice. 
     Only the observed facts must adhere to the ascending-chain condition over the flow functions when using the on-demand supergraph \cite{Bodden2012}.
     
     Also, the original IFDS definition ignores the type structure of the programming language. 
@@ -241,7 +241,7 @@
     Also, facts with the same variable but different types can be merged with the superclass as its new type \cite{Naeem2010}.
 
     Furthermore, the original definition starts the IFDS algorithm at the entry point of the interprocedural call-graph. 
-    As described in \autoref{s:ifds}, a flow function can derive an initial fact from the zero fact whenever needed. 
+    As described in \autoref{s:ifds}, a flow function can derive an initial fact from the zero fact if needed. 
     If the methods where initial facts will be introduced are known a priori, the supergraph can be traversed without applying flow functions until such a method is found on the path. 
     This optimization introduces unbalanced problems where a method returns but no corresponding call site is found, which can be solved by a small extension to the tabulation algorithm. 
     Lerch et al. first described the extension \cite{Lerch2015} and it is also present in \textsc{FlowDroid} \cite{Arzt2017PhD}.
@@ -259,7 +259,7 @@
     Access paths are one possible heap model. 
     They consist of a list of field dereferences linked to a tainted variable of a reference type \cite{Khedker2009}. 
     Note, this increases the domain size because now not only "object $o$ is tainted" is a data flow fact, but also all of its fields can be tainted. 
-    Especially when encountering recursive data structures with loops such as doubly linked lists, this gets problematical. 
+    Especially when encountering recursive data structures with loops such as doubly-linked lists, this gets problematical. 
     Consider \autoref{lst:infiniteap}, the loop would let the observed domain grow indefinitely and never reach a fixpoint.
     As a solution, access paths are limited in length, which is also called $k$-limiting, whereas the constant $k$ is the maximum access path length. 
     If an access path passes this length, it is cut off and the entire last reference is considered tainted.
@@ -302,11 +302,11 @@
     After a loop like in \autoref{lst:infiniteap}, the access path is polluted with a dereference chain to its base object even though the $next.prev$ dereference could be omitted without precision loss. 
     As a solution, Deutsch proposed symbolic access paths, which try to eliminate loops in access paths \cite{Deutsch1994}. 
     In practice, Deutsch's approach needs some adaptions as he only considered fields but not base objects and he defines loops simply by type \cite{Arzt2017PhD}. 
-    With symbolic access paths $k$-limiting is theoretically obsolete but still often applied in practice to speed-up the analysis.
+    With symbolic access paths $k$-limiting is theoretically obsolete but still often applied to speed up the analysis.
 
     \section{Intermediate Representations}\label{s:jimple}
     Most compilers these days use intermediate representations (IRs). 
-    IRs are an equivalent representation of the source code but are much simpler and more regular and are typically not architecture-dependent. 
+    IRs are an equivalent representation of the source code but are less complex and more regular and are typically not architecture-dependent. 
     They are often in an interchangeable format and can be saved as text to be used by various tools \cite{Thain2019}.
     Such an IR allows compilers to apply machine-independent optimizations to the code without worrying about complex expressions in the source code or reimplementing the optimization for each architecture. 
 

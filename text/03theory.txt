@@ -10,8 +10,8 @@
 
     Now, let us consider an AssignStmt where the left side is either a field reference or a local and the right side is an expression.
     In the following, we assume the right side is always a local or a field dereference.
-    If the expression is a InvokeExpr, we handle this in the call flow.
-    For unary operators, the local can simply be extracted and for binary operators, we consider both locals separately.
+    If the expression is an InvokeExpr, we handle this in the call flow.
+    For unary operators, the local is extracted and for binary operators, we consider both locals separately.
     An assignment has the structure  with  modeling a possible field reference.
     As taints may have an access path of an arbitrary length, we denote this as .( is a -length chain of field dereferences, not -times the same field dereference)
     Jimple also ensures only one field dereference per statement, which Arzt chose not to represent in the semi-formal definitions and neither did we. 

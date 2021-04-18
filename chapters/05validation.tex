@@ -34,7 +34,7 @@
     It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 
     The latest development version 3 includes 190 test cases\footnotemark{}.
     \footnotetext{Source: \url{https://github.com/secure-software-engineering/DroidBench/} (visited on 18.04.2021)}
-    We used the newest commit on develop at the time of writing\footnotemark{} to validate our implementation.
+    We used the newest commit on the develop branch at the time of writing\footnotemark{} to validate our implementation.
     \footnote{Commit \texttt{ddbd50c}}
     We aim to achieve similar results as \textsc{FlowDroid}'s existing forward implementation.
     % Still, there might be subtle differences due to the alias approximation.
@@ -245,13 +245,19 @@
     The analyses only differ in \code{StaticTests#StaticInitialization1} where we do not miss the leak. 
     As all \code{StaticInitialization} tests depend on the \code{<clinit>} behavior modeling, we decided to explain all three even though only StaticInitialization1 is different.
 
-    \textbf{StaticInitialization1} differs between forward and backward analysis. Backward reports one leak due to the explicit modeling of \code{<clinit>} edges instead of relying on SPARK. Recall \autoref{s:clinitrule}, leaks inside static blocks are missed in the forward analysis. This test case is quite similar to \autoref{lst:clinit_examples_b}, and therefore, only the backward analysis reports the leak. The Clinit Rule could also be ported to the forward analysis but a larger overapproximation because, unlike backward, there is no guarantee that there will be another edge to \code{<clinit>} if the statement is in the same class as the \code{<clinit>} method. 
+    \textbf{StaticInitialization1} differs between forward and backward analysis. 
+    Backward reports one leak due to the explicit modeling of \code{<clinit>} edges instead of relying on SPARK. 
+    Recall \autoref{s:clinitrule}, leaks inside static blocks are missed in the forward analysis. 
+    This test case is quite similar to \autoref{lst:clinit_examples_b}, and therefore, only the backward analysis reports the leak. 
+    The Clinit Rule could also be ported to the forward analysis but a larger overapproximation. 
+    Unlike backward, there is no guarantee that there will be another edge to \code{<clinit>} if the statement is in the same class as the \code{<clinit>} method.
+    Thus, it inherits the entire overapproximation from the SPARK call-graph algorithm.
     
     \textbf{StaticInitialization2} yields the same result but because of different reasons. The test assigns a tainted value to a static field in the static initializer. Again, recall \autoref{s:clinitrule}. Backward, the clinit rule takes care of visiting the \code{<clinit>} edge while forwards the followReturnsPastSeeds option of the IFDS solver is responsible. 
 
     \textbf{StaticInitialization3}'s leak is missed despite the explicit modeling of clinit. The code is provided in \autoref{lst:staticinit3}. The \code{MainActivity} is using the singleton pattern and thus has a static field \code{v} referring to its instance. The source statement is inside the \code{Test} class's static block using the singleton to access the instance field \code{s}.
     The taint is now introduced at the sink and refers to the field through the \code{this} instance. When we visit line 13, the \code{<clinit>} edge is not taken due to the taint being an instance field. Line 12 kills the taint and stops the analysis as there is no taint to propagate anymore. We never get to see the statement where the static field \code{v} aliases \code{this}. 
-    This is a limitiation of the alias handling. 
+    The false negative is a limitation of the alias handling. 
     % Tracking more aliases is too inefficient for the analysis to be applicable and also fully precise aliasing is still an unsolved problem \cite{Bodden2012}.
     
     \begin{figure}[tbp]
