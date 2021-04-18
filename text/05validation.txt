@@ -6,66 +6,72 @@
 
     Validation
     Unit Tests
-    FlowDroid already contains 519 unit tests for the core component. 
-    We also validated the backward analysis with these tests. 
+    FlowDroid already contains 519 unit tests for the core component.
+    We also validated the backward analysis with these tests.
     In the following, we briefly explain why tests were left out or did not return the same results.
 
-    EasyTaintWrapperTests 
-    equalsTest and hashCodeTest are expected to return one leak, but the backward analysis does report no leaks. 
-    This difference is related to the EasyTaintWrapper implementation. 
-    equals() and hashCode() are exclusive in the EasyTaintWrapper, which means the analysis can skip these methods because the taint wrapper provides a summary for them. 
-    The exclusive check happens in the Call Flow function. 
-    In both tests, the source is in an exclusive method. 
+    EasyTaintWrapperTests
+    equalsTest and hashCodeTest are expected to return one leak, but the backward analysis does report no leaks.
+    This difference is related to the EasyTaintWrapper implementation.
+    equals() and hashCode() are exclusive in the EasyTaintWrapper, which means the analysis can skip these methods because the taint wrapper provides a summary for them.
+    The exclusive check happens in the Call Flow function.
+    In both tests, the source is in an exclusive method.
     The IFDS solver behaves as already observed with <clinit> in s:clinitrule and creates a return flow for an unbalanced problem; while going backward, the exclusive check kills the taint in the Call Flow function and applies the summary unaware of the override.
     We marked those two tests forwards-specific and created two equivalent backward-specific tests with sinks inside the equals() or hashCode() method with one expected leak.
 
-    HeapTestPtsAliasing 
-    We focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of FlowDroid. 
+    HeapTestPtsAliasing
+    We focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of FlowDroid.
     Other aliasing strategies are left for future work.
 
-    DroidBench    DroidBench is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. 
-    It originated from the initial work on FlowDroid to assess it in comparison to other tools. 
+    DroidBench    DroidBench is a test suite to evaluate data flow analysis tools targeting the Android ecosystem.
+    It originated from the initial work on FlowDroid to assess it in comparison to other tools.
     The latest development version 3 includes 190 test cases.
     Source: https://github.com/secure-software-engineering/DroidBench/ (visited on 18.04.2021)
-    We used the newest commit on develop at the time of writing to validate our implementation.
+    We used the newest commit on the develop branch at the time of writing to validate our implementation.
     (Commit ddbd50c)
     We aim to achieve similar results as FlowDroid's existing forward implementation.
     
-    
-    Configuration    For the validation, we ran FlowDroid with the Android module's default configuration using the EasyTaintWrapper as the taint wrapper. 
+
+    Configuration    For the validation, we ran FlowDroid with the Android module's default configuration using the EasyTaintWrapper as the taint wrapper.
     The configuration summary is in t:droidbenchconfig.
 
     
                 
         Real World Apps Configuration
             
-    We only used a subset of DroidBench's tests to validate our results. Dynamic Code Loading, Self Modification, Unreachable Code and Native Code are all not supported by FlowDroid. The first three are all call-graph related and the latter is not supported because FlowDroid has no Android native call handler for now. 
-    Also, Inter Component Communication (ICC), Reflection Inter Component Communication and Inter App Communication were left out because the ICC module is - at the time of this work - not maintained anymore. 
+    We only used a subset of DroidBench's tests to validate our results. Dynamic Code Loading, Self Modification, Unreachable Code and Native Code are all not supported by FlowDroid. The first three are all call-graph related and the latter is not supported because FlowDroid has no Android native call handler for now.
+    Also, Inter Component Communication (ICC), Reflection Inter Component Communication and Inter App Communication were left out because the ICC module is - at the time of this work - not maintained anymore.
     All of the tests stated above are flow function independent. If FlowDroid gets support for those features in the future, they should also work in backward analysis.
 
     Results
-    The complete overview of the results is in t:droidbenchvalidation. 
+    The complete overview of the results is in t:droidbenchvalidation.
      denotes true positive,  false positive and  false negative.
-    If a row is empty, the test expects no leaks and also none were found. 
-    
+    If a row is empty, the test expects no leaks and also none were found.
+
     Our backward-directed implementation yields nearly the same result as the existing forward implementation, with one missed leak more than the baseline. We achieve a F1 measure of  equally to the baseline.
 
     
 
 
     Results Explanation
-    The analyses only differ in StaticTests#StaticInitialization1 where we do not miss the leak. 
+    The analyses only differ in StaticTests#StaticInitialization1 where we do not miss the leak.
     As all StaticInitialization tests depend on the <clinit> behavior modeling, we decided to explain all three even though only StaticInitialization1 is different.
 
-    StaticInitialization1 differs between forward and backward analysis. Backward reports one leak due to the explicit modeling of <clinit> edges instead of relying on SPARK. Recall s:clinitrule, leaks inside static blocks are missed in the forward analysis. This test case is quite similar to lst:clinit_examples_b, and therefore, only the backward analysis reports the leak. The Clinit Rule could also be ported to the forward analysis but a larger overapproximation because, unlike backward, there is no guarantee that there will be another edge to <clinit> if the statement is in the same class as the <clinit> method. 
-    
-    StaticInitialization2 yields the same result but because of different reasons. The test assigns a tainted value to a static field in the static initializer. Again, recall s:clinitrule. Backward, the clinit rule takes care of visiting the <clinit> edge while forwards the followReturnsPastSeeds option of the IFDS solver is responsible. 
+    StaticInitialization1 differs between forward and backward analysis.
+    Backward reports one leak due to the explicit modeling of <clinit> edges instead of relying on SPARK.
+    Recall s:clinitrule, leaks inside static blocks are missed in the forward analysis.
+    This test case is quite similar to lst:clinit_examples_b, and therefore, only the backward analysis reports the leak.
+    The Clinit Rule could also be ported to the forward analysis but a larger overapproximation.
+    Unlike backward, there is no guarantee that there will be another edge to <clinit> if the statement is in the same class as the <clinit> method.
+    Thus, it inherits the entire overapproximation from the SPARK call-graph algorithm.
+
+    StaticInitialization2 yields the same result but because of different reasons. The test assigns a tainted value to a static field in the static initializer. Again, recall s:clinitrule. Backward, the clinit rule takes care of visiting the <clinit> edge while forwards the followReturnsPastSeeds option of the IFDS solver is responsible.
 
     StaticInitialization3's leak is missed despite the explicit modeling of clinit. The code is provided in lst:staticinit3. The MainActivity is using the singleton pattern and thus has a static field v referring to its instance. The source statement is inside the Test class's static block using the singleton to access the instance field s.
-    The taint is now introduced at the sink and refers to the field through the this instance. When we visit line 13, the <clinit> edge is not taken due to the taint being an instance field. Line 12 kills the taint and stops the analysis as there is no taint to propagate anymore. We never get to see the statement where the static field v aliases this. 
-    This is a limitiation of the alias handling. 
+    The taint is now introduced at the sink and refers to the field through the this instance. When we visit line 13, the <clinit> edge is not taken due to the taint being an instance field. Line 12 kills the taint and stops the analysis as there is no taint to propagate anymore. We never get to see the statement where the static field v aliases this.
+    The false negative is a limitation of the alias handling.
     
-    
+
     
         
             public class MainActivity extends Activity 
@@ -75,10 +81,10 @@
                 @Override
                 protected void onCreate(Bundle savedInstanceState) 
                     v = this;
-                
+
                     super.onCreate(savedInstanceState);
                     setContentView(R.layout.activity_main);
-                
+
                     s = ""; // T=
                     Test t = new Test(); // T=this.s
                     Log.i("DroidBench", s); // T=this.s
@@ -89,10 +95,10 @@
                 static 
                     TelephonyManager mgr = (TelephonyManager) MainActivity.v.getSystemService(Activity.TELEPHONY_SERVICE);
                     MainActivity.v.s = mgr.getDeviceId(); // source
-                    
+                
             
                 StaticInitialization3 code
             
     Improvements From The Summary Taint Wrapper
-    We briefly explained the simple but not always precise rules of the EasyTaintWrapper in s:taintwrapper. Using StubDroid's more precise summaries yields even better results for both directions. The false positives in the test cases BroadcastReceiverLifecycle2 and SharedPreferenceChanged1 are gone and the leak in Serialization1 is found. 
+    We briefly explained the simple but not always precise rules of the EasyTaintWrapper in s:taintwrapper. Using StubDroid's more precise summaries yields even better results for both directions. The false positives in the test cases BroadcastReceiverLifecycle2 and SharedPreferenceChanged1 are gone and the leak in Serialization1 is found.
     

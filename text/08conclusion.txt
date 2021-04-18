@@ -1,21 +1,21 @@
 
     Conclusion
-    In this thesis, we extended FlowDroid to feature a backward-directed static data flow analysis as an alternative to the existing forward implementation. 
+    In this thesis, we extended FlowDroid to feature a backward-directed static data flow analysis as an alternative to the existing forward implementation.
     The alternative analysis is equally precise and sound.
-    Just like FlowDroid, our extensions are open-source and possibly will be integrated into FlowDroid in the future. 
+    Just like FlowDroid, our extensions are open-source and possibly will be integrated into FlowDroid in the future.
     To our knowledge, it is novel for a taint analysis to offer two distinct general purpose analysis directions.
     Moreover, our work broadens the applicability of FlowDroid for real-world applications with a amount of sources much greater than the amount of sinks.
 
     Furthermore, we evaluated our implementation against the existing one in FlowDroid.
-    We confirmed the assumption that the runtime and also the favorable direction highly depends on the analyzed app. 
+    We confirmed the assumption that the runtime and also the favorable direction highly depends on the analyzed app.
     Both analyses put up similar numbers.
-    In the app set we used for evaluation we even had a statistically significant smaller runtime on our implementation. 
-    To fully utilize the benefits from a favorable direction, we investigated whether apriori known parameters can be used to predict which direction performes better. 
-    Our experiments included naturally known parameters such as code size, source and sink count, but also a fast preanalysis. 
+    In the app set we used for evaluation we even had a statistically significant smaller runtime on our implementation.
+    To fully utilize the benefits from a favorable direction, we investigated whether apriori known parameters can be used to predict which direction performes better.
+    Our experiments included naturally known parameters such as code size, source and sink count, but also a fast preanalysis.
     None of which showed a correlation toward the runtime.
 
     As the prediction of runtime remains unsolved, further research should continue on clues to choose the favorable direction beforehand.
-    For example, it is still an open question whether there are certain taint analysis applications (e.g. to find SQL injections) that favor one direction. 
+    For example, it is still an open question whether there are certain taint analysis applications (e.g. to find SQL injections) that favor one direction.
     Also, further work could evaluate the impact of commonly used third-party libraries on the analysis time.
-    Additionally, our work focused on the most-common context-sensitive alias analysis. 
+    Additionally, our work focused on the most-common context-sensitive alias analysis.
     Other aliasing strategies were not implemented for the backward analysis.
