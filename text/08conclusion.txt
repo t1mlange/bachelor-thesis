@@ -17,5 +17,5 @@
     As the prediction of runtime remains unsolved, further research should continue on clues to choose the favorable direction beforehand.
     For example, it is still an open question whether there are certain taint analysis applications (e.g. to find SQL injections) that favor one direction.
     Also, further work could evaluate the impact of commonly used third-party libraries on the analysis time.
-    Additionally, our work focused on the most-common context-sensitive alias analysis.
-    Other aliasing strategies were not implemented for the backward analysis.
+    Additionally, our work focused on the most-common context-sensitive alias analysis and other aliasing strategies were not implemented for the backward analysis. 
+    For the sake of completeness, future work coudl include a points-to aliasing strategy for our implementation.
