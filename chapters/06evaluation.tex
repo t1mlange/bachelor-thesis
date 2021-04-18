@@ -613,10 +613,15 @@
     \end{table}
 
     Next, we only consider the runs without any timeouts in \autoref{t:realworldresultswithouttimeout}.
-    This time we can still observe a relation between backward infoflow edges and forward alias edges even though to a lesser extent.
-    More significant, backward needed way less forward propagations either because fewer aliases were on the path or the alias analysis could be stopped earlier due to a near turn unit.
-    The runtimes also represent this fact. In the 85\textsuperscript{th} percentile, both analyses are more close than the average suggest, with the backward analysis needing $2.25$ seconds less.
-    The median here renders useless as a comparison point because of the huge variance in the data set.
+    This time we the relation between backward infoflow edges and forward alias edges is present to a lesser extent, maybe even non-existent.
+    More significant, backward needed less propagations in average and in the 85\textsuperscript{th} percentile.
+    This fact is also represented in the runtimes. 
+    The average runtime is the half of the existing implementation.
+    Though because of the diverse data, the average is not convincing.
+    The median is equally at zero for both.
+    This is partly based on our measuring where we only measure the time in seconds and round it down.
+    Thus, all runs with a runtime of zero seconds did terminate in less than 1 second.
+    In the 85\textsuperscript{th} percentile, more significant given our data set, the backward analysis needs $68.8$ seconds less.
 
     \begin{table}[tbp]
         \centering
