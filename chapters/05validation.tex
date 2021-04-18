@@ -30,8 +30,13 @@
     Other aliasing strategies are left for future work.
 
     \section{DroidBench}\label{s:droidbenchvalidation}
-    \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. The latest development version 3 includes 190 test cases\footnote{\url{https://github.com/secure-software-engineering/DroidBench/}}. We used the newest commit on develop at the time of writing\footnote{6th March 2021, Commit \texttt{ddbd50c}} to validate our implementation.
-    We aim to achieve similar results as \textsc{FlowDroid}'s existing forward implementation. 
+    \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. 
+    It originated from the initial work on \textsc{FlowDroid} to assess it in comparison to other tools \cite{Arzt2014}. 
+    The latest development version 3 includes 190 test cases\footnotemark{}.
+    \footnotetext{Source: \url{https://github.com/secure-software-engineering/DroidBench/} (visited on 18.04.2021)}
+    We used the newest commit on develop at the time of writing\footnotemark{} to validate our implementation.
+    \footnote{Commit \texttt{ddbd50c}}
+    We aim to achieve similar results as \textsc{FlowDroid}'s existing forward implementation.
     % Still, there might be subtle differences due to the alias approximation.
     
     \subsection{Configuration}\label{s:droidbenchconfig}
@@ -68,7 +73,7 @@
 
     \begin{longtable}{l | l | l}
         \textbf{Test Case} & \textbf{Forwards} & \textbf{Backwards}\\
-        \hline\hline
+        \hhline
         \endhead % begin droidbench
         \tsub{Aliasing}
         FlowSensitivity1 & &\\
@@ -225,7 +230,7 @@
         JavaThread2 & \tp & \tp\\
         Looper1 & \tp & \tp\\
         TimerTask1 & \tp & \tp\\
-        \hline\hline  % end droidbench
+        \hhline  % end droidbench
         \tp &$ 108 $&$ 109 $\\
         \fp &$ 14 $&$ 14 $\\
         \fn &$ 13 $&$ 12 $\\

@@ -12,7 +12,7 @@
 	parskip=half-,%Absatzkennzeichnung durch Abstand vgl. KOMA-Sript
 	fontsize=11pt,%Basisschriftgröße laut Corporate Design ist mit 9pt häufig zu klein
 	IMRAD=false,
-	instbox=false
+	instbox=false,
 ]{tudapub}
 
 %%%%%%%%%%%%%%%%%%%
@@ -24,9 +24,7 @@
 
 \usepackage[scaled=.8]{beramono} % fixed to big \code
 
-% Falls mit pdflatex kompiliert wird, wird microtype automatisch geladen, in diesem Fall muss diese Zeile entfernt werden, und falls weiter Optionen hinzugefügt werden sollen, muss dies über
-% \PassOptionsToPackage{Optionen}{microtype}
-% vor \documentclass hinzugefügt werden.
+% \overfullrule=1mm
 \usepackage{microtype}
 
 \usepackage{subfiles}
@@ -51,7 +49,12 @@
 \usepackage{tabularx}   % Tabellen, die sich automatisch der Breite anpassen
 \usepackage{longtable} % Mehrseitige Tabellen
 \usepackage{multirow}
-\newcommand{\lline}[1]{\hline\multicolumn{#1}{c}{}\\[-1.3em]\hline}
+\newcommand{\hhline}[0]{%
+	\hline
+	\noalign{\vskip\doublerulesep
+				\vskip-\arrayrulewidth}
+	\hline
+}
 
 % \usepackage{xltabular} % Mehrseitige Tabellen mit anpassarer Breite
 % \usepackage{booktabs}   % Verbesserte Möglichkeiten für Tabellenlayout über horizontale Linien
@@ -74,7 +77,6 @@
 \makeatother
 
 \usepackage{todonotes}
-
 
 \usetikzlibrary{decorations.text}
 

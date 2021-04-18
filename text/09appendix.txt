@@ -1,1 +1,408 @@
+toctocdepth0
+
 Appendix
+Evaluation App Sets:appset
+longtablel  l
+    App Name & SHA256 Checksum
+
+            kr.co.smartstudy.cartownandroidgooglemarket.apk & 8418072e714bcc1aeb0fcc680e28597593cb58cff2620c491f5553f79d88ecea
+
+    org.mopria.scan.application.apk & 4b8a16d52786fb93fa73dc369f33ae162dbd2511d53b6c7e8fe23c9e3e8c18e3
+
+    com.groplay.tutalfonsaberg.apk & 8dadce517f3eb70a0290a46c9e8e03b904b11c7ee081e7152d8307e0978b543d
+
+    jp.co.canon.oip.android.opal.apk & 68ad1ea695b166bce8ceedcdb868a72331ca84464bd09c1a2ef7f1240c2975d2
+
+    com.binibambini.minidancing.apk & 37c8b39f21c13d93501b13fbae9333276bddc8cc91dd1d33adfb8c2199fe9978
+
+    com.amazon.dee.app.apk & cd7cb55c7ac0d07f7cc77c0dfec8eb5e997f24e646c41cd9d79c98d872342581
+
+    com.musicplayer.player.mp3player.white.apk & 862d93dbc58ffeee4e2c6aabae6cdb5d6cc13597c71d91065a577f2941664894
+
+    com.rvappstudios.sight.words.phonics.reading.kids.games.apk & 8086ccf8d37dcab37aacffc8fc4f18e9d2cc95930f5d3455c61ed7d6924240c3
+
+    com.nhn.android.navertv.apk & df82e47d243e39c5d50f8d13275053c616c3c0e8b16a9de28ba6012f10bf7419
+
+    ru.beeline.services.apk & 52341773824950e4837f568eb4dddac1b24287e8d783dd530b6bf44b4d8e71d7
+
+    com.fsn.nds.apk & ce9a6c7e7f4d19c8612be401df1b63e9ca47c0ca5e098534b91e8781c47940c8
+
+    org.familysearch.mobile.apk & 78a71de5ea3201fe5ddbb78863cc660009f28bba99c2d02de59f70a001828026
+
+    com.radio.fmradio.apk & 195cb39d61cec6352e9d9d81324ebbc00f5b5b1f3cb9f9885add78805d4957e8
+
+    com.edokicademy.montessoriacademy.apk & 6a6ae06bd561f21bb3db23f5c8329f730bec7f91ca2c7b913bf09d7af0fa4e9b
+
+    com.fivory.prod.apk & 5e71cd35a08542fc4a08ad9b4f2d11d31220f305935a8732c03c6f5a73c6d3f7
+
+    com.tocaboca.tocahairsalon4.apk & 4741f734998795ef97a25d424b6e078b50c1657dc60f0537dbab4ddfa043dd3e
+
+    com.speeddating.ad.pro.apk & 4c6bc4808a3d85e641c59349f1dc77e31680120a2e6a251e809cb0a2bb171875
+
+    com.mufumbo.android.recipe.search.apk & 1ae688150b2ea8f61d2312c002c74e036beb8939818e76b675e4790a4fca1bba
+
+    fr.tisseo.android.apk & aad5d2f60bdec52256f98b75e031f8019e71d9ac8b3dc2062a747968b63cb758
+
+    com.kedronic.cbndinosaursfree.apk & e3981f77053713d3c8a548a33cb4ff6ed0addaad205ac0f9625551d040733398
+
+    com.labs.merlinbirdid.app.apk & b56750a84c97ec7a68ea9df287725aac9807fd6947821d05ed68e3a0ae9f6989
+
+    com.tacobell.ordering.apk & e71109bd49a559a07b53463baf06a73441046736858d548d86424d40130cba8e
+
+    kidzooly.fivelittle.apk & ae53861ad8ac4e0cc24cdec1cef8ca42a2dc1acc1cfe947e1478ecbeaaedb711
+
+    com.backgrounderaser.cutout.photoeditor.apk & 3b2b960b015fe0856a428226666f9110c0bfe4f54805899363b0816ce0277a78
+
+    com.newspaperdirect.pressreader.android.apk & d8484f6c7223c21abc6089cde52becff8330206b2852fe5eb9cf6abc3829917c
+
+    com.khorasannews.akharinkhabar.apk & 4afdd725f8fc67b4f3731513d54934ea129d23f92df14c5e72d1d989208284e8
+
+    com.microsoft.office.officehubrow.apk & 9f843239b726f490a2507b7a0ec65b7016c2707cae89befb1e7f40bff7cbbcb3
+
+    com.cabs.apk & e7e50f08b7f84110ba4454d4d718bcbbaf91a0d59b20e52ae6aeb1acb80b60c1
+
+    com.hasbro.tf360appstore.apk & bcbf06c936a17d916d9bc919ece29799e04eea42eb06a4ea7b404206ee9c5f54
+
+    com.budgestudios.MissHollywood2.apk & 4a353c4422edd629a5c7ec8f2edb7548be125944631d93010ef4265ccc79cfaf
+
+    com.amazon.mShop.android.shopping.apk & 1088bd390ac9f563b2504bbb2198e716a19955649963fd22020a645d8bb73b1a
+
+    com.romwe.apk & 3286701bd36d9aec5b27df8f5dc09c2b9bfb7052630810d2f0d8ec874ebbfff1
+
+    au.com.parrotfish.phonemic.lite.apk & 78cb56109dcf59d25e9eb9198834ea438beb3f61e02eb6e653ac9cedd3dd63c1
+
+    com.budgestudios.googleplay.StrawberryShortcakeIceCreamIsland.apk & 4e9449df1339e286d012bc7d7cabdd8d01d9bf9d511007685795e129a614c425
+
+    com.autoscout24.apk & e092be53ade9be07e4c240d7d03cb7556ef057c289987d273f21d7498a6e0eda
+
+    de.number26.android.apk & 06e3936e3a86ef322f3f34ca161385c4ceedaf780441a50e37ed4eee9e8d532e
+
+    com.bplus.vtpay.apk & 2cabed3808b291835995d4a76d8e54c82219b2dd836374bb77c8b432cf6617fe
+
+    hr.palamida.apk & 27cf78d7ffacb9b9423002a2f28e3f27058df90c0e08217da5d4219e05fdcb41
+
+    com.kinky.fetlifestyle.apk & 5b16b9e6fdf13f3d58a9580dd0607f58022e3882c37466f72d2932ee1a305065
+
+    com.indianexpress.android.apk & 636e7e086f17641b97788bd7300a20e16aff7a00884e43a691ebdcac4d1d9ab9
+
+    com.fabernovel.ratp.apk & f3d3fa90757a28f0cb10a72b4b773d601f7b247b91d4afc699f415221104fb5f
+
+    cz.seznam.novinky.apk & 97cd2918938ece6f424b48bd7e26331de1859010f92ead25e9ae20c405d7691b
+
+    com.dywx.larkplayer.apk & 4f665ba83f38759ffcd543b45c5c70ec1378f44b446a4a849b2df624ef9d6a03
+
+    com.euronews.express.apk & b035eed311648ece2e14ec100e3364b2bdf519919363e2ce4d06529749d1833f
+
+    cn.wps.pdf.fillsign.apk & c9570f742fd38114c9bdcb259edb40d6448f8a8dcc6bfb33d0d84564362dfc34
+
+    com.citymobil.apk & b1193852f2af90f359f909fe9462e36346c2dc8fed4dbb22aacaaa6892ad3b3c
+
+    com.starfall.StarfallABCs.apk & 1ee69079e23c3369b9a1ef8113e60cda6855a5427e4234c47da9f2f0df22b248
+
+    com.apartmentlist.mobile.apk & d6c97d944b806ac21b9f904ea194deacf593dce783c42f765132fc0088eaa5b3
+
+    tw.com.ctitv.ctitvnews.apk & 74829666eeeb1994657bf8d91c6f4203a19c9a4c98258bd00491f1b62d454472
+
+    nineNewsAlerts.nine.com.apk & 5cee9279a553e237e72bb722a55f8195a2bdf87940af6ce6f9106dc6abd6b4f7
+
+    com.grabtaxi.passenger.apk & e1bd94679df49deed01c62451fa4600a07db592d1d4d9994b7cf5e6d760846ff
+
+    com.hk01.newsapp.apk & 9588f493009410cf77d02743dd4c08f2532e6edbed8139869fe84d5c0b03ff1a
+
+    mnn.Android.apk & 39faafcbf57d1d5304589c8821ec39fc2617b2c3516f93f9257fe5d06b80824d
+
+    com.ubieva.cura.userapp.droid.apk & 78363ffe77b2990147eaab29f5b457c69edff3a47dad3b3345f12b3f6421a0fe
+
+    com.simplepractice.video.apk & b4e865f7a88ce5a93af23e0babe44a6297ff03e870780705c608bb3ccee2e23e
+
+    com.google.android.apps.seekh.apk & 8e7d1497c1a47fa95696c9420108db519521f3b105ee6ed5fd1bbff93f328ec8
+
+    com.murphy.driverewards.apk & 03ff479296df50738a22d3e53cbfa31c89587dabc7cc4e37e482b425fcedab26
+
+    com.pjmasks.heroacademy.apk & b334d463d46c32b4cea340eb4cf90a66a4f30c6f139f68ccfa290501eda3afac
+
+    com.aspiro.tidal.apk & 76815743bcecfbc496dbea55548e6f8990a69f131877d7618e3371c7b9c829c2
+
+    com.skyhealth.glucosebuddyfree.apk & e44196157332eb962bc360a31fcc0cfc26940bfe609b6ca4ed58602edde38199
+
+    com.vuclip.viu.apk & a2656f844f94474a7127782bd15ce2cbc058c6e6119de7ee301873e0d7bcbd3b
+
+    air.com.pepiplay.pepigarage.apk & c7b91a6417bce6abbb5b2d4ce1323aff3f6734153f38ebe9a592e23272bf71c9
+
+    com.google.toontastic.apk & 713bc62548c59f490f71befdc8b3fc3d87c8709c40d4fa6cade85188d851fb5e
+
+    com.touchtype.swiftkey.apk & 7e468abed703af7460057a03894dcc0f662707273d74da37a69be39c4cb6661d
+
+    com.croquis.zigzag.apk & 37e78c46bf7b3b83171f742a127845f32f959902aff348fe9faa147526505486
+
+    com.yoox.apk & 229ce64b93b142ea9be0c466db8615b78dccabc5c82365cf27d84d7a8b32a5d1
+
+    com.application.zomato.apk & 89c5d4ded29dbb7086817ca8b587de5bffff7940983097f99fd8b0ec16f4393c
+
+    com.rcmbusiness.apk & 8e7fe9a43abe495ce33000cdfe5c82e61767f89ce1a21761b424148493598a58
+
+    com.zoho.show.app.apk & 00ad2b874ddfb64a71a5acd009fa25e468879ed46dd95e03f9716155f9f2c1d0
+
+    com.streema.simpleradio.apk & ce25bf663eea858613fbdaad93f2a9b7686306d6d6519b1632ee12506d8d79b2
+
+    com.google.android.apps.docs.editors.sheets.apk & 404839c316cf7da89aaadf76fc5d3ad5b83eeb388e66972c17c01cea61f5be69
+
+    com.orange.kidspiano.music.songs.apk & bec50a9d2fff2a10d7f00a07ee90342d0fd5020c53ccc1e82de2e7d151fa77fa
+
+    com.storytoys.sesame.elmolovesyou.free.android.googleplay.apk & abb874e0e937fa0e5f60a42aa88aebe7165f22aba51c1473fb5e0398dd3be4e0
+
+    com.creditkarma.mobile.apk & 67e8ede728e14867360a225dd438a894e35167ed7e5ca02f185e2ea9e4fde0d5
+
+    com.originatorkids.EndlessWordplay.apk & 3b3a99e848987b3a62b62d841a979094abb67e23fee6b6c22744bbd28552b0eb
+
+    vivino.web.app.apk & 973fe4a43c2043e62b838e3b3f0c1c37ccf2f7df80ede965edd9c39694bf3bd9
+
+    com.playtoddlers.sweethomestories.free.apk & 13733d16365110e5488447538c712948a759ca87af35dc3c07fed6c6588d1a4e
+
+    com.nbaimd.gametime.nba2011.apk & 23bf97f3c22a77b9099e015f8c52564ba946b6b07b6b2e875f2cd28817935132
+
+    com.flur.apk & dcc34218c61cdeff2ee3c6585c2d35c317214fa2f46ccc20ee2307e1602fed61
+
+    com.budgestudios.googleplay.ThomasAndFriendsMinis.apk & fd33c8a08ccf34810efc72cc593fd92200782589fed11a2278126401a5ef57e7
+
+    com.lezhin.comics.apk & 9e7d8ffb9058daf5c307a7d073edf9113155266dd94447a23d09155627092c60
+
+    HinKhoj.Dictionary.apk & 0686392baac6af8bc914b0f24516b3ae157973511c75e0e85b22baaf2c5ef334
+
+    com.videocall.randomfriendvideo.apk & 78f2192d37c09f462c7b5ae7ab5e6992c47a8f57683513704550121f1d1ba541
+
+    com.cupidmedia.wrapper.filipinocupid.apk & eed66095038d1ee8e64e90e683bd4fc2c3a8c84183c182e14e60580cae927739
+
+    com.xfinity.cloudtvr.apk & 1f9dc3426f87910ec38c4edc4ffd1324e3203814bb28a962fa959153c203d162
+
+    dbx.taiwantaxi.apk & 2095de12ff28e7608047c857d5ba94e95405e3753d412ea9c7447d1a69f150b7
+
+    com.socialnetwork.hookupsapp.apk & 6f484feab595fcd69ef4780ec994ce2fe2fecb4c95afdb18e607c793ce8e4a5a
+
+    com.bilgapp.mydevs.mathapp.apk & c5ca6e542433a94351d200a8e022a4fb75e1d4756dc55f66d8234d2115d05381
+
+    com.clusterdev.hindikeyboard.apk & 84ccada3b4ee531697823eab17082713aef2076d142f5213fe62cc11f031b7a9
+
+    document.scanner.scan.pdf.image.text.apk & a2756e08587e804b0f3fd694222a18c68368f1f988a45e42ccf2b229b2f72eb7
+
+    com.splendapps.voicerec.apk & c8f53b7f1918755c60ae16ace4e5ecefeabead04e3311314e3ff4d8b686d4fa2
+
+    air.com.turner.boomerangmakeandrace.apk & 516ede7668b7f9d13ece8d9c8358f4a2c4044e84c8bf09050d4e7ac94681fc4c
+
+    app.habitaclia2.apk & a8e949ffe4e6b3a67b52a6a9d59c4880a5ec252148c2e7592c644f0b55b07e4e
+
+    com.FDGEntertainment.Oceanhorn.gp.apk & e53c6f684f4a01037238e9ebc9c79aa028291cd3d4007dfedf8d90f222be09a5
+
+    sweet.selfie.lite.apk & 0afc498f4b19d2f33a9772ddcb0a0c5bce554a79931ffe1e676ad2d81c1a87bc
+
+    fr.anuman.HomeDesign3D.apk & 9f7f2a4690c2c2de7ca24e457ec75d57c9e97b7f86726a12ae9e80166fe17b0e
+
+    com.espn.scorecenter.apk & 643813688fee805d2f8ef33b2afc7fb2591d6e4d15a3179a79846332558bfd25
+
+    mobi.ka.gp.wrkshts.app.apk & 083d0771826379f85d53892a661591dc3591bdbdb0fa4b8939366b1399acde3a
+
+    com.fineapp.yogiyo.apk & a4d16bba29ce7c01990cbd1e07608cf1fb478137d2e0a08ddd4a563137f0d45a
+
+    com.thredup.android.apk & 1a7f39f229d09b371f9241b097d7c71b120b3363dcd9c5552003a0bd8f08d2a1
+
+    kr.co.smartstudy.dinoworldandroidgooglemarket.apk & b92f2ee76807e26deec705eb48ea7168bd1dfa2152cb313772209ca7f19ced11
+
+    com.opera.touch.apk & 4b67fb5161fc1e3b1fc4d900a606d6e59903a6eecebcc2c12a0c96c45860f91e
+
+    com.calmid.learnandplay.launcher.apk & 7e582912c2f9f12a5e4150b6b7c63df1b70e261d7ef0d57804bb888ec726ad06
+
+    com.astepanov.mobile.mathforkids.apk & c08f4f8ca574688175b849881b5e4c97776b1e3830525783b229c080605df6cd
+
+    com.microsoft.math.apk & 2cedcf2fd59d5b23ec44f6e3c3b715522e92b8bb2c2515fd223cde95af645960
+
+    com.citi.citimobile.apk & 5ba14ca78a07bdc80f96f4ddfd84c096b58b870e1c9e75b22dddf168452e18d6
+
+    com.yy.hiyo.apk & cca85c559c68dbdd65324e83b7a045f006ccf36ac18c9c0c4307e7acc1f56ed2
+
+    com.kedronic.cbnvehiclesfree.apk & a7b5ffdf5cd94e2475fbca33effffa7186603f6781c0af4c64a95b0177136ea7
+
+    de.etecture.ekz.onleihe.apk & bb44ebf657d97a2236df28efc7d5f0d1f02bc30a75f15652c4267df107882456
+
+    com.urbanclap.urbanclap.apk & 1bbdbfda6a19b6e2fe241757a140539411a1f36aabe2603901b243305fcd4a30
+
+    com.niksoftware.snapseed.apk & e0b85eed2f84aa09bdfe65033cb9a48e9b97edde5eb6d7b5a0e04b13825f0b31
+
+    com.kevinbradford.games.pklg2.apk & 52b733c7c41b871b4df60cf0989afd4fed144e7534cbed2f931503b8875d653b
+
+    ua.insomnia.kenya.newsi.apk & d2c7dfe4bb09e928f3cce393fa18ee7df0371ed5adf652d788b7b58441b05b16
+
+    com.microsoft.amp.apps.bingnews.apk & 39b24376d9ffdb027135a53e07c5a65ac6296ab77e32a7a53ebd5840f6aebb5d
+
+    com.rvappstudios.abckidstoddlertracingphonics.apk & 76d7a1613be00b4bfb4eeb4e647ef5f6f5222ccbf5473ced542e9e07d4b51fd8
+
+    com.budgestudios.CrayolaNailParty.apk & 44977ccffde8abe8e9775435a8c15fda5ee78a809f3cf00b6474e2d117fd633a
+
+    com.bimiboo.puzzles.apk & 21b1f93f974429d2c4589de445115cdb590ae9d34c973dd59bd9157b08d3e168
+
+    org.pbskids.video.apk & b1024916bae5e592e58f71eb5c3f32162172334bf7bd376b50b29adbe7278621
+
+    com.rvappstudios.shapes.colors.toddler.apk & ab434ef8106e24d39e79af477b45a97f40de526d3caed3bfa421957aae3ce34b
+
+    com.curse.dndbeyond.apk & 38ebf5fd508c05559f02a5094cd7ba4816ebc5bda3a1f67c156104ff78d500b9
+
+    com.money91.apk & f10db842b0b8051e8ed752d0eda71cb5110cbce3d0a57bc10bb366a0176411e4
+
+    com.foofoo.tracing.apk & 8aba701329ecbbd52dd5b6060ff7d1ea6f3fc0f736b79182c2c28237803c49d1
+
+    com.cisco.wx2.android.apk & e43d84e5609a1f7cc9c76195c27355abd2634723a43ace192ecbca9e9015a1d3
+
+    com.adpdigital.mbs.ayande.apk & a7fb7a5a13128ea90643193b6156ce9c06f1e987e7feac4966119aa9aa04a919
+
+    kz.kkb.homebank.apk & aa833049899cf5dfce78a552a8fb115fa837d6a2b813798163277b29fa86c3cb
+
+    com.aol.mobile.aolapp.apk & 214482468cea54a4d0e85af74ec9a8f554d674cc5f92a5b8527de053dd9cb4f6
+
+    com.resmed.myair.apk & 02dfb457f663a1416d9efe9d829088b56e759430a692ab58977edfd6b0e21a2b
+
+    com.sadadpsp.eva.apk & 46b990e564c0af762bd983fce9513547d97546d47b0f9002e104e65768c127d7
+
+    com.budgestudios.googleplay.HotWheelsUnlimited.apk & 4de9cb4ced761b8840fa9dbf071f50f83c50e1c503f403eca5af58cdda3c626c
+
+    com.zoho.sheet.android.apk & 85ae0ca44350672d0ff45f1ddfaabbef3e066ed41cb32de834fdc8a7319f43c7
+
+    com.facebook.mlite.apk & 8021599efe390a204262d673f9e62ed05054a59c02d93a61e3300b46d895694c
+
+    taxi.android.client.apk & 013b701e2d70c4f3dbc8abc680a059697018dd02c93de491e54b7ca1692e57e8
+
+    com.budgestudios.StrawberryShortcakeFoodFair.apk & efe0f27383e12a8c0902cc771c5606e2dbb7711fe6939efa8c08d784a1100463
+
+    au.com.auspost.android.apk & 42cadeb194c47220a062c2a6e59ea99728b324016794dc67a846a27b18559ebf
+
+    com.dating.findlove.apk & 748fc4335fcf91c4aa1da9d22b6bf2177eb637676680863325e56aaf20b77770
+
+    ma.safe.bnau.apk & 2a49e104e9c2aeb4680f0ea4f611bbac38353a825dbbc75b20b3b00c87f6d95b
+
+    com.buildium.resident.android.apk & a9f36d1586ac8f6e0e98a7da0c722942a36452047202026f9e98b08496340812
+
+    com.affinityapps.blk.apk & 71d10693759939057ed7613f19756ced19bcad130503e7d760fa2a381bdcd75f
+
+    com.jrtstudio.music.apk & ebbaf09fc37e65af9089bd815b7528ff9c067d9c95e901111974480939bcf0d7
+
+    app.quiktrip.com.quiktrip.apk & 00f66fdc41dbb684bd122a20cc7106392d8352246998ed249528d60303bb1a48
+
+    com.sendo.apk & ae51b595f53d5f9cebef94a404431a38faa8f3c1cb8c9ac4e252193df2fb0934
+
+    com.covalent.kippo.apk & 6596e1854adf1b70d9983463cb7dedd72c5492e4645fb6351f2e7fd65a88adbf
+
+    com.weedmaps.app.android.apk & 67e97774f38a5845ad45663342ddd50b4d73749698f4d83ad5e7eba9f78e470f
+
+    com.emra.AntibioticGuide.apk & 8c9365e2eaf715f44f62ffd8bb1b0fbe1aef8a60355ace7b5821e534b59a71b4
+
+    com.onlyoffice.documents.apk & 3e7afe11ac7748ff6a7282ab13b17058d73ae22b8c3aa624a499a44607cd2147
+
+    com.ak.ta.dainikbhaskar.activity.apk & 2cbd59a1c20e63ad7928276ffb0de2c550b138b7a7d901448708d41a65b54dd1
+
+    com.cloudmosa.puffinFree.apk & f7e724e3d3dabcbd0c6ad61a849736bdd98a2ed84037826c1a69b9fb69b68acf
+
+    com.spinmaster.enterprise.colleggtibles.apk & 0a25e9808c34d2a35e51c2da2bc2ec57bef20ef3659b98cbc85124a5aafbd41c
+
+    com.finlim.forkapp.apk & 9244a6aefb04db4782c335a39ca65dc6d63baedb9ba066e017b679af68b046e7
+
+    com.planner5d.swedishhomedesign.apk & 4f92722e91e48271b4dacc75cf279779be90a1c795aa14a1a4e9a60ec2ab8acb
+
+    net.psyberia.offlinemaps.apk & a7179816079cf58190fb910ac20dfeec028c5dc199b4baa454d6bdc9649929f1
+
+    com.nhn.android.webtoon.apk & dcbfced34bf850d89aa081668769169cc3a3a4e7e77047aaea2b868c41407af7
+
+    com.ace.android.apk & f648fae084e813040a2dddbdd7ae9272d8dcc23e5106da001b23abc6555528dd
+
+    com.lafiya.telehealth.apk & ad7cb0615e066bf8f8339b3e954d680cb930b5e96a0322e9b06900e62eb978a7
+
+    com.waitrapp.apk & d346641d19bcbdc82298d24a2a19d4a3d005acb82ffd662339e945128cd64b74
+
+    com.match.android.matchmobile.apk & 07e6158383c378f3c177ad406539d49eb5eba57c281d3b27c4da528541a723dc
+
+    com.clouthub.clouthub.apk & 040338ae80e20a9c3b772ebd0ca513607debfc93964e3314fe935424b1522c49
+
+    com.belk.android.belk.apk & ee53358cf307bae014c6a85d499e10f02ab9c2a335b47d65c6813f54ad4f8858
+
+    com.lyrebirdstudio.facecamera.apk & 4b4a20f9569c43f260350518ec9c5e3e3548d52ed8f8b92b9bcd09babb54d904
+
+    com.poqstudio.app.platform.boohoo.apk & d8104cfd2d2bbe18d69f9b8550ea6dd5e89927b6ae7000646a45eab59b0535a8
+
+    com.foofoo.tracing123.apk & 111e78eeed80b86f613aee13b4e93bcb87a3a9287a7564baad7be0200bbf8e74
+
+    com.pinger.textfree.apk & db6704e865af504b70488bcbe8143daf790e796afdc5bf4e240777fc2b36f2f0
+
+    com.accruehealth.mobile.apk & 6a2f15edf4fe9d9b8651d4675088acc70ea3df2a3515b1ca00faa055d1b9fa9f
+
+    com.enuma.todomath.apk & 1380ebed63a240ade60bbc42f4e581615ca35bf61ae32a3e1b2ffa7f21509077
+
+    com.lyrebirdstudio.tbt.apk & e2b83af323cd294ad24905098ff43efcb4d9a7426d830709962996d47b3e1a68
+
+    ir.balad.apk & 168d8ccc23bbe32051bb627719efcec6067ae55df5f71fd7c28e21ac7d55cda3
+
+    co.brainly.apk & 3df6da10ac62569cf7d52c261fba5f4701624f13648f800e9bdce1cedb7bfa97
+
+    com.budgestudios.MyLittlePonyHarmonyQuest.apk & b79cbe2fc940147dba81092e39dfa21f545809eab2304def6e91e9c9ee4028bc
+
+    com.budgestudios.StrawberryShortcakePocketLockets.apk & 232d2ce3364ce1f4d6062043ca7bf0a4df8ed6d90ba261b0e957bbbe68fb099e
+
+    ir.nasim.apk & ee51967db6972af6343a58f2c282c5c882261febd1640e6c9e4836c60139428b
+
+    photocollage.photoeditor.collagemaker.apk & ec23c5112a67815ec5faf5f3f74f1987f9fcfe17802ef4458354e3389c751cf9
+
+    com.app.rondevo.apk & 341bc42f3e13038be22298d13faa2f961d7801c135ae0b3d4a556cd54eb6c4cd
+
+    com.foofoo.coloring.apk & b8a345a5b777c727296ce6bff3fb56d255c629f9c314865aef919ae8d5555135
+
+    com.uba.vericash.apk & 8004ff6108f8f0578e70ab4a31fc7d9586df1d4d9529db053f5005016551d8a4
+
+    com.rubenmayayo.reddit.apk & d715f10d81b69f8ae970bea4c22e5807eb7a25afc744ae8ef8d6e260eec576f2
+
+    com.adobe.reader.apk & 2b0f8e9cadc1355398215cdc61f4f4519124587220d964a1b469f18e6117bfe0
+
+    com.musicplayer.music.apk & e832ecfba016f7c0a7decc2cd0f5f1f2ba6539dea74074ee06b1cb596f57aabf
+
+    com.footba11.results.apk & fccbed1ac44299c09ccb28e4792b43a03e9022b604b42c7a0e78c551bbe93d21
+
+    com.budgestudios.StrawberryShortcakeCandyGarden.apk & 06c97d3d7f9d0b3644bdd178f2c205be8359fe201359a4b63f65dcb7838ac1c2
+
+    com.microsoft.office.onenote.apk & c249ca4011ec76cd328a1ba6c3a3b10535a1df87d1c5a5b4c1e5e8f3b0da3da7
+
+    it.casa.app.apk & 0006a8a47b457e9bd2a7e64335dbdd951ca67008b22f47223e72fae34b29660c
+
+    com.tubitv.apk & d6595ccdf6d351c49eca443e2519ee5aa8590153dfc301b5d90c4f3ed6202200
+
+    info.yogantara.utmgeomap.apk & 75fe0d4e3470149e7ec591b7927685b53303828130ddfa36b6920fb93eaa1cee
+
+    com.thesouledstore.apk & c57c26eb55a6d0618484a1e35f25ef9f9fc642ce2906d73a7f1fee42f5b9c467
+
+    com.duckduckmoosedesign.cpkids.apk & 915a3b700fa63cf3e8770e2e0346de186a039fedf4b010da090b5e4a0519ead8
+
+    com.dazz.hoop.apk & 4b120cd31fc522d4efbfcd65e5aa3d4ec3c543b6af5d2f1ab849bcb33f4dbb78
+
+    ir.tgbs.peccharge.apk & c16b725a5ebd1734f665f0cfbeca268058949a608aa9b5701f7576f56ff70fd8
+
+    com.sinyee.babybus.engineering.apk & 2d1cf94bf57e039f12463d4365152c199a14410a5faa9a5372f76155724f0f1b
+
+    com.meesho.supply.apk & a63f721b81514caefed3157df8aedbc18d09a53b944cc6c4fa35087196913dee
+
+    de.wonderkind.flightschool.apk & ce69c9d93a2c703f4339efc1b87874c80512d505a937e7c3f06c6673a94f1131
+
+    fr.cnaf.mobile.moncompte.apk & 1fa6fde595d41916ce246ca16bbedce5f8712e6a55b0a77f08c6d40bfb37df79
+
+    com.marlustudio.englishforkids.apk & ba0cb61dc4e913c8ca61c9ad83ed9bc5fd98202ab7f200cdd76068c8544b0217
+
+    com.Slack.apk & 200de82bccde54d4db7d09e0c887ca39015bad5a2877d01250bf873472208dfc
+
+    com.fuib.android.spot.online.apk & 066fbef97444bbb17a71688a817e56cf86ee338bc7fb667ce328474edc47ea75
+
+    com.playtoddlers.urbancitystories.free.apk & 64581c42741a40ab76b404acbc2df39845193716cb5f6e397571021e1b758548
+
+    camsurf.com.apk & 3b35f57e003092271644fb99aca3aea7cd24f3017d28a7f77742bf3853c8c4e8
+
+    com.lego.friends.heartlake.apk & c8539ee963bcd42c6527da0c7c433773a32a8c61df832d6d96e2c079f220bc29
+
+    kidzooly.rhymes.apk & 42b0e6172af6ae1204582c85807ca04177aeb1b3915c7c6bbb7da27dbe2a8603
+
+    police.scanner.radio.broadcastify.citizen.apk & ba23252a676054d0f9f02a2a72a670ad943b7d68aec1536721906b6f53c6ac98
+
+        App Set
+    a:appset
+longtable

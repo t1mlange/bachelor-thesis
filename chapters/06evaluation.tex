@@ -45,8 +45,8 @@
     \begin{longtable}{l | r | r | r | r | r | r | r | r}
         & \multicolumn{2}{c|}{\textbf{Forwards}} & \multicolumn{2}{c|}{\textbf{Backwards}} & \multicolumn{4}{c}{\textbf{Difference}}\\
         \multirow{-2}{*}{\textbf{Test Case}} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A}& \textbf{Total} & \textbf{Relative}\\
+        \hhline
         \endhead
-        \hline
         \tsubEight{AliasingTest}
         FlowSensitivity1 & $175$ & $72$ & $39$ & $4$ & $-136$ & $-68$ & $-204$ & $-0.83$\\
         Merge1 & $137$ & $65$ & $89$ & $47$ & $-48$ & $-18$ & $-66$ & $-0.33$\\
@@ -202,7 +202,7 @@
         JavaThread2 & $62$ & $10$ & $31$ & $8$ & $-31$ & $-2$ & $-33$ & $-0.46$\\
         Looper1 & $49$ & $3$ & $20$ & $16$ & $-29$ & $13$ & $-16$ & $-0.31$\\
         TimerTask1 & $203$ & $28$ & $32$ & $33$ & $-171$ & $5$ & $-166$ & $-0.72$\\
-        \hline\hline
+        \hhline
         \hiderowcolors
         $\varnothing$ Propagations & $85.46$ & $23.41$ & $117.64$ & $38.6$ & $32.19$ & $15.19$ & $47.37$ & $1.61$\\
         $\varnothing$ without Implicit Flow & $70.61$ & $22.46$ & $60.56$ & $40.1$ & $-10.05$ & $17.63$ & $7.59$ & $1.34$\\
@@ -272,7 +272,7 @@
     \begin{longtable}{l | r | r | r | r | r | r | r | r}
         & \multicolumn{2}{c|}{\textbf{EasyTW}} & \multicolumn{2}{c|}{\textbf{SummaryTW}} & \multicolumn{4}{c}{\textbf{Difference}}\\
         \multirow{-2}{*}{\textbf{Test Case}} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A} & \textbf{\#I} & \textbf{\#A}& \textbf{Total} & \textbf{Relative}\\
-        \hline\hline
+        \hhline
         \endhead
         \hline
         \tsubEight{AliasingTest}
@@ -422,7 +422,7 @@
         JavaThread2 & $31$ & $8$ & $28$ & $8$ & $-3$ & $0$ & $-3$ & $-0.08$\\
         Looper1 & $20$ & $16$ & $20$ & $16$ & $0$ & $0$ & $0$ & $0.0$\\
         TimerTask1 & $32$ & $33$ & $45$ & $37$ & $13$ & $4$ & $17$ & $0.26$\\
-        \hline\hline
+        \hhline
         $\varnothing$ Propagations & $60.56$ & $40.1$ & $57.29$ & $39.16$ & $-3.27$ & $-0.93$ & $-4.2$ & $0.13$\\
         $\varnothing$ without Serialization1& $60.88$ & $40.19$ & $55.04$ & $35.0$ & $-5.84$ & $-5.19$ & $-11.02$ & $0.0$\\
         \caption{\textsc{DroidBench} Evaluation with Summary Taint Wrapper}
@@ -445,7 +445,7 @@
 
     We also measured the memory usage of both implementations. 
     Using the memory amount reported by the JVM is not precise because the JVM prefers to take up free memory before running the garbage collector \cite{Arzt2017PhD}. 
-    We borrowed the memory evaluation tool from CleanDroid, which internally depends on a memory calculation tool from Twitter\footnote{\url{https://mvnrepository.com/artifact/com.twitter.common/objectsize}}. 
+    We borrowed the memory evaluation tool from CleanDroid, which internally depends on a memory calculation tool from Twitter\footnote{\url{https://mvnrepository.com/artifact/com.twitter.common/objectsize} (visited on 18.04.2021)}. 
     The memory evaluation tool measures the size of the exploded supergraph in 15 seconds intervals \cite{Arzt2021}. 
     Because we do not want to pollute the measured data flow time with the memory evaluation tool's latency, the memory measuring runs were run independently of the time measuring runs. 
     The memory sampling also takes up memory and because our test system has enough memory available, we bumped the maximum heap size up to 100GB, effectively eliminating memory timeouts.
@@ -566,7 +566,7 @@
     We had many apps with a single-digit analysis time and on the other side, we also found many apps that triggered a timeout or were close to triggering one. 
     In between those extrema are only a few apps.
     Recall that we set a soft limit on the runtime at 600 seconds.
-    The reference forward runs have a standard deviation of $209s$ and the runs of our implementation has $277s$ standard deviation.
+    The reference forward runs have a standard deviation of $209$ seconds and the runs of our implementation has $277$ seconds standard deviation.
     It is important to keep this in mind when interpreting the results.
 
     We first begin with an overview of the results. 
@@ -935,7 +935,7 @@
     % We argue that the memory timeouts are connected with the $10^7$ more propagations in ten minutes. If the forward analysis had more time to run, it would also trigger the memory timeout.
 
     Next, we look at the memory consumption difference per app in \autoref{f:memHist}. 
-    The x-axis shows the delta maximum memory consumption in $MB$ and the y-axis the frequency. 
+    The x-axis shows the delta maximum memory consumption in megabytes and the y-axis the frequency. 
     Each bin is $1GB$ wide.
     The delta is calculated with forward as the refrence: $m_{\mathit{Backward}}-m_{\mathit{Forward}}$. 
     Again, we see a gathering around $0$. Otherwise, the histogram has a more uniform distribution than its \hyperref[f:deltaHist]{time counterpart}.

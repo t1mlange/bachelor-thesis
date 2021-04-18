@@ -193,10 +193,11 @@
     Like in Call and Return Flow, we also kill taints that do not match any of these rules.
     
     \section{Runtime of the Data Flow Analysis}\label{s:complexity}
-    IFDS has a worst-case time complexity of $O(|E| \cdot |D|^3)$. $|E|$ is the number of observed edges in the control-flow graph and $|D|$ is the number of tainted variables observed by the IFDS analysis. 
-    \todo{Concluding}Concluding, the complexity highly depends on the choice of sources and sinks and the analyzed app. 
-    Therefore it is not possible to make a general statement about a better analysis direction. 
-    Nevertheless, what we can do is discuss certain cases where one direction is favorable. 
+    IFDS has a worst-case time complexity of $O(|E| \cdot |D|^3)$. $|E|$ is the number of observed edges in the control-flow graph and $|D|$ is the number of observed domain elements by the IFDS analysis. 
+    As a consequence, the complexity highly depends the analyzed app and on the location of the sources or sinks depending on the analysis direction.
+    Therefore it is not possible to deduce a general advantage for any direction.
+    Nevertheless, there are certain cases where one direction is favorable which we discuss in the following paragraphs.
+
     We decide favorably based on the number of taint propagations, i.e. the exploded supergraph's observed edges. 
     They correlate to the runtime and depend on two factors: taints' lifetime and the number of taints. 
     In the following paragraphs, we show examples where the analysis direction influences both factors. 
@@ -368,7 +369,6 @@
     Sadly, it is not as easy to generalize the statement to less starting taints means less runtime. 
     Arzt's evaluation of \textsc{FlowDroid} has shown no correlation between the number of sources and the runtime in \textsc{FlowDroid}\cite{Arzt2017PhD}. 
     This result indicates that the observed statements have way more influence on the number of taint propagations balancing out the initial advantage.
-    As a part of this work, we evaluate whether it is possible to decide the favorable analysis direction in \textsc{FlowDroid} on the same app in \autoref{s:realworld}.\\
     Even though the starting taints possibly do not correlate with the runtime, whenever there is a tiny number of sinks but hundreds of sources, the backward analysis should perform better.
     Likewise, Lerch et al. claim in their work that a magnificent smaller amount of sinks than sources are advantageous for a backward-directed search \cite{Lerch2014}.
 

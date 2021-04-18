@@ -469,4 +469,23 @@ Our static analysis found 29 security vulnerabilities in nine large, popular ope
   shorttitle = {{CogniCrypt}},
 }
 
+@InProceedings{King2008,
+  author     = {King, Dave and Hicks, Boniface and Hicks, Michael and Jaeger, Trent},
+  booktitle  = {Information {Systems} {Security}},
+  title      = {Implicit {Flows}: {Can}’t {Live} with ‘{Em}, {Can}’t {Live} without ‘{Em}},
+  year       = {2008},
+  address    = {Berlin, Heidelberg},
+  editor     = {Sekar, R. and Pujari, Arun K.},
+  pages      = {56--70},
+  publisher  = {Springer},
+  series     = {Lecture {Notes} in {Computer} {Science}},
+  abstract   = {Verifying that programs trusted to enforce security actually do so is a practical concern for programmers and administrators. However, there is a disconnect between the kinds of tools that have been successfully applied to real software systems (such as taint mode in Perl and Ruby), and information-flow compilers that enforce a variant of the stronger security property of noninterference. Tools that have been successfully used to find security violations have focused on explicit flows of information, where high-security information is directly leaked to output. Analysis tools that enforce noninterference also prevent implicit flows of information, where high-security information can be inferred from a program’s flow of control. However, these tools have seen little use in practice, despite the stronger guarantees that they provide.To better understand why, this paper experimentally investigates the explicit and implicit flows identified by the standard algorithm for establishing noninterference. When applied to implementations of authentication and cryptographic functions, the standard algorithm discovers many real implicit flows of information, but also reports an extremely high number of false alarms, most of which are due to conservative handling of unchecked exceptions (e.g., null pointer exceptions). After a careful analysis of all sources of true and false alarms, due to both implicit and explicit flows, the paper concludes with some ideas to improve the false alarm rate, toward making stronger security analysis more practical.},
+  doi        = {10.1007/978-3-540-89862-7_4},
+  file       = {Springer Full Text PDF:https\://link.springer.com/content/pdf/10.1007%2F978-3-540-89862-7_4.pdf:application/pdf},
+  isbn       = {9783540898627},
+  keywords   = {False Alarm , False Alarm Rate , Null Pointer , Secret Data , Authentication Method },
+  language   = {en},
+  shorttitle = {Implicit {Flows}},
+}
+
 @Comment{jabref-meta: databaseType:bibtex;}

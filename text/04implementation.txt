@@ -2,12 +2,14 @@
     Implementation
     This chapter describes the details of our backward-directed implementation and how we integrated it into FlowDroid.
 
-    Integration
-    FlowDroid is built to be extensible from to ground up. We wanted to reuse as many components of FlowDroid as possible. 
-    
-    First, we needed a backward interprocedural control-flow graph. FlowDroid already contained one for the on-demand aliasing, which only missed the notifyMethodChanged() method.
+    Integration    
+    First, we needed a backward interprocedural control-flow graph. 
+    FlowDroid already contained one for the on-demand aliasing and it just needed some small extensions. 
+    For example, implementing the notifyMethodChanged() method for the use inside StubDroid.
     Next, we need to introduce unconditional taints at sinks and check for the matching access paths at sources.
-    The methods for retrieving sources and sinks from a Source Sink Manager have different signatures because, in the forward analysis, access paths only have to match at sinks. We added the interface IReversibleSourceSinkManager extending the ISourceSinkManager. It enforces two additional methods:
+    The methods for retrieving sources and sinks from a Source Sink Manager have different signatures because, in a forward analysis, access paths only have to match at sinks. 
+    We added the interface IReversibleSourceSinkManager extending the ISourceSinkManager. 
+    It enforces two additional methods:
     
         SourceInfo getInverseSinkInfo(Stmt sCallSite,
 
@@ -15,18 +17,38 @@
         SinkInfo getInverseSourceInfo(Stmt sCallSite,
 
               Info getInverseSourceInfo(InfoflowManager manager, AccessPath ap)
-        getInverseSinkInfo returns the necessary information for introducing unconditional taints at sinks, while getInverseSourceInfo also matches the access paths at sources.
+        getInverseSinkInfo() returns the necessary information for introducing unconditional taints at sinks, while getInverseSourceInfo() also matches the access paths at sources.
     All source sink managers needed for the data flow analysis now implement the corresponding interface.
     Note that reversible source sink managers currently do not support the one-source-at-a-time mode.
 
-    For the core flow functions, we created two new classes implementing IInfoflowProblem. BackwardsInfoflowProblem implements the flow functions described in s:flowfunctions. We also refer to this as the main analysis. Additional language features are sourced out into rules which are informally described in s:rules. The second class is BackwardsAliasProblem which is responsible for the on-demand forward alias analysis. We describe the on-demand aliasing in greater detail in s:aliasing.
+    For the core flow functions, we created two new classes implementing IInfoflowProblem. 
+    BackwardsInfoflowProblem implements the flow functions described in s:flowfunctions. 
+    We also refer to this as the main analysis or infoflow analysis.
+    
+        The term information flow analysis is sometimes used interchangeably with taint analysis.
+        Others use it to describe taint analyses which also support implicit flows.
+    
+    Additional language features are sourced out into rules which are informally described in s:rules. 
+    The second class is BackwardsAliasProblem which is the on-demand forward alias analysis. 
+    We describe the on-demand aliasing in greater detail in s:aliasing.
 
-    After the analysis, the path builder constructs a path out of the leaked taint and its predecessors. Because the path builder expects a forward-built taint, the path ends up being the wrong way round. To hide the fact that we internally searched backward, we also created a BackwardsInfoflowResults extending InfoflowResults. The implementation is quite simple. It overwrites only the addResult implementations to swap the start and end. If full path reconstruction is enabled, it also reverses the path in between.
+    After the analysis, the path builder constructs a path out of the leaked taint and its predecessors. 
+    Because the path builder expects a forward-built taint chain, the path ends up being the wrong way round. 
+    To hide the fact that we internally searched backward, we also created a BackwardsInfoflowResults extending InfoflowResults. 
+    The implementation is quite simple. 
+    It overwrites only the addResult() implementations used by the path builder to save the results and swaps the start and end. 
+    If full path reconstruction is enabled, it also reverses the path in between.
 
     Flow-Sensitive Alias Analysis    FlowDroid offers multiple aliasing strategies.
-    In this work, we focus on flow-sensitive alias analysis. The analysis is another IFDS problem. However, this time, it is a forward-directed IFDS analysis using flow function with aliasing rules. The main analysis invokes the alias analysis on-demand when it discovers an alias. The alias analysis runs independent from the main analysis and later injects found aliases back into the main analysis.
+    In this work, we focus on flow-sensitive alias analysis. 
+    The analysis is formulated as another IFDS problem. 
+    Basically, it is a forward-directed IFDS analysis using flow function with aliasing rules. 
+    The main analysis invokes the alias analysis on-demand when it discovers an alias.
+    The alias analysis runs independent from the main analysis and later injects found aliases back into the main analysis.
 
-    Note that pointer analysis itself is a non-distributive problem. Nonetheless, the alias analysis is encoded in IFDS and we just accept the possibly imprecise results due to the overapproximation. Not using the intertwined alias analysis is too imprecise and the cases of overapproximation are rare in practice.
+    Note that pointer analysis itself is a non-distributive problem. 
+    Nonetheless, the alias analysis is encoded in IFDS and we just accept the possibly imprecise results due to the overapproximation. 
+    Not using the intertwined alias analysis is too imprecise and the cases of overapproximation are rare in practice.
 
     
                 [b]0.45
@@ -50,9 +72,21 @@
                             Normal flow Aliasing examples
             
     Handover between the analyses
-    The main analysis discovers aliases at assignments. Consider lst:aliasex where two different cases are displayed. On the left is a normal flow according to rule 1. In line 2, the in taint a.str produces the outcoming taint b.str. Because the assignment type is a heap type, the backward analysis now recognizes that it possibly missed updates to b.str below of line 2. It invokes the alias analysis with b.str. On the right is a normal flow according to rule 3. This time the assignment in line 2 is swapped. The main analysis leaves the incoming taint b.str untouched but notices a aliases b below line 2, hence invoking the alias analysis with a.str.
+    The main analysis discovers aliases at assignments. 
+    Consider lst:aliasex where two different cases are displayed. 
+    On the left is a normal flow according to rule 1. 
+    In line 2, the in taint a.str produces the outcoming taint b.str.
+    Because the assignment type is a heap type, the backward analysis now recognizes that it possibly missed updates to b.str below of line 2.
+    It invokes the alias analysis with b.str. 
+    On the right is a normal flow according to rule 3. 
+    This time the assignment in line 2 is swapped. 
+    The main analysis leaves the incoming taint b.str untouched but notices a aliases b below line 2, hence invoking the alias analysis with a.str.
     
-    The alias analysis searches for missed updates. If the analysis found an update, e.g., the taint is on the left side of the assignment, the analysis injects an edge to the statement with the taint into the main analysis' worklist. Consider again lst:aliasex_a. In line 3, the alias analysis encounters the tainted b.str on the left side. At this point, b.str gets handed back to the main analysis, following the missed update to find a possible leak. In this case, the leak happens right away.
+    The alias analysis searches for missed updates. 
+    If the analysis found an update, e.g., the taint is on the left side of the assignment, the analysis injects the edge to the statement with the taint into the main analysis' worklist. 
+    Consider again lst:aliasex_a. 
+    In line 3, the alias analysis encounters the tainted b.str on the left side. 
+    At this point, b.str gets handed back to the main analysis, following the missed update to find a possible leak. In this case, the leak happens right away.
 
     
                 max width=
@@ -66,61 +100,147 @@
                             Aliasing example with turn unit
             
     Maintaining Flow Sensitivity
-    Arzt solved this in the existing forward implementation using an activation unit. This statement marks the update at which the alias gets tainted and can leak at sinks. This concept does not work for our backward implementation as the alias analysis traverses forward where a write to a variable means a leak. Thus we introduce the turn unit. The turn unit holds the last non-aliasing assignment. When a taint reaches its turn unit in the aliasing analysis, the analysis kills the taint. Consider lst:turnunit. The introduced taint str in line 6 also has line 6 as a turn unit. In line 4, a non-aliasing assignment happens. In line 2, the alias analysis starts for a.str. Without the turn unit, the taint would pass line 3. Further in line 5, the taint is handed to the main analysis. The main analysis then reports a leak. With the turn unit, the alias analysis kills the taint in line 4, preventing the false positive. 
+    Arzt solved this in the existing forward implementation using an activation unit.
+    This statement marks the update at which the alias gets tainted and can leak at sinks. 
+    This concept does not work for our backward implementation as our alias analysis traverses forward where the taint is already valid. 
+    Thus we introduce the turn unit. 
+    The turn unit holds the last non-aliasing assignment. 
+    When a taint reaches its turn unit in the aliasing analysis, the analysis kills the taint. 
+    Consider lst:turnunit. 
+    The introduced taint str in line 6 also initially has line 6 as a turn unit. 
+    In line 3, a non-aliasing assignment happens, hence the turn unit is updated. 
+    In line 2, b.str is tainted and the alias analysis is invoked with a.str. 
+    Without the turn unit, the taint would pass line 3. 
+    Further in line 4, the taint is handed to the main analysis. 
+    The main analysis then reports a leak. 
+    With the turn unit in place, the alias analysis kills the taint in line 4, preventing the false positive.
     
     
                 max width=
             [gobble=16]
                 void foo() 
-                    // [...]
-                    bar(someObject1);
-                    sink(someObject1);
+                    // In: o1.str
+                    bar(o1);
 
-                    bar(someObject2);
-                    sink(someObject2);
+                    // In: o2.str
+                    bar(o2);
                 
-                            Summaries with Turn Units
+                            Summaries And Turn Units
             
-    The turn unit is a new field in the Abstraction class, which is representing a taint. A possible drawback of the backward analysis could be the reusability of the IFDS summaries. Because the turn unit is part of the taint, IFDS treats equal taints with different turn units as if they have a different context. Consider lst:turnunitsum. str1 and str2 are equal taints, but one has the turn unit at line 7 while the other one has the turn unit set to line 4. Let us assume IFDS already traversed the call to bar(someObject2); in line 6 and created a summary from it. Later, it observes the same callee but with someObject1 as an argument. Though, because the turn units differ, IFDS can not apply the already existing summary. In this case, applying the summary would not be harmful. However, if the turn unit is inside the callee or the transitive callees, we would effectively lose the flow sensitivity as the turn unit is ignored.
+    The turn unit is a new field in the Abstraction class, which is representing a taint. 
+    A possible drawback of the backward analysis could be the reusability of the IFDS summaries. 
+    Because the turn unit is part of the taint, IFDS treats equal taints with different turn units as if they have a different context. 
+    Consider lst:turnunitsum within the alias analysis.
+    Let us assume IFDS already returned from the call bar(o1) and created the summary for this context.
+    Later, the analysis observes the same access path with the same context but a different turn unit.
+    Now, IDFS can not apply the summary from bar(o1).
+    If turn unit of o1 is inside the callee or one of the transitive callees but the turn unit of o2 is not, we would effectively lose the flow sensitivity as the taint is wrongfully killed.
+    In the reverse case, we would also lose the flow sensitivity because, this time, the turn unit is ignored.
 
-    Rules    Flow functions can get quite large, complicated to understand and hard to maintain. To counteract this, FlowDroid outsources certain features into rules. These rules also implement the four flow functions and are applied in the main analysis's corresponding flow function.
+    Rules    Flow functions can get quite large, complicated to understand and hard to maintain. 
+    To counteract this, FlowDroid outsources certain features into rules. 
+    These rules also implement the four flow functions and are applied in the main analysis's corresponding flow function.
     In this section, we describe our implementation and informally state the rule behavior.
 
-    Source  Sink Propagation Rule    In backward analysis, sources act like sinks and vice versa. Thus, the Source Propagation Rule records taints flowing into sources and the Sink Propagation Rule unconditionally introduces taints at sinks requiring an IReversibleSourceSinkManager.
+    Source  Sink Propagation Rule    In backward analysis, sources act like sinks and vice versa. 
+    Thus, the Source Propagation Rule records taints flowing into sources and the Sink Propagation Rule unconditionally introduces taints at sinks requiring an IReversibleSourceSinkManager.
 
-    Notably, the DefaultSourceSinkManager assumes the return value to be tainted. Only if the return value is ignored or the method has no return value, the base object is assumed to be tainted while at sinks base object and parameters are leaked. Thus, starting at sinks results in more taints per statement than in forwards analysis. Recall s:complexity, Arzt's evaluation has shown that the initial source count does not correlate with the runtime, which implies that this should be is insignificant on real-world apps.
+    Notably, the default handling of sources assumes the return value to be tainted. 
+    Only if the return value is ignored or the method has no return value, the base object is assumed to be tainted.
+    While at sinks the base object and parameters are leaked by default.
+    Thus, starting at sinks might result in more taints per statement.
+    We did not notice an impact on the performance in the development phase but the test cases are fairly simple, so the base object creation is often right before the sink call.
+    Also, we do not think this have an impact on the real-world performance of the backward analysis because Arzt evaluation of the forward implementation showed no correlation between runtime and source count.
+    Whether this is actually true is sorted out in the evaluation in s:realworld.
 
     Backwards Array Propagation Rule
     In FlowDroid, array taints are overapproximated by only distinguishing contents and length but not elements. Meaning if one element of an array is tainted, FlowDroid considers all elements tainted. 
-    Indices are often computed at runtime and thus not available for a static analysis without applying another analysis beforehand. So, the approximation is not as severe because we could only track constant indices regardless. 
-    Furthermore, distinguishing elements would increase the domain even more, subsequently increasing the runtime.  
+    Indices are often computed at runtime and thus not available for a static analysis without applying another analysis beforehand. So, the approximation is not as severe because we could only track constant indices without large overhead regardless. 
+    Furthermore, distinguishing elements would increase the domain even more, subsequently increasing the runtime.
 
     The Array Propagation Rule handles ArrayNewExpr, LengthExpr and ArrayRef on the right-hand side.
-
     
         Array Rule 1: If the left side's length is tainted and the right side is an ArrayNewExpr, the outcoming taint is the size local of the ArrayNewExpr.
         Array Rule 2: If the left side is tainted and the right side is a LengthExpr, the outcoming taint is the operand of the LengthExpr with only its length tainted.
         Array Rule 3: If the left side is tainted and the right side is an ArrayRef, the outcoming taint is the array base with only its content tainted.
-    
-    The overapproximation of arrays also implies that array taints can not be killed if the left side is an ArrayRef.
+        The overapproximation of arrays also implies that array taints can not be killed if the left side is an ArrayRef.
 
     Backwards Exception Propagation Rule
-    The backwards analysi first finds a catched exception in the form of someVar := @caughtexception. Then it sets an exception flag at the taint and propagates the taint onwards. The subsequent propagation then finds the corresponding throw statement.
+    The backwards analysis first finds a catch statement someVar := @caughtexception. 
+    If the left side matches, it sets an exception flag at the taint and propagates the taint onwards. 
+    The subsequent propagation then finds the corresponding throw statement.
     
         Exception Rule 1: On a caught exception expression, derive a new taint with an exception flag set.
         Exception Rule 2: If a taint with the exception flag set occurs at a ThrowStmt, derive taint the operand of the ThrowStmt. 
-    
-    The second rule is present in Call and Normal Flow because the throw statement can be inside the same method or in a callee.
+        The second rule is present in Call and Normal Flow because the throw statement can be inside the same method or in a callee.
 
     Backwards Wrapper Propagation Rule
-    The implementation of this rule is similar to the existing implementation. A tainted returned value also needs to be passed into the taint wrapper because of the backward direction. The rule calls getInverseTaints() and thus requires the taint wrapper to implement the IReversibleTaintWrapper interface .
+    The implementation of this rule is similar to the existing implementation. 
+    A tainted returned value also needs to be passed into the taint wrapper because of the backward direction. 
+    The rule calls getInverseTaints() and thus requires the taint wrapper to implement the IReversibleTaintWrapper interface.
+    
+    Additionally, we added an optimization to the taint wrapper rule. 
+    Recall s:complexity where we explained our backward implementation benefits from a right-to-left order. 
+    The StringBuilder however can alias and the alias search offsets the advantage. 
+    We use the observation that Jimple does not reuse the local variables when compiled from Java bytecode and all locals pointing to the same StringBuilder instance except one are not reused either.
+    Thus, we apply a live variables analysis for the base object in between the current statement and the turn unit as a preanalysis. 
+    Only if the preanalysis finds an use, the alias analysis is used. 
+    The preanalysis is around  runtime and cheaper than the alias analysis.
+    Based on our observations, it should rarely find an use.
 
+    Backwards Implicit Propagation Rule
+    Flows which are influenced by a condition are called implicit flows. 
+    A common example is a password check. 
+    Such a method could return a boolean signifying the password is correct or not. 
+    Without implicit flows, the taint analysis would be unable to find the path between the password input and the output action. 
+    The semantics of implicit flows in FlowDroid are that every update flowing into a sink or a sink call inside a conditional branch, even in transitive callees, are considered as a leak.
+    
+    The existing forward-directed implementation derives a wildcard taint and propagates it until the conditional branch is left again at the immediate postdominator. 
+    A wildcard taint is an taint without an object or access path but a wildcard appended.
+    This behavior does not scale well because the semantics demand tainting every update and following every call in conditionals leading to many unneccessary taints never reaching a sink.
+    This is not an issue specific to FlowDroid but is present for most analyses providing implicit flows.
+
+    We also use the wildcard taint but with a different semantic. 
+    Backward, the wildcard signifies a conditional update and is propagated further to find the corresponding condition.
+    Thus, the branching factor inside a conditional branch should be lower. 
+    To detect a conditonal, we push and pop the dominator on the taints.
+    Whenever an update is conducted to a taint carrying a dominator, the wildcard taint is derived.
+    However, it is not that easy to reconstruct the conditional branches while traversing the exploded supergraph.
+    Consider the code in lst:impflow. 
+    We expect from the analysis to find the path from line 2 to line 10. 
+    First of all, starting at the sink it is unknown whether a conditional influenced the call to the transitiveSink() method. 
+    Also, assuming we created a taint representing the sink call, consider the return edge into foo(). 
+    The edge is already inside a conditional branch, thus the dominator is per-definition line 4. 
+    We are unable to use the dominator as a indication whether a taint enters a conditional in such cases.
+    Both of those challenges are not a data-flow problem but rather a control-flow graph reachability problem. 
+    We extended the backward interprocedural control-flow graph with two methods:
+    
+        List<Unit> getConditionalBranchesInterprocedural(Unit unit)
+        Unit getConditionalBranchIntraprocedural(Unit unit)
+        The first one is used for sink calls. 
+    It traverses the interprocedural graph using a worklist algorithm to find all possibly reachable conditional statements. 
+    We then use those found conditionals to derive sink taints with the correct conditional dominator.
+    The second one is used at return edges and returns the conditional statement if the call site is inside a conditional else null. 
     
     
+                [b]0.45
+                        [gobble=16]
+                void foo() 
+                    int tainted = source();
+                    if (tainted == 42) 
+                        x = 0;
+                        transitiveSink();
+                    
+                
 
+                void transitiveSink() 
+                    sink();
+                
+                            Implicit Flow Challenges
+            
     Backwards Strong Update Rule
     Until now, we always assumed that a taint is only affected if the variable occurs in a statement. 
-    However, with aliasing, this gets quite more complicated. 
+    However, with aliasing, this gets more complicated. 
     A taint could not match the left side and, thus, is propagated over the statement according to the default rule of normal flow, but the taint is an alias of the left side and should have been killed. 
     Also, we can not just link aliases to taints for such strong updates because that would violate the flow functions' distributiveness property.
     
@@ -130,9 +250,13 @@
     
         Strong Update Rule: If the incoming taint must-aliases the left side, then apply the normal flow rules just as if the left side was tainted. 
     
-    Backwards Clinit Rule    <clinit> is a special method in the JVM and stands for class loader init. The compiler generates the method and calls it implicitly. Examples of statements that get compiled into clinit are in lst:clinit_examples. The invokation is implicit at the class's initialization phase and is executed at most once for each class(https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.htmljvms-2.9). 
-    SPARK, which default call graph algorithm in FlowDroid, overapproximates the <clinit> behavior. It adds an edge to <clinit> at each statement containing a StaticFieldRef, StaticInvokeExpr or NewExpr
-    (https://github.com/soot-oss/soot/blob/59931576784b910a7d38f81910b7313aa2feafea/src/main/java/soot/jimple/toolkits/callgraph/OnFlyCallGraphBuilder.javaL969).
+    Backwards Clinit Rule    <clinit> is a special method in the JVM and stands for class loader init. 
+    The compiler generates the method and calls it implicitly. Examples of statements that get compiled into clinit are in lst:clinit_examples. 
+    The invokation is implicit at the class's initialization phase and is executed at most once for each class.
+    Source: https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.htmljvms-2.9 (visited on 17.04.2021) 
+    SPARK, the default call graph algorithm of FlowDroid, overapproximates the <clinit> behavior. 
+    It adds an edge to <clinit> at each statement containing a StaticFieldRef, StaticInvokeExpr or NewExpr.
+    (https://github.com/soot-oss/soot/blob/59931576784b910a7d38f81910b7313aa2feafea/src/main/java/soot/jimple/toolkits/callgraph/OnFlyCallGraphBuilder.javaL969 (visited on 17.04.2021))
    
     
                 [b]0.45
@@ -151,25 +275,37 @@
                         static block
                             Examples of statements being in <clinit>
             
+    The need for this rule is rooted in the IFDS solver of FlowDroid.
+    The solver decides whether to use Normal Flow or Call Flow by calling isCallStmt(Unit u) on the interprocedural control-flow graph generated by Soot. 
+    Internally, this method calls containsInvokeExpr() on the Unit object. containsInvokeExpr() for AssignStmt only returns true if the right-hand side is an instance of InvokeExpr. 
+    Consequently, the calls to <clinit> from AssignStmts with NewExpr or StaticFieldRef on the right side are missed.
 
-    The need for this rule is rooted in the IFDS solver of FlowDroid. The solver decides whether to use Normal Flow or Call Flow by calling isCallStmt(Unit u) on the interprocedural control-flow graph generated by Soot. Internally, this method calls containsInvokeExpr() on the Unit object. containsInvokeExpr() for AssignStmt only returns true if the right-hand side is an instance of InvokeExpr. Consequently, the calls to <clinit> from AssignStmts with NewExpr or StaticFieldRef on the right side are missed.
-
-    The Backwards Clinit Rule manually injects an edge to the <clinit> method in the infoflow solver when appropriate during the analysis. Also, it lessens the overapproximation of SPARK by carefully choosing whether to inject the edge. The rule works as follows:
+    The Backwards Clinit Rule manually injects an edge to the <clinit> method in the infoflow solver when appropriate during the analysis. 
+    Also, it lessens the overapproximation of SPARK by carefully choosing whether to inject the edge. The rule works as follows:
     
         Clinit Rule 1: If the tainted static variable is a field of the methods class, do not inject because we will at least encounter a NewExpr of the same class further in the call graph.
         Clinit Rule 2: Else if the tainted static variable matches the StaticFieldRef on the right hand side: Inject the edge because we can not be sure whether we see another edge to <clinit>.
         Clinit Rule 3: Else if the class of the tainted static variable matches the class of the NewExpr: Inject the edge because we can not be sure whether we see another edge to <clinit>.
-        The behavior is still an overapproximation, of course. A more precise solution would require bookkeeping of every class's last observation equal to the first occurrence in the code. 
+        The behavior is still an overapproximation, of course. 
+    A more precise solution would require bookkeeping of every class's last observation equal to the first occurrence in the code. 
 
-    In the existing implementation, there is no such explicit. As taints are introduced at sources, if the source statement is a static initialization as shown in lst:clinit_examples_a, the propagation starts inside the <clinit> method. The solver has a followReturnsPastSeeds feature which propagates return flows for unbalanced problems, for example when the taint was introduced inside a method and therefore there was no incoming flow. This allows the forward analysis to detect leaks originated from static variable initializations but misses leaks inside static blocks as shown in lst:clinit_examples_b.
+    In the existing implementation, there is no such explicit modelling. 
+    As taints are introduced at sources, if the source statement is a static initialization as shown in lst:clinit_examples_a, the propagation starts inside the <clinit> method. 
+    Then unbalanced problem handling of the solver propagates the taint into the callers of ClinitClass1 <clinit>. 
+    This allows the forward analysis to detect leaks originating from static variable initializations but misses leaks inside static blocks as shown in lst:clinit_examples_b.
 
     Other Rules
-    Skip System Class Rule and Stop After First K Flows Rule are not direction-dependent. Both are shared with the forwards search and therefore use the existing implementation in FlowDroid.
+    Skip System Class Rule and Stop After First K Flows Rule are not direction-dependent. 
+    Both are shared with the forwards search and therefore use the existing implementation in FlowDroid.
     
     
 
     Other Components
-    Taint Wrappers    FlowDroid already has an interface IReversibleTaintWrapper for taint wrappers providing inversed summaries. The SummaryTaintWrapper using StubDroid's summaries already implemented this interface. For the EasyTaintWrapper, we contributed the inverse implementation. Its implementation follows simple rules which cover most cases. The rules are inverted to:
+    Taint Wrappers    FlowDroid already has an interface IReversibleTaintWrapper for taint wrappers providing inversed summaries. 
+    The SummaryTaintWrapper using StubDroid's summaries already implemented this interface. 
+    For the EasyTaintWrapper, we contributed the inverse implementation. 
+    Its implementation follows simple rules which cover most cases. 
+    The rules are inverted to:
     
         If the return value is tainted, taint the object and the parameters.
         If the base object is tainted, taint all parameters.
@@ -184,22 +320,36 @@
                 sink(sb.toString());
                             Easy Taint Wrapper Example
             
-    Note that these simple rules are disadvantageous for the backward direction the more parameters a method has. Consider the code snippet in lst:etw, especially line 3. Forwards, 
-    tainted is the incoming taint and the EasyTaintWrapper produces the taint set tainted, sb. Backward, the incoming taint is sb and the taint wrapper produces four taints sb, tainted, offset, len. Luckily, most methods supported by the EasyTaintWrapper have less than three arguments.
+    Note that these simple rules are disadvantageous for the backward direction the more parameters a method has. 
+    Consider the code snippet in lst:etw, especially line 3. 
+    Forwards, tainted is the incoming taint and the EasyTaintWrapper produces the taint set tainted, sb. 
+    Backward, the incoming taint is sb and the taint wrapper produces four taints sb, tainted, offset, len. 
+    Luckily, most methods supported by the EasyTaintWrapper have less than three arguments.
 
     Native Call Handler
     The native call handler of FlowDroid handles two methods: System#arraycopy and reflect.Array#newArray.
-    The the handling of System#arraycopy is direction-dependent. Thus, we adapted the existing implementation and reversed the logic of System#arraycopy to reflect the analysis direction.
+    The handling of System#arraycopy is direction-dependent. 
+    Thus, we adapted the existing implementation and reversed the logic of System#arraycopy to reflect the analysis direction.
 
     Code Optimizer: AddNOPStmts
-    Before starting the analysis, FlowDroid applies code optimization to the interprocedural call graph. By default, dead code elimination and within constant value propagation is performed. Those are also applied before backward analysis,but we needed another code optimizer to handle an edge case in backward analysis.
+    Before starting the analysis, FlowDroid applies code optimization to the interprocedural call graph. 
+    By default, dead code elimination and within constant value propagation is performed. 
+    Those are also applied before backward analysis,but we needed another code optimizer to handle an edge case in backward analysis.
 
-    First, consider the static2Test test case in the StatictTestCode class of FlowDroid in lst:static2TestJava. The method is also the entry point for the analysis, is static and does not have any parameters. The same is true for the source TelephonyManager#getDeviceId. Due to the first condition, static2Test has no identity statements and because of the second condition, there are also no assign statements before the source statement in Jimple. Therefore the source statement is the first statement in the graph. 
-    Next, a detail of FlowDroid's IFDS solver is important. The Return and CallToReturn flow function is only applied if a return site is available.
-    When traversing backward, the source statement is the last and thus has no return sites. Now, the taints flowing into source methods are registered in the Call To Return flow function. Altogether, leaks are missed if the source statement is the first statement.
+    First, consider the static2Test test case in the StatictTestCode class of FlowDroid in lst:static2TestJava. 
+    The method is also the entry point for the analysis, is static and does not have any parameters. 
+    The same is true for the source TelephonyManager#getDeviceId. 
+    Due to the first condition, static2Test has no identity statements and because of the second condition, there are also no assign statements before the source statement in Jimple. 
+    Therefore the source statement is the first statement in the graph. 
+    Next, a detail of FlowDroid's IFDS solver is important. 
+    The Return and CallToReturn flow function is only applied if a return site is available.
+    When traversing backward, the source statement is the last and thus has no return sites. 
+    Now, the taints flowing into source methods are registered in the Call To Return flow function. 
+    Altogether, leaks are missed if the source statement is the first statement.
 
     Moving the detection of incoming taints flows into sources from the CallToReturn to the Call flow function was not an option because by default source methods are not visited and changing this would require multiple changes in the existing implementation and also ours. 
-    Our solution is to add a NOP statement in such cases before the analysis. Due to the entry points being known beforehand, the overhead is nearly zero.
+    Our solution is to add a NOP statement in such cases before the analysis. 
+    Due to the entry points being known beforehand, the overhead is negligible.
 
     
                 [b]

@@ -6,11 +6,13 @@
 
     Normal Flow    Normal flow functions handle every statement that does not contain an InvokeExpr.
     
-    For the base cases in normal flow, new taints are only produced at assignments. Assignments are always explicit in Jimple and are either AssignStmt's or IdentityStmt's. The IdentityStmt's are at the top of a method(With the exception of local_name := @caughtexception, which is outside of the base cases.) and assign special values to locals, e.g., parameters and the this reference. We perform the identity function over those because we want to keep those taints alive to reach the return edge. Then the Return Flow function takes care of mapping all parameters back into the caller(Note that traversing the interprocedural control-flow graph backward means call edges are now return edges and vice versa.). So in the following, we only consider AssignStmt's.
+    For the base cases in normal flow, new taints are only produced at assignments. Assignments are always explicit in Jimple and are either AssignStmts or IdentityStmts. The IdentityStmt's are at the top of a method(With the exception of local_name := @caughtexception, which is outside of the base cases.) and assign special values to locals, e.g., parameters and the this reference. We perform the identity function over those because we want to keep those taints alive to reach the return edge. Then the Return Flow function takes care of mapping all parameters back into the caller(Note that traversing the interprocedural control-flow graph backward means call edges are now return edges and vice versa.). So in the following, we only consider AssignStmts.
 
-    Now, let us consider an AssignStmt. The left side is either a field reference or a local and the right side is an expression.
-    In the following, we assume the right side is always a variable.
-    The assignment has the structure  with  modeling a possible field reference.
+    Now, let us consider an AssignStmt where the left side is either a field reference or a local and the right side is an expression.
+    In the following, we assume the right side is always a local or a field dereference.
+    If the expression is a InvokeExpr, we handle this in the call flow.
+    For unary operators, the local can simply be extracted and for binary operators, we consider both locals separately.
+    An assignment has the structure  with  modeling a possible field reference.
     As taints may have an access path of an arbitrary length, we denote this as .( is a -length chain of field dereferences, not -times the same field dereference)
     Jimple also ensures only one field dereference per statement, which Arzt chose not to represent in the semi-formal definitions and neither did we. 
 
@@ -21,12 +23,18 @@
      
     
 
-    Next, we need a rule for the case the field dereference  is included in a cut-off approximation. Recall s:ap, symbolic access paths can also be -limited to speedup the analysis and are -limited in FlowDroid by default. Thus, we might encounter a taint with no field dereferences and a wildcard  appended. In this case, just the base needs to match. However, this time, the left side is kept alive because we can not reason which field is tainted due to the cut-off approximation.
+    Next, we need a rule for the case the field dereference  is included in a cut-off approximation. 
+    Recall s:ap, symbolic access paths can also be -limited to speedup the analysis and are -limited in FlowDroid by default. 
+    Thus, we might encounter a taint with no field dereferences and a wildcard  appended. 
+    In this case, just the base needs to match. 
+    However, this time, the left side is kept alive because we can not reason which field is tainted due to the cut-off approximation.
     
         [] Rule 2: An incoming taint  with  produces the outflowing taint set .
      
 
-    Lastly, we could also observe a taint on the right side. In this case, we apply the identity, so propagate the taint over the statement. This case is necessary later when we consider aliasing in s:aliasing.
+    Lastly, we could also observe a taint on the right side. 
+    In this case, we apply the identity, so propagate the taint over the statement. 
+    This case is necessary later when we consider aliasing in s:aliasing.
     
         [] Rule 3: An incoming taint  with  produces the outflowing taint set .
         [] Rule 4: An incoming taint  produces the outflowing taint set .
@@ -35,12 +43,32 @@
 
     Call Flow
     The Call Flow function and subsequently Return and Call To Return Flow function apply whenever a statement contains an InvokeExpr.
-    For call statements without an assignment, we have statements of the structure  with .  denotes the -th argument,  the -th parameter and  the class instance of the callee's base object.
+    For call statements without an assignment, we have statements of the structure  with .  denotes the -th argument,  the corresponding parameter to  and  the class instance of the callee's base object.
 
-    When we encounter a tainted argument in the caller, the taint needs to go through the callee. Java uses pass-by-value, so the arguments are copied into the callee. Thus, for primitives, the value is copied and pushed on the stack. For reference types, the pointer to the object is pushed on the stack. In the second case, if only the base reference is tainted but nothing more ( and no wildcard), the callee can only access and overwrite the reference saved in the parameter on the stack but not change the object's data on the heap. besser formulieren
-    We know the update that tainted the primitive or reference without field dereferences can not be inside the callee due to the backward direction. 
-    This property becomes apparent when we get specific to Java's types. Primitives do not have fields and strings are immutable(The special handling of strings results in transparent fields, e.g. we can treat strings as if they were primitives in this case.). Consider the example in lst:primret. On the left, we use the built-in String type. In line 2, str is copied into callee. After this statement, both str hold the value 42 but point to another memory location(The JVM might only set a copy-on-write flag on str in callee and point it to the identical location as str in main to save memory. At least right before the update happens, it is guaranteed that the variable points to a different location.). Thus, main carries on with the original value of str no matter what callee writes to str. In contrast, on the right, the callee can update the field on the heap. Therefore, the taint needs to be propagated into the callee to find the leak. Conclusively,  needs to be greater than .
-
+    When we encounter a tainted argument in the caller, the taint needs to go through the callee. 
+    Java uses pass-by-value, so the arguments are copied into the callee. 
+    Thus, for primitives, the value is copied and pushed on the stack. 
+    For reference types, the pointer to the object is pushed on the stack. 
+    In the second case, if only the base reference is tainted but nothing more ( and no wildcard), the callee can only access and overwrite the reference saved in the parameter on the stack but is not able to change the reference in the callee.
+    We know an update that tainted the primitive or reference without field dereferences can not be inside the callee due to the backward direction. 
+    This property becomes apparent when we get specific to Java's types. 
+    Primitives do not have fields and strings are immutable(The special handling of strings results in transparent fields, e.g. we can treat strings as if they were primitives in this case.). 
+    Consider the example in lst:primret. 
+    On the left, we use the built-in String type. 
+    In line 2, str is copied into callee. 
+    After this statement, both str hold the value 42 but point to another memory location.
+    (
+        The JVM might only set a copy-on-write flag on str in callee and point it to the identical location as str in main to save memory. 
+        At least right before the update happens, it is guaranteed that the variable points to a different location.
+    )
+    Thus, main carries on with the original value of str no matter what callee writes to str.
+    In contrast, on the right, the callee can update the field on the heap. 
+    Therefore, the taint needs to be propagated into the callee to find the leak. 
+    Conclusively,  needs to be greater than .
+    
+        [] Rule 1: An incoming taint  with  produces the outflowing taint set .
+        [] Rule 2: An incoming taint  with  produces the outflowing taint set .
+    
     
                 [b]0.45
                         max width=
@@ -71,29 +99,41 @@
                 Call Flow Example
          
     
-    
-        [] Rule 1: An incoming taint  with  produces the outflowing taint set .
-        [] Rule 2: An incoming taint  with  produces the outflowing taint set .
-    
-    A non-static callee can also access instance fields of the base object. When we observe a tainted base object, the taint also needs to flow through the callee. The tainted object transforms into a  reference. In Java, this references the current instance the method operates on.
+    A non-static callee can also access instance fields of the base object. 
+    When we observe a tainted base object, the taint also needs to flow through the callee. 
+    The tainted object transforms into a  reference. 
+    In Java, this references the current instance the method operates on.
     
         [] Rule 3: An incoming taint  with  produces the outflowing taint set . 
         [] Rule 4: An incoming taint  produces the outflowing taint set .
         
-    Static fields form a special case. Their scope extends over the whole program and thus, tainted static fields always have to go through the callee. The taint is untouched as the access path to those is the same everywhere.
+    Static fields form a special case. 
+    Their scope extends over the whole program and thus, tainted static fields always have to go through the callee.
+    The taint is untouched as the access to those is the same everywhere.
     
         [] Rule 5: An incoming taint  with  produces the outflowing taint set .
     
-    In Jimple, AssignStmt's can also consist of an InvokeExpr on the right side. The structure of the statement is in this case .  denotes a return value.  is the number of return statements in the callee. If we observe such a statement and the left side is tainted, we need to map the returned value back into the callee. Now, methods can have multiple return statements and as we traverse the reversed interprocedural control-flow graph, there are multiple outgoing edges. We can not reason which return statement is the right one, so we need to taint every return statement's operand in the callee.
+    In Jimple, AssignStmts can also consist of an InvokeExpr on the right side. 
+    The structure of the statement is in this case .  denotes a return value. 
+     is the number of return statements in the callee. 
+    If we observe such a statement and the left side is tainted, we need to map the left-hand side of the AssignStmt back into the callee. 
+    Now, methods can have multiple return statements and as we traverse the reversed interprocedural control-flow graph, there are multiple outgoing edges. 
+    We can not reason which return statement is the right one, so we need to taint every return statement's operand in the callee.
     
         [] Rule 6: An incoming taint  with  produces the outflowing taint set . 
     
-    Unlike at normal flows, we kill all taints not matching any of the rules. In the case of a taint being out of the callee's scope, the Call To Return flow function propagates the taint over the statement.
+    Unlike at normal flows, we kill all taints not matching any of the rules. 
+    In the case of a taint being out of the callee's scope, the Call To Return flow function propagates the taint over the statement.
 
     Return Flow
-    Taints reaching the end of a method need to be mapped back into the caller. The statement we consider is of the structure  with . Again,  denotes the -th argument,  the -th parameter and  the class instance.
+    Taints reaching the end of a method need to be mapped back into the caller. 
+    The statement we consider is of the structure  with . 
+    Again,  denotes the -th argument,  the -th parameter and  the class instance.
 
-    The first rule is the counterpart rule 1 and 2 of Call Flow(Note that if  can be , the wildcard also works.) and map all parameters back into the caller. In contrast to the Call Flow, we also map primitives and strings back into the caller. Thus, the taints are also visible in the caller.
+    The first rule is the counterpart rule 1 and 2 of Call Flow and map all parameters back into the caller. 
+    Note that if  can be , the wildcard also works.
+    In contrast to the Call Flow, we also map primitives and strings back into the caller.
+    This is because if a taint reaches the end of the method, as we traverse backward this is the beginning of a method body, the contents of the parameter were copied from the caller into the callee. 
     
         [] Rule 1: An incoming taint  with  produces the outflowing taint set .
     
@@ -102,28 +142,40 @@
         [] Rule 2: An incoming taint  with  produces the outflowing taint set . 
         [] Rule 3: An incoming taint  with  produces the outflowing taint set .
         
-    Tainted static fields are also mapped back untouched. This rule is the same as rule 5 of the Call Flow.
+    Tainted static fields are also mapped back. As already written in the corresponding rule 5 of Call flow, the taints is untouched.
     
         [] Rule 4: An incoming taint  with  produces the outflowing taint set . 
         
-    Again, taints not matching any rule are killed. For example, this kills taints, which are not in the caller's scope, when returning from a method.
+    Again, taints not matching any rule are killed. 
+    For example, this kills taints, which are not in the caller's scope, when returning from a method.
 
     CallToReturn Flow
-    The statement structure is  with .  denotes the -th argument.
+    The statement structure is  with . 
+     denotes the -th argument.
 
-    A taint is not in the callee's scope if it is not static and neither matches an argument nor the base object the method is called on. Such a taint is not matched inside Call Flow and needs to be propagated over the call statement.
+    A taint is independent from a callee if it is not static and neither matches an argument nor the base object the method is called on. 
+    Such a taint is not matched inside Call Flow and needs to be propagated over the call statement.
     
         [] Rule 1: An incoming taint  with  produces the outflowing taint set . 
     
-    Consider again the left side of lst:primret. In line 3, the taint is in the kill set of Call Flow. As we want to preserve the taint after the call, we need to propagate the taint over the call statement in such cases. 
+    Now, consider again the left side of lst:primret. 
+    In line 3, the str taint is in the kill set of Call Flow because the callee can not be responsible for the tainted variable in the caller.
+    But the taint is still valid after the call.
+    As we want to preserve the taint, we need to propagate the taint over the call statement in such cases. 
     
         [] Rule 2: An incoming taint  with  produces the outflowing taint set . 
             
     Like in Call and Return Flow, we also kill taints that do not match any of these rules.
     
-    Runtime of the Data Flow Analysis    IFDS has a worst-case time complexity of .  is the number of observed edges in the control-flow graph and  is the number of tainted variables observed by the IFDS analysis. Concluding, the complexity highly depends on the choice of sources and sinks and the analyzed app. 
-    Therefore it is not possible to make a general statement about a better analysis direction. 
-    Nevertheless, what we can do is discuss certain cases where one direction is favorable. We decide favorably based on the number of taint propagations, i.e. the observed edges in the exploded supergraph. They correlate to the runtime and depend on two factors: taints' lifetime and the number of taints. In the following paragraphs, we show examples where the analysis direction influences both factors. After that we discuss clues suitable for a a-priori decision on the direction.
+    Runtime of the Data Flow Analysis    IFDS has a worst-case time complexity of .  is the number of observed edges in the control-flow graph and  is the number of observed domain elements by the IFDS analysis. 
+    As a consequence, the complexity highly depends the analyzed app and on the location of the sources or sinks depending on the analysis direction.
+    Therefore it is not possible to deduce a general advantage for any direction.
+    Nevertheless, there are certain cases where one direction is favorable which we discuss in the following paragraphs.
+
+    We decide favorably based on the number of taint propagations, i.e. the exploded supergraph's observed edges. 
+    They correlate to the runtime and depend on two factors: taints' lifetime and the number of taints. 
+    In the following paragraphs, we show examples where the analysis direction influences both factors. 
+    After that, we discuss clues suitable for an apriori decision on the direction.
 
     
                 max width=
@@ -139,9 +191,11 @@
                         return "default";
                 
                 
-                Branching Factor Example
+                Call Flow Rule 6 Example
             
-    First, we take a look at the is the branching factor. The branching factor describes the number of outgoing edges from a node. A smaller branching factor is favorable.   
+    First, we take a look at the is the branching factor. 
+    The branching factor describes the number of outgoing edges from a node. 
+    A smaller branching factor is favorable.   
     Consider a binary operator expression such as int c = a + b;, backward we can not argue which operand is responsible for the tainted output and thus proceed with both operands tainted.
     The same restriction is present in rule 6 of Call Flow which describes how the returned value is mapped back into the callee.
     This time the branching factor can be even larger.
@@ -149,45 +203,46 @@
     Let us assume the returned value of a call to returnParam() is tainted. Backward, every returned operand is tainted and later on mapped according to Return Flow rule 2 back into the caller.
     The effect gets apparent when looking at the method summary.
     The IFDS algorithm ends up with a summary . 
-    Forwards, a tainted parameter is mapped into the callee and later on returned to the caller resulting in three possible summaries  ,  or .
-    Such cases favor forward analysis.
+    Forward, a tainted parameter is mapped into the callee and later on returned to the caller resulting in three possible summaries  ,  or .
+    Such a case favors the forward analysis.
 
-    In contrast, a strict right-to-left flow favors backward analysis as taints are killed more often due to a stronger overwrite rule. 
+    In contrast, a strict right-to-left flow favors backward analysis as taints are killed more often due to a stricter overwrite rule. 
     In tikz:rtol is such a right-to-left flow displayed. 
     Forward, the right-hand side is always kept alive because it still holds the tainted value below the statement and could be leaked. 
     When traversing a right-to-left flow backward, the left side is always killed. 
-    A visited statement is the update responsible for tainting, leading to a branching factor of 1 and a shorter lifetime per taint. 
+    A visited statement is the update responsible for tainting, leading to a branching factor of 1 and a shorter lifetime per taint.
+
+    A prominent real-world example of an right-to-left order is Java's StringBuilder. 
+    The implementations of append() and insert() return the this instance to allow for easy chaining of multiple calls.
+    Consider the corresponding Jimple code in lst:stringbuilder.
+    Soot does not reuse the local variables when translating JVM bytecode to Jimple.
+    Locals are reused when converting Dalvik bytecode to Jimple.
+    Although all locals from stack9 to stack15 refer to the same object, the forward analysis can not kill any of those.
+    In a simple view our backward analysis has a huge advantage here.
+    However, when we also consider aliases the advantage is weakened by the aliasing queries.
+    Nevertheless, because the Java compiler internally transforms non-constant string concatenation into a StringBuilder, StringBuilder are present in nearly every JVM-based program.
 
     
                 [b]0.45
                         
-            Forwards
+            Forward
                                     [b]0.45
                               
-            Backwards
+            Backward
               
                 Right-to-Left Order
             
-    We already briefly mentioned the global scope of static field taints in the [s:rules]last section. Hence, unless the static taint is overwritten, it traverses the whole interprocedural control-flow graph. FlowDroid already applies an optimization and looks ahead to skip methods in which the static field is not used. Still, the longer lifetime stays an issue.
-
-    We discussed the complexity based on the taint propagations. 
-    However, they are only known after the analysis. 
-    Now, it would be beneficial to decide which direction is the best before analyzing an app. 
-    An obvious choice for a clue would be the ratio of sources and sinks. 
-    If one is much less than the other, we could argue less taints to start with should also lower the taint propagations. 
-    Sadly, it is not as easy to generalize the statement to less starting taints means less runtime. 
-    Arzt's evaluation of FlowDroid has shown no correlation between the number of sources and the runtime in FlowDroid. 
-    This result is probably owed to the unpredictable taint's lifetime balancing out the initial advantage.
-    As a part of this work, we evaluate whether it is possible to decide the favorable analysis direction in FlowDroid on the same app in s:realworld.
-
-    Even though the starting taints possibly not correlate with the runtime, whenever there is a really small number of sinks but hundreds of sources the backward analysis should perform better.
-    Likewise, Lerch et al. claim in their work that a magnificent smaller amount of sinks than sources are advantageous for a backward-directed search.
-
-    In general, we can not predict the lifetime of taints before actually analyzing the app. 
-    However, in special cases of application, this might be naturally given. 
-    Think of a case where sanitization methodsare in use. 
-    Sanitization methods are run against user input to ensure the input is safe to be processed.
-    Depending on the use case, it might be possible to deduce the proximity between sanitization methods and sources or sinks.
-    Whenever this is possible, there should be a clear favorite for one direction due to the taints' lower lifetime.
-
-    Summarized, we discussed cases where one direction seems favorable, but no generalized statement can be made on which analysis direction is better. Further, most of the influencing factors depend on the app and thus, at most, a favorable direction can be determined for a single app.
+    
+                [b]
+            [gobble=16]
+                StringBuilder sb = new StringBuilder();
+                sb = sb.append("DeviceID: ").append(id).append("IMEI: ")
+                    .append(imei).append("ISMI: ").append(imsi);
+                        Java
+                        [b]
+            [language=Jimple, gobble=16]
+                stack9.<java.lang.StringBuilder: void <init>()>();
+                stack9.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>("My device id is ");
+                stack10.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(stack12 = virtualinvoke stack13 = virtualinvoke stack7);
+                stack13.<java.lang.StringBuilder: java.lang.StringBuilder append(java.lang.String)>(" and my IMSI is ");
+                stack14.<java.lang.StringBuilder: java.lang.StringBuilder append(int)>(

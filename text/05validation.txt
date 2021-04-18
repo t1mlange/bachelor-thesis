@@ -6,9 +6,12 @@
 
     Validation
     Unit Tests
-    FlowDroid already contains 519 unit tests for the core component. We also validated the backward analysis with these tests. In the following, we briefly explain why tests were left out or did not return the same results.
+    FlowDroid already contains 519 unit tests for the core component. 
+    We also validated the backward analysis with these tests. 
+    In the following, we briefly explain why tests were left out or did not return the same results.
 
-    EasyTaintWrapperTests equalsTest and hashCodeTest are expected to return one leak, but the backward analysis does report no leaks. 
+    EasyTaintWrapperTests 
+    equalsTest and hashCodeTest are expected to return one leak, but the backward analysis does report no leaks. 
     This difference is related to the EasyTaintWrapper implementation. 
     equals() and hashCode() are exclusive in the EasyTaintWrapper, which means the analysis can skip these methods because the taint wrapper provides a summary for them. 
     The exclusive check happens in the Call Flow function. 
@@ -16,12 +19,17 @@
     The IFDS solver behaves as already observed with <clinit> in s:clinitrule and creates a return flow for an unbalanced problem; while going backward, the exclusive check kills the taint in the Call Flow function and applies the summary unaware of the override.
     We marked those two tests forwards-specific and created two equivalent backward-specific tests with sinks inside the equals() or hashCode() method with one expected leak.
 
-    HeapTestPtsAliasing We focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of FlowDroid. Other aliasing strategies are left for future work. 
-    
-    ImplicitFlowTests + Set contains. Not implemented. implement later
+    HeapTestPtsAliasing 
+    We focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of FlowDroid. 
+    Other aliasing strategies are left for future work.
 
-    DroidBench    DroidBench is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. It originated from the initial work on FlowDroid to assess it in comparison to other tools. The latest development version 3 includes 190 test cases(https://github.com/secure-software-engineering/DroidBench/). We used the newest commit on develop at the time of writing(6th March 2021, Commit ddbd50c) to validate our implementation.
-    We aim to achieve similar results as FlowDroid's existing forward implementation. 
+    DroidBench    DroidBench is a test suite to evaluate data flow analysis tools targeting the Android ecosystem. 
+    It originated from the initial work on FlowDroid to assess it in comparison to other tools. 
+    The latest development version 3 includes 190 test cases.
+    Source: https://github.com/secure-software-engineering/DroidBench/ (visited on 18.04.2021)
+    We used the newest commit on develop at the time of writing to validate our implementation.
+    (Commit ddbd50c)
+    We aim to achieve similar results as FlowDroid's existing forward implementation.
     
     
     Configuration    For the validation, we ran FlowDroid with the Android module's default configuration using the EasyTaintWrapper as the taint wrapper. 
@@ -46,11 +54,7 @@
 
 
     Results Explanation
-    In greater detail, we miss both leaks in EmulatorDetectionTests#IMEI1, whereas in StaticTests#StaticInitialization1 we do not miss the leak. We explain why below.
-
-    IMEI1 Implicit flows not implement atmTODO: implement
-
-    General Java
+    The analyses only differ in StaticTests#StaticInitialization1 where we do not miss the leak. 
     As all StaticInitialization tests depend on the <clinit> behavior modeling, we decided to explain all three even though only StaticInitialization1 is different.
 
     StaticInitialization1 differs between forward and backward analysis. Backward reports one leak due to the explicit modeling of <clinit> edges instead of relying on SPARK. Recall s:clinitrule, leaks inside static blocks are missed in the forward analysis. This test case is quite similar to lst:clinit_examples_b, and therefore, only the backward analysis reports the leak. The Clinit Rule could also be ported to the forward analysis but a larger overapproximation because, unlike backward, there is no guarantee that there will be another edge to <clinit> if the statement is in the same class as the <clinit> method. 
