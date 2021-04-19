@@ -488,4 +488,15 @@ Our static analysis found 29 security vulnerabilities in nine large, popular ope
   shorttitle = {Implicit {Flows}},
 }
 
+@InProceedings{Scholz2016,
+  author   = {Scholz, Bernhard and Jordan, Herbert and Subotic, Pavle and Westmann, Till},
+  title    = {On {Fast} {Large}-{Scale} {Program} {Analysis} in {Datalog}},
+  year     = {2016},
+  month    = mar,
+  pages    = {196--206},
+  abstract = {Designing and crafting a static program analysis is challenging due to the complexity of the task at hand. Among the challenges are modelling the semantics of the input language, finding suitable abstractions for the analysis, and handwriting efficient code for the analysis in a traditional imperative language such as C++. Hence, the development of static program analysis tools is costly in terms of development time and resources for real world languages. To overcome, or at least alleviate the costs of developing a static program analysis, Datalog has been proposed as a domain specific language (DSL). With Datalog, a designer expresses a static program analysis in the form of a logical specification. While a domain specific language approach aids in the ease of development of program analyses, it is commonly accepted that such an approach has worse runtime performance than handcrafted static analysis tools. In this work, we introduce a new program synthesis methodology for Datalog specifications to produce highly efficient monolithic C++ analyzers. The synthesis technique requires the re-interpretation of the semi-naive evaluation as a scaffolding for translation using partial evaluation. To achieve high-performance, we employ staged-compilation techniques and specialize the underlying relational data structures for a given Datalog specification. Experimentation on benchmarks for large-scale program analysis validates the superior performance of our approach over available Datalog tools and demonstrates our competitiveness with state-of-the-art handcrafted tools.},
+  doi      = {10.1145/2892208.2892226},
+  file     = {ResearchGate Link:https\://www.researchgate.net/publication/311488907_On_Fast_Large-Scale_Program_Analysis_in_Datalog:},
+}
+
 @Comment{jabref-meta: databaseType:bibtex;}

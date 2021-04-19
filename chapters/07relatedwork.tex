@@ -2,7 +2,7 @@
 
 \begin{document}
     \chapter{Related Work}
-    One of the first taint analyses was based on a points-to analysis in 2005 \cite{Livshits2005}. Sinsce then, taint analyses have made tremendous progress and gained traction in the last decade.
+    One of the first taint analyses was based on a points-to analysis in 2005 \cite{Livshits2005}. Since then, taint analyses have made tremendous progress and gained traction in the last decade.
     TAJ\cite{Tripp2009} uses a context-sensitive forward thin-slice\footnote{Thin-slices only include statements responsible for the explicit flow from or to a seed.} for local variables and a context-insensitive points-to analysis modeling the heap.
     Other taint analyses utilize slicing, either as a preprocessing step \cite{} or standalone using a chop, a combination of a forward and backward slice \cite{Titze2015}.
     Andromeda\cite{Tripp2013} was the first data flow analysis to incorporate an on-demand intertwined alias analysis.
@@ -30,7 +30,7 @@
     The taint analysis is compared to another non-public tool at Oracle on three benchmarks\footnote{Securibench, WebGoat and OWASP.} and on a not further specified Oracle product.
     Also, the choice of sources and sinks remain unclear and they only provide a too-brief summary of the results.
     Because both tools in the comparison are not public and the results are not detailed, we neither can comprehend the weak points of their analysis besides the missing alias resolving nor score the given runtimes.
-    We are skeptical that their analysis can find non-trivial data flows because aliasing is ubiquitously in Java and access paths of k=13 are observed in real-world applications \cite{Spaeth2019}.
+    We are skeptical that their analysis can find non-trivial data flows because aliasing is ubiquitously in Java and access paths of $k=13$ are observed in real-world applications \cite{Spaeth2019}.
 
     Yan et al.\cite{Yan2017} proposed a vulnerability detection tool for PHP with a focus on web applications.
     They aim to detect typical web application vulnerabilities such as cross-site scripting and SQL injections using backward taint analysis.
@@ -58,14 +58,14 @@
     CogniCrypt \cite{Krueger2017} finds misuses of cryptographic APIs based on rules written in a domain-specific language.
     Internally, it also consists of a taint analysis and is based on SPDS.
     CodeShield\footnote{\url{https://codeshield.io/}} is a proprietary taint analysis for cloud applications to detect vulnerabilities and also based on SPDS.
-    The only open-source general-purpose taint analysis based on SPDS we found is SWAN\footnote{\url{https://github.com/themaplelab/swan}}.
-    It targets the Swift programming language but is still in heavy development and not ready to use.
+    SWAN\footnote{\url{https://github.com/themaplelab/swan}} is a framework for static analysis for the Swift programming language. It is based on SPDS and currently in heavy development.
+    They plann to include a taint analysis.
 
     Doop\cite{Bravenboer2009} is a framework initially for pointer analysis.
     In contrast to all others, it uses a declarative approach.
     Doop's frontend depends on Soot to create facts and encodes them in tables.
     The analyses are a declarative rule set written in Datalog.
-    These rule sets are then fed into the datalog solver Soufflé\footnote{\url{https://souffle-lang.github.io/}}.
+    These rule sets are then fed into the datalog solver Soufflé\cite{Scholz2016}.
     P/Taint\cite{Grech2017} extends Doop with a taint analysis.
     Doop is flow-insensitive and, thus, P/Taint as well.
 \end{document}
