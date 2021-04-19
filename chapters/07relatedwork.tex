@@ -1,7 +1,7 @@
 \documentclass[../draft.tex]{subfiles}
 
 \begin{document}
-    \chapter{Related Work}
+    \chapter{Related Work}\label{c:relatedwork}
     One of the first taint analyses was based on a points-to analysis in 2005 \cite{Livshits2005}. Since then, taint analyses have made tremendous progress and gained traction in the last decade.
     TAJ\cite{Tripp2009} uses a context-sensitive forward thin-slice\footnote{Thin-slices only include statements responsible for the explicit flow from or to a seed.} for local variables and a context-insensitive points-to analysis modeling the heap.
     Other taint analyses utilize slicing, either as a preprocessing step \cite{} or standalone using a chop, a combination of a forward and backward slice \cite{Titze2015}.
