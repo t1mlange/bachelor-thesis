@@ -1,6 +1,5 @@
 
-    Implementation
-    This chapter describes the details of our backward-directed implementation and how we integrated it into FlowDroid.
+    Implementation    This chapter describes the details of our backward-directed implementation and how we integrated it into FlowDroid.
 
     Integration
     First, we needed a backward interprocedural control-flow graph.
@@ -185,9 +184,25 @@
     We use the observation that Jimple does not reuse the local variables when compiled from Java bytecode and all locals pointing to the same StringBuilder instance except one are not reused either.
     Thus, we apply a live variables analysis for the base object between the current statement and the turn unit as a preanalysis.
     Only if the preanalysis finds an use, the alias analysis is used.
-    The preanalysis is around  runtime and cheaper than the alias analysis.
+    The preanalysis needs around 100 runtime per query.
     Based on our observations, it should rarely find an use.
+    We reviewed the optimization using the well-known org.json library.
+    https://mvnrepository.com/artifact/org.json/json/20210307 (visited 17.04.2021)
+    The library makes use of StringWriter, which internally uses StringBuffer. A StringBuffer has the same chaining in place for the append() and insert() methods.
+    For the test case shown in lst:json, we observed 58 misses and 0 hits while spending 0.0337 seconds in the preanalysis until the analysis found the first flow.
 
+    
+                max width=   
+            [gobble=20]
+                public void JSONTest() 
+                    String tainted = TelephonyManager.getDeviceId();
+                    JSONObject jsonO = new JSONObject();
+                    jsonO.put("str", tainted);
+                    ConnectionManager cm = new ConnectionManager();
+                    cm.publish(jsonO.toString());
+                
+                            JSON Test Code
+            
     Backwards Implicit Propagation Rule
     Flows which are influenced by a condition are called implicit flows.
     A common example is a password check.

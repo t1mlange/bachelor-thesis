@@ -1,6 +1,5 @@
 
-    Theory
-    In the first part of this chapter, we define the flow functions for the IFDS analysis. In the second part, we discuss taint analysis's runtime, highlighting possible differences between forward and backward analysis.
+    Theory    In the first part of this chapter, we define the flow functions for the IFDS analysis. In the second part, we discuss taint analysis's runtime, highlighting possible differences between forward and backward analysis.
 
     Flow Functions    We describe the flow functions' behavior based on the Jimple language and define semi-formal rules analogous to the publication on FlowDroid. These rules only focus on the basic language constructs. We describe flows for additional language features such as arrays and exceptions later and more informal in s:rules.
 

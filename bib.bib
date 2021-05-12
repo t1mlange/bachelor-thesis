@@ -1,5 +1,16 @@
 % Encoding: UTF-8
 
+@InProceedings{NguyenQuangDo2017,
+  author   = {Nguyen Quang Do, Lisa and Ali, Karim and Livshits, Benjamin and Bodden, Eric and Smith, Justin and Murphy-Hill, Emerson},
+  title    = {Just-in-time static analysis},
+  year     = {2017},
+  month    = jul,
+  pages    = {307--317},
+  abstract = {We present the concept of Just-In-Time (JIT) static analysis that interleaves code development and bug fixing in an integrated development environment. Unlike traditional batch-style analysis tools, a JIT analysis tool presents warnings to code developers over time, providing the most relevant results quickly, and computing less relevant results incrementally later. In this paper, we describe general guidelines for designing JIT analyses. We also present a general recipe for transforming static data-flow analyses to JIT analyses through a concept of layered analysis execution. We illustrate this transformation through CHEETAH, a JIT taint analysis for Android applications. Our empirical evaluation of CHEETAH on real-world applications shows that our approach returns warnings quickly enough to avoid disrupting the normal workflow of developers. This result is confirmed by our user study, in which developers fixed data leaks twice as fast when using CHEETAH compared to an equivalent batch-style analysis.},
+  doi      = {10.1145/3092703.3092705},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Justin-Smith-55/publication/318375338_Just-in-time_static_analysis/links/59f75092a6fdcc075ec7b0ef/Just-in-time-static-analysis.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/318375338_Just-in-time_static_analysis:},
+}
+
 @InProceedings{Tripp2013,
   author     = {Tripp, Omer and Pistoia, Marco and Cousot, Patrick and Cousot, Radhia and Guarnieri, Salvatore},
   booktitle  = {Fundamental {Approaches} to {Software} {Engineering}},
@@ -497,6 +508,171 @@ Our static analysis found 29 security vulnerabilities in nine large, popular ope
   abstract = {Designing and crafting a static program analysis is challenging due to the complexity of the task at hand. Among the challenges are modelling the semantics of the input language, finding suitable abstractions for the analysis, and handwriting efficient code for the analysis in a traditional imperative language such as C++. Hence, the development of static program analysis tools is costly in terms of development time and resources for real world languages. To overcome, or at least alleviate the costs of developing a static program analysis, Datalog has been proposed as a domain specific language (DSL). With Datalog, a designer expresses a static program analysis in the form of a logical specification. While a domain specific language approach aids in the ease of development of program analyses, it is commonly accepted that such an approach has worse runtime performance than handcrafted static analysis tools. In this work, we introduce a new program synthesis methodology for Datalog specifications to produce highly efficient monolithic C++ analyzers. The synthesis technique requires the re-interpretation of the semi-naive evaluation as a scaffolding for translation using partial evaluation. To achieve high-performance, we employ staged-compilation techniques and specialize the underlying relational data structures for a given Datalog specification. Experimentation on benchmarks for large-scale program analysis validates the superior performance of our approach over available Datalog tools and demonstrates our competitiveness with state-of-the-art handcrafted tools.},
   doi      = {10.1145/2892208.2892226},
   file     = {ResearchGate Link:https\://www.researchgate.net/publication/311488907_On_Fast_Large-Scale_Program_Analysis_in_Datalog:},
+}
+
+@InProceedings{Gibler2012,
+  author     = {Gibler, Clint and Crussell, Jonathan and Erickson, Jeremy and Chen, Hao},
+  booktitle  = {Trust and {Trustworthy} {Computing}},
+  title      = {{AndroidLeaks}: {Automatically} {Detecting} {Potential} {Privacy} {Leaks} in {Android} {Applications} on a {Large} {Scale}},
+  year       = {2012},
+  address    = {Berlin, Heidelberg},
+  editor     = {Katzenbeisser, Stefan and Weippl, Edgar and Camp, L. Jean and Volkamer, Melanie and Reiter, Mike and Zhang, Xinwen},
+  pages      = {291--307},
+  publisher  = {Springer},
+  series     = {Lecture {Notes} in {Computer} {Science}},
+  abstract   = {As mobile devices become more widespread and powerful, they store more sensitive data, which includes not only users’ personal information but also the data collected via sensors throughout the day. When mobile applications have access to this growing amount of sensitive information, they may leak it carelessly or maliciously.Google’s Android operating system provides a permissions-based security model that restricts an application’s access to the user’s private data. Each application statically declares the sensitive data and functionality that it requires in a manifest, which is presented to the user upon installation. However, it is not clear to the user how sensitive data is used once the application is installed. To combat this problem, we present AndroidLeaks, a static analysis framework for automatically finding potential leaks of sensitive information in Android applications on a massive scale. AndroidLeaks drastically reduces the number of applications and the number of traces that a security auditor has to verify manually.We evaluate the efficacy of AndroidLeaks on 24,350 Android applications from several Android markets. AndroidLeaks found 57,299 potential privacy leaks in 7,414 Android applications, out of which we have manually verified that 2,342 applications leak private data including phone information, GPS location, WiFi data, and audio recorded with the microphone. AndroidLeaks examined these applications in 30 hours, which indicates that it is capable of scaling to the increasingly large set of available applications.},
+  doi        = {10.1007/978-3-642-30921-2_17},
+  file       = {Springer Full Text PDF:https\://link.springer.com/content/pdf/10.1007%2F978-3-642-30921-2_17.pdf:application/pdf},
+  isbn       = {9783642309212},
+  keywords   = {Private Data , Android Application , Native Code , Privacy Leak , Java Source Code },
+  language   = {en},
+  shorttitle = {{AndroidLeaks}},
+}
+
+@InProceedings{Zhao2012,
+  author     = {Zhao, Z. and Osono, F. C. Colon},
+  booktitle  = {2012 7th {International} {Conference} on {Malicious} and {Unwanted} {Software}},
+  title      = {“{TrustDroid}™”: {Preventing} the use of {SmartPhones} for information leaking in corporate networks through the used of static analysis taint tracking},
+  year       = {2012},
+  month      = oct,
+  pages      = {135--143},
+  abstract   = {Over the last 12 years three important dates have marked the beginning of a major paradigm shift in computing and the security models applied to protect an emerging computing environment - March 1999, January 9th, 2007, and July 2007. These dates roughly correspond to the birth of SalesForce.com, the most successful Software as a Service (SaS) provider to date, Steve Jobs introduction of the Iphone,, and the discovery of the Zeus Botnet. These innovations have been instrumental in enabling a paradigm shift in computing, away from a corporate network centric model with Windows end-point devices to what we called in this manuscript the Circa 2020 Computing Model. In the circa 2020 Computing model applications and data reside in the Cloud, the concept of an extended Trust Domain (network) disappears - there is no corporate network, and finally the end-point device is a SmartPhone owned and operated by employees - Bring Your Own Device (BYOD). In such an environment, the end-point device is not “Trusted”, and there is a high likelihood that the BYOD can be used as a channel to leak sensitive data. In this manuscript, we present a new mechanism to prevent such a situation. We called this mechanism “TrustDroid™”. TrustDroid™ is a static analyzer based on taint tracking that can be used to prevent leakage of sensitive information by an un-trusted Android SmartPhone.},
+  doi        = {10.1109/MALWARE.2012.6461017},
+  file       = {IEEE Xplore Full Text PDF:https\://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=6461017&ref=aHR0cHM6Ly9pZWVleHBsb3JlLmllZWUub3JnL2Fic3RyYWN0L2RvY3VtZW50LzY0NjEwMTc=:application/pdf},
+  keywords   = {Sockets, Telephony, Abstracts, Libraries, Software},
+  shorttitle = {“{TrustDroid}™”},
+}
+
+@InProceedings{Yang2012,
+  author     = {Yang, Z. and Yang, M.},
+  booktitle  = {2012 {Third} {World} {Congress} on {Software} {Engineering}},
+  title      = {{LeakMiner}: {Detect} {Information} {Leakage} on {Android} with {Static} {Taint} {Analysis}},
+  year       = {2012},
+  month      = nov,
+  pages      = {101--104},
+  abstract   = {With the growing popularity of Android platform, Android application market becomes a major distribution center where Android users download apps. Unlike most of the PC apps, Android apps manipulates personal information such as contract and SMS messages, and leakage of such information may cause great loss to the Android users. Thus, detecting information leakage on Android is in urgent need. However, till now, there is still no complete vetting process applied to Android markets. State-of-the-art approaches for detecting Android information leakage apply dynamic analysis on user site, thus they introduce large runtime overhead to the Android apps. This paper proposes a new approach called Leak Miner, which detects leakage of sensitive information on Android with static taint analysis. Unlike dynamic approaches, Leak Miner analyzes Android apps on market site. Thus, it does not introduce runtime overhead to normal execution of target apps. Besides, Leak Miner can detect information leakage before apps are distributed to users, so malicious apps can be removed from market before users download them. Our evaluation result shows that Leak Miner can detect 145 true information leakages inside a 1750 app set.},
+  doi        = {10.1109/WCSE.2012.26},
+  file       = {IEEE Xplore Full Text PDF:https\://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=6394931&ref=aHR0cHM6Ly9pZWVleHBsb3JlLmllZWUub3JnL2RvY3VtZW50LzYzOTQ5MzE=:application/pdf},
+  keywords   = {Smart phones, Androids, Humanoid robots, Java, Context, Security, Runtime, Information security, Mobile computing},
+  shorttitle = {{LeakMiner}},
+}
+
+@InProceedings{Mann2012,
+  author    = {Mann, Christopher and Starostin, A.},
+  booktitle = {{SAC} '12},
+  title     = {A framework for static detection of privacy leaks in android applications},
+  year      = {2012},
+  abstract  = {We report on applying techniques for static information flow analysis to identify privacy leaks in Android applications. We have crafted a framework which checks with the help of a security type system whether the Dalvik bytecode implementation of an Android app conforms to a given privacy policy. We have carefully analyzed the Android API for possible sources and sinks of private data and identified exemplary privacy policies based on this. We demonstrate the applicability of our framework on two case studies showing detection of privacy leaks.},
+  doi       = {10.1145/2245276.2232009},
+  file      = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/A-framework-for-static-detection-of-privacy-leaks-Mann-Starostin/d8761cdf360eb686bd7d182ef4167f54ef192085:text/html},
+}
+
+@Article{Binns2018,
+  author   = {Binns, Reuben and Lyngs, Ulrik and Kleek, M. V. and Zhao, Jun and Libert, Timothy and Shadbolt, N.},
+  journal  = {WebSci},
+  title    = {Third {Party} {Tracking} in the {Mobile} {Ecosystem}},
+  year     = {2018},
+  abstract = {Third party tracking allows companies to identify users and track their behaviour across multiple digital services. This paper presents an empirical study of the prevalence of third-party trackers on 959,000 apps from the US and UK Google Play stores. We find that most apps contain third party tracking, and the distribution of trackers is long-tailed with several highly dominant trackers accounting for a large portion of the coverage. The extent of tracking also differs between categories of apps; in particular, news apps and apps targeted at children appear to be amongst the worst in terms of the number of third party trackers associated with them. Third party tracking is also revealed to be a highly trans-national phenomenon, with many trackers operating in jurisdictions outside the EU. Based on these findings, we draw out some significant legal compliance challenges facing the tracking industry.},
+  doi      = {10.1145/3201064.3201089},
+  file     = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/Third-Party-Tracking-in-the-Mobile-Ecosystem-Binns-Lyngs/40cf9ef2f6db11dbb1361825f65a7cc21eddf16e:text/html},
+}
+
+@InProceedings{Enck2011,
+  author    = {Enck, William and Octeau, Damien and McDaniel, P. and Chaudhuri, Swarat},
+  booktitle = {{USENIX} {Security} {Symposium}},
+  title     = {A {Study} of {Android} {Application} {Security}},
+  year      = {2011},
+  abstract  = {The fluidity of application markets complicate smartphone security. Although recent efforts have shed light on particular security issues, there remains little insight into broader security characteristics of smartphone applications. This paper seeks to better understand smartphone application security by studying 1,100 popular free Android applications. We introduce the ded decompiler, which recovers Android application source code directly from its installation image. We design and execute a horizontal study of smartphone applications based on static analysis of 21 million lines of recovered code. Our analysis uncovered pervasive use/misuse of personal/ phone identifiers, and deep penetration of advertising and analytics networks. However, we did not find evidence of malware or exploitable vulnerabilities in the studied applications. We conclude by considering the implications of these preliminary findings and offer directions for future analysis.},
+  file      = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/A-Study-of-Android-Application-Security-Enck-Octeau/a25cec5c05ffcbda885044d0c67bfdc698adcccd:text/html},
+}
+
+@Article{Kotzias2021,
+  author     = {Kotzias, Platon and Caballero, Juan and Bilge, Leyla},
+  journal    = {42nd IEEE Symposium onSecurity and Privacy},
+  title      = {How {Did} {That} {Get} {In} {My} {Phone}? {Unwanted} {App} {Distribution} on {Android} {Devices}},
+  year       = {2021},
+  abstract   = {Android is the most popular operating system with billions of active devices. Unfortunately, its popularity and openness makes it attractive for unwanted apps, i.e., malware and potentially unwanted programs (PUP). In Android, app installations typically happen via the official and alternative markets, but also via other smaller and less understood alternative distribution vectors such as Web downloads, pay-per-install (PPI) services, backup restoration, bloatware, and IM tools. This work performs a thorough investigation on unwanted app distribution by quantifying and comparing distribution through different vectors. At the core of our measurements are reputation logs of a large security vendor, which include 7.9M apps observed in 12M devices between June and September 2019. As a first step, we measure that between 10\% and 24\% of users devices encounter at least one unwanted app, and compare the prevalence of malware and PUP. An analysis of the who-installs-who relationships between installers and child apps reveals that the Play market is the main app distribution vector, responsible for 87\% of all installs and 67\% of unwanted app installs, but it also has the best defenses against unwanted apps. Alternative markets distribute instead 5.7\% of all apps, but over 10\% of unwanted apps. Bloatware is also a significant unwanted app distribution vector with 6\% of those installs. And, backup restoration is an unintentional distribution vector that may even allow unwanted apps to survive users' phone replacement. We estimate unwanted app distribution via PPI to be smaller than on Windows. Finally, we observe that Web downloads are rare, but provide a riskier proposition even compared to alternative markets.},
+  file       = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/How-Did-That-Get-In-My-Phone-Unwanted-App-on-Kotzias-Caballero/b2a2e799beb396b1d42cc20174e5f27a7259fb06:text/html;Full Text PDF:https\://arxiv.org/pdf/2010.10088.pdf:application/pdf},
+  shorttitle = {How {Did} {That} {Get} {In} {My} {Phone}?},
+}
+
+@InProceedings{Rahman2016,
+  author     = {Rahman, Mahmudur and Rahman, Mizanur and Carbunar, Bogdan and Chau, Duen Horng},
+  title      = {{FairPlay}: {Fraud} and {Malware} {Detection} in {Google} {Play}},
+  year       = {2016},
+  month      = jun,
+  abstract   = {Fraudulent behaviors in Google's Android app market fuel search rank abuse and malware proliferation. We present FairPlay, a novel system that uncovers both malware and search rank fraud apps, by picking out trails that fraudsters leave behind. To identify suspicious apps, FairPlay's PCF algorithm correlates review activities and uniquely combines detected review relations with linguistic and behavioral signals gleaned from longitudinal Google Play app data. We contribute a new longitudinal app dataset to the community, which consists of over 87K apps, 2.9M reviews, and 2.4M reviewers , collected over half a year. FairPlay achieves over 95\% accuracy in classifying gold standard datasets of malware, fraudulent and legitimate apps. We show that 75\% of the identified malware apps engage in search rank fraud. FairPlay discovers hundreds of fraudulent apps that currently evade Google Bouncer's detection technology, and reveals a new type of attack campaign, where users are harassed into writing positive reviews, and install and review other apps.},
+  doi        = {10.1137/1.9781611974348.12},
+  file       = {Full Text PDF:https\://www.researchgate.net/profile/Mizanur-Rahman-3/publication/289503269_FairPlay_Fraud_and_Malware_Detection_in_Google_Play/links/57ac0ba908ae42ba52af38d4/FairPlay-Fraud-and-Malware-Detection-in-Google-Play.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/289503269_FairPlay_Fraud_and_Malware_Detection_in_Google_Play:},
+  shorttitle = {{FairPlay}},
+}
+
+@Article{Backes2016,
+  author   = {Backes, M. and Bugiel, S. and Derr, Erik},
+  journal  = {CCS},
+  title    = {Reliable {Third}-{Party} {Library} {Detection} in {Android} and its {Security} {Applications}},
+  year     = {2016},
+  abstract = {Third-party libraries on Android have been shown to be security and privacy hazards by adding security vulnerabilities to their host apps or by misusing inherited access rights. Correctly attributing improper app behavior either to app or library developer code or isolating library code from their host apps would be highly desirable to mitigate these problems, but is impeded by the absence of a third-party library detection that is effective and reliable in spite of obfuscated code. This paper proposes a library detection technique that is resilient against common code obfuscations and that is capable of pinpointing the exact library version used in apps. Libraries are detected with profiles from a comprehensive library database that we generated from the original library SDKs. We apply our technique to the top apps on Google Play and their complete histories to conduct a longitudinal study of library usage and evolution in apps. Our results particularly show that app developers only slowly adapt new library versions, exposing their end-users to large windows of vulnerability. For instance, we discovered that two long-known security vulnerabilities in popular libs are still present in the current top apps. Moreover, we find that misuse of cryptographic APIs in advertising libs, which increases the host apps' attack surface, affects 296 top apps with a cumulative install base of 3.7bn devices according to Play. To the best of our knowledge, our work is first to quantify the security impact of third-party libs on the Android ecosystem.},
+  doi      = {10.1145/2976749.2978333},
+  file     = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/Reliable-Third-Party-Library-Detection-in-Android-Backes-Bugiel/ea4f8cd1495903cc262d255db8bbd697180e194b:text/html},
+}
+
+@Misc{Statista2021,
+  title    = {Mobile {OS} market share 2021},
+  year     = {2021},
+  abstract = {The Android operating system (OS) has the highest market share worldwide on mobile devices. Android held 71.93 percent of the market.},
+  journal  = {Statista},
+  language = {en},
+  url      = {https://www.statista.com/statistics/272698/global-market-share-held-by-mobile-operating-systems-since-2009/},
+  urldate  = {2021-04-20},
+}
+
+@Misc{Statista2020,
+  title      = {Google {Play} {Store}: number of apps 2020},
+  year       = {2020},
+  abstract   = {There were 2.95 million apps available on Google Play as of December 2020. The number of apps offered by the store has fluctuated in recent years.},
+  journal    = {Statista},
+  language   = {en},
+  shorttitle = {Google {Play} {Store}},
+  url        = {https://www.statista.com/statistics/266210/number-of-available-applications-in-the-google-play-store/},
+  urldate    = {2021-04-20},
+}
+
+@InProceedings{Backes2016a,
+  author     = {Backes, Michael and Bugiel, Sven and Derr, Erik and Gerling, Sebastian and Hammer, Christian},
+  title      = {R-{Droid}: {Leveraging} {Android} {App} {Analysis} with {Static} {Slice} {Optimization}},
+  year       = {2016},
+  month      = may,
+  pages      = {129--140},
+  abstract   = {Today's feature-rich smartphone apps intensively rely on access to highly sensitive (personal) data. This puts the user's privacy at risk of being violated by overly curious apps or libraries (like advertisements). Central app markets conceptually represent a first line of defense against such invasions of the user's privacy, but unfortunately we are still lacking full support for automatic analysis of apps' internal data flows and supporting analysts in statically assessing apps' behavior. In this paper we present a novel slice-optimization approach to leverage static analysis of Android applications. Building on top of precise application lifecycle models, we employ a slicing-based analysis to generate data-dependent statements for arbitrary points of interest in an application. As a result of our optimization, the produced slices are, on average, 49\% smaller than standard slices, thus facilitating code understanding and result validation by security analysts. Moreover, by re-targeting strings, our approach enables automatic assessments for a larger number of use-cases than prior work. We consolidate our improvements on statically analyzing Android apps into a tool called R-Droid and conducted a large-scale data-leak analysis on a set of 22,700 Android apps from Google Play. R-Droid managed to identify a significantly larger set of potential privacy-violating information flows than previous work, including 2,157 sensitive flows of password-flagged UI widgets in 256 distinct apps.},
+  doi        = {10.1145/2897845.2897927},
+  file       = {ResearchGate Link:https\://www.researchgate.net/publication/303601493_R-Droid_Leveraging_Android_App_Analysis_with_Static_Slice_Optimization:},
+  shorttitle = {R-{Droid}},
+}
+
+@InProceedings{Feichtner2018,
+  author    = {Feichtner, Johannes},
+  booktitle = {{SEC}},
+  title     = {Hunting {Password} {Leaks} in {Android} {Applications}},
+  year      = {2018},
+  abstract  = {A wide range of mobile applications for the Android operating system require users to input sensitive data, such as PINs or passwords. Given the ubiquitous and security-critical role of credentials, it is paramount that programs process secrets responsibly and do not expose them to unrelated parties. Unfortunately, users have no insight into what happens with their data after entrusting it to an application. In this paper, we introduce a new approach to identify and follow the trace of user input right from the point where it enters an application. By using a combination of static slicing in forward and backward direction, we are able to reveal potential data leaks and can pinpoint their origin. To evaluate the applicability of our solution, we conducted a manual and automated inspection of security-related Android applications that process user-entered secrets. We find that 182 out of 509 (36\%) applications insecurely store given credentials in files or pass them to a log output.},
+  doi       = {10.1007/978-3-319-99828-2_20},
+  file      = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/Hunting-Password-Leaks-in-Android-Applications-Feichtner/4e58508499a5d46e176dd2246350b6e2dbfc1f64:text/html},
+}
+
+@InProceedings{Zhao2020,
+  author    = {Zhao, Q. and Zuo, C. and Dolan-Gavitt, B. and Pellegrino, G. and Lin, Z.},
+  booktitle = {2020 {IEEE} {Symposium} on {Security} and {Privacy} ({SP})},
+  title     = {Automatic {Uncovering} of {Hidden} {Behaviors} {From} {Input} {Validation} in {Mobile} {Apps}},
+  year      = {2020},
+  month     = may,
+  note      = {ISSN: 2375-1207},
+  pages     = {1106--1120},
+  abstract  = {Mobile applications (apps) have exploded in popularity, with billions of smartphone users using millions of apps available through markets such as the Google Play Store or the Apple App Store. While these apps have rich and useful functionality that is publicly exposed to end users, they also contain hidden behaviors that are not disclosed, such as backdoors and blacklists designed to block unwanted content. In this paper, we show that the input validation behavior-the way the mobile apps process and respond to data entered by users-can serve as a powerful tool for uncovering such hidden functionality. We therefore have developed a tool, InputScope, that automatically detects both the execution context of user input validation and also the content involved in the validation, to automatically expose the secrets of interest. We have tested InputScope with over 150,000 mobile apps, including popular apps from major app stores and preinstalled apps shipped with the phone, and found 12,706 mobile apps with backdoor secrets and 4,028 mobile apps containing blacklist secrets.},
+  doi       = {10.1109/SP40000.2020.00072},
+  file      = {IEEE Xplore Full Text PDF:https\://ieeexplore.ieee.org/stampPDF/getPDF.jsp?tp=&arnumber=9152205&ref=aHR0cHM6Ly9pZWVleHBsb3JlLmllZWUub3JnL2RvY3VtZW50LzkxNTIyMDU=:application/pdf},
+  issn      = {2375-1207},
+  keywords  = {Blacklisting, Password, Google, Tools, Syntactics, Semantics},
 }
 
 @Comment{jabref-meta: databaseType:bibtex;}

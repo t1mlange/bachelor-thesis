@@ -39,7 +39,7 @@
     If we look at it on a per-test basis, there are not many test cases where both perform identically.
     Instead, dependent on the specific test case, the relative difference is between $-1$ and $1$.
     However, we did not expect cases that let the edge propagations of our implementation explode up to a factor of $100$, as seen in \code{LifecycleTest#BroadcastReceiverLifecycle3}.
-    In contrast, the existing forward implementation only at most a relative difference of $-0.95$.
+    In contrast, the existing forward implementation has a maximum relative difference of $-0.95$.
 
     \footnotesize
     \begin{longtable}{l | r | r | r | r | r | r | r | r}
@@ -557,7 +557,7 @@
     We chose 200 apps randomly out of a Google Playstore dump from 2021 containing over 6000 apps for our evaluation set.
     Out of 200 apps, 60 apps do not have any sources or sinks and thus, the analysis did not start.
     For six apps, the analysis aborted with errors on at least one run. All thrown exceptions happened outside of \textsc{FlowDroid}.
-    We are left with 131 apps for which both implementations completed all runs without errors.
+    We are left with 134 apps for which both implementations completed all runs without errors.
     The full list is appended to this work in \autoref{a:appset}.
 
     \FloatBarrier
@@ -908,17 +908,17 @@
             & \multicolumn{3}{c}{\textbf{Forward}}\\
             \textbf{Metric} & \textbf{Avg} & \textbf{Median} & $\mathbf{P_{85}}$\\
             \hline\hline
-            Maximum Memory Consumption & $10005.68MB$ & $10459.48MB$ & $15482.98MB$\\
+            Maximum Memory Consumption & $\SI{10005.68}{\mega\byte}$ & $\SI{10459.48}{\mega\byte}$ & $\SI{15482.98}{\mega\byte}$\\
             \hline
-            Maximum Memory Consumption & \multirow{2}{*}{$1535.20MB$} & \multirow{2}{*}{$6.98MB$} & \multirow{2}{*}{$4952.20MB$}\\
+            Maximum Memory Consumption & \multirow{2}{*}{$\SI{1535.20}{\mega\byte}$} & \multirow{2}{*}{$\SI{6.98}{\mega\byte}$} & \multirow{2}{*}{$\SI{4952.20}{\mega\byte}$}\\
             Without Timeouts & & &\\            
             \multicolumn{4}{c}{}\\
             & \multicolumn{3}{c}{\textbf{Backward}}\\
             \textbf{Metric} & \textbf{Avg} & \textbf{Median} & $\mathbf{P_{85}}$\\
             \hline\hline
-            Maximum Memory Consumption & $8326.27MB$ & $10008.52MB$ & $14539.64MB$\\
+            Maximum Memory Consumption & $\SI{8326.27}{\mega\byte}$ & $\SI{10008.52}{\mega\byte}$ & $\SI{14539.64}{\mega\byte}$\\
             \hline
-            Maximum Memory Consumption & \multirow{2}{*}{$1473.21MB$} & \multirow{2}{*}{$7.33MB$} & \multirow{2}{*}{$1566.61MB$}\\
+            Maximum Memory Consumption & \multirow{2}{*}{$\SI{1473.21}{\mega\byte}$} & \multirow{2}{*}{$\SI{7.33}{\mega\byte}$} & \multirow{2}{*}{$\SI{1566.61}{\mega\byte}$}\\
             Without Timeouts & & &\\
         \end{tabular}
         \caption{Memory Results}
@@ -931,12 +931,12 @@
     The measurements with timeouts show similar values for both directions with a bias toward our implementation.
     Though, maximum measurements with timeouts are not meaningful because of the cut-off at ten minutes.
     Without timeouts, the gap gets a bit bigger.
-    The average maximum memory consumption of our implementation is around $65MB$ lower than the existing one. 
-    Especially in the 85\textsuperscript{th} percentile, our implementation shines where it needs $3.3GB$ less memory.
+    The average maximum memory consumption of our implementation is around $\SI{65}{\mega\byte}$ lower than the existing one. 
+    Especially in the 85\textsuperscript{th} percentile, our implementation shines where it needs $\SI{3.3}{\giga\byte}$ less memory.
 
     Next, we look at the memory consumption difference per app in \autoref{f:memHist}.
     The x-axis shows the delta maximum memory consumption in megabytes and the y-axis the frequency.
-    Each bin is $1GB$ wide.
+    Each bin is $\SI{1}{\giga\byte}$ wide.
     The delta is calculated with forward as the refrence: $m_{\mathit{Backward}}-m_{\mathit{Forward}}$.
     Again, we see a gathering around $0$. 
     Otherwise, the histogram has a more uniform distribution than its \hyperref[f:deltaHist]{time counterpart}.

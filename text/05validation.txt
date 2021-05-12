@@ -4,8 +4,7 @@
 
 
 
-    Validation
-    Unit Tests
+    Validation    Unit Tests
     FlowDroid already contains 519 unit tests for the core component.
     We also validated the backward analysis with these tests.
     In the following, we briefly explain why tests were left out or did not return the same results.

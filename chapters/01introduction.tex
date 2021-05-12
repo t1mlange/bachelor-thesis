@@ -1,68 +1,76 @@
 \documentclass[../draft.tex]{subfiles}
 
+% \begin{itemize}
+%     \item Android überall vorhanden
+%     \item Trotzdem immer noch Privacy Leaks
+%     \item und Malware im App Store
+%     \item Static Analysis könnte das lösen
+%     \item Problem: Scaled nicht
+%     \item Wir wollen das lösen
+%     \item Implementieren eine rückwärtsgerichtene Analyse
+%     \item Vergleich andere Disziplinen
+%     \item RQ1: How does the Backward Analysis perform on Real World Apps
+%     \item RQ2: Apriori parameter to predict the runtime
+%     \item Overview Thesis
+% \end{itemize}
+
 \begin{document}
     \chapter{Introduction}
-    % \begin{itemize}
-    %     \item Android überall vorhanden
-    %     \item Trotzdem immer noch Privacy Leaks
-    %     \item und Malware im App Store
-    %     \item Static Analysis könnte das lösen
-    %     \item Problem: Scaled nicht
-    %     \item Wir wollen das lösen
-    %     \item Implementieren eine rückwärtsgerichtene Analyse
-    %     \item Vergleich andere Disziplinen
-    %     \item RQ1: How does the Backward Analysis perform on Real World Apps
-    %     \item RQ2: Apriori parameter to predict the runtime
-    %     \item Overview Thesis
-    % \end{itemize}
     Smartphones are a companion in our daily lives.
-    We use them to keep track of our appointments, manage contact, navigation and much more.
-    To provide these convenient functionalities, smartphones need to process and store sensitive data.
-    In most mobile ecosystems, the users are not limitited to the default-shipped apps but also can install apps from third-parties.
-    Android is the market-leading operating system and mobile ecosystem for smartphones with a market share of over 74\%.
-    The most common way to distribute third-party apps is through app stores.
+    We use them to keep track of our appointments, manage contacts, navigation and much more.
+    Smartphones need to process and store sensitive data to provide these convenient functionalities.
+    In most mobile ecosystems, the users are not limited to the default-shipped apps but also can install apps from third parties.
+    Android is the market-leading operating system and mobile ecosystem for smartphones, with a market share of over 71\% \cite{Statista2021}.
+    The most common way to distribute third-party apps is through app stores \cite{Kotzias2021}.
     Google Play, Android's default app store, allows developers to publish their apps for a small fee.
-    The Play Store currently offers nearly three million apps of all kinds from millions of developers.
-    The gigantic amount of apps and updates to those makes it infeasible to manually examine each app before publishing.
+    The Play Store currently offers nearly three million apps of all kinds from hundred of thousands of developers \cite{Statista2020}.
     The issue, however, is that every third-party app is a threat to the privacy of the user.
-    The mobile ecosystem is known for tracking where apps send identifying information to an advertiser for individually tailored ads to the user or even sell the user's data.
-    Third-party apps developed by unaware or careless developers might include vulnerabilities which allow to compromise the user's data.
-    And last but not least, there are also malicious players which try to sneak malware into the app stores trusted by millions.
+    The mobile ecosystem is known for tracking where apps send identifying information to an advertiser for individually tailored ads to the user or even sell the user's data \cite{Binns2018, Enck2011}.
+    Third-party apps developed by unaware or careless developers might include vulnerabilities that allow compromising the user's data \cite{Backes2016}.
+    Moreover, some malicious players try to sneak potentially unwanted programs into the app stores trusted by millions \cite{Rahman2016}.
     
-    As a counteract, Android offers a permission system allows the user to specify which data or resources an app can access. 
+    As a counteract, Android offers a permission system to specify which data or resources an app can access. 
     There are multiple categories for permission.
-    \textit{Normal permissions} are granted at installation automatically but are displayed in a submenu on the store page. 
-    \textit{Dangerous permissions} need a confirmation from the user at runtime.
-    Android guarantees that an app only accesses resources and data it got permission for. 
-    While the permission system helps to identify blatant misuses of resources and data, e.g., a flashlight app wanting to access the dangerous permission \code{CAMERA}, it is far away from eliminating the problem.
+    Normal permissions are granted at installation automatically but are displayed in a submenu on the store page. 
+    Dangerous permissions need confirmation from the user at runtime.
+    Android guarantees that an app only accesses resources and data for which it has permission to do so.\footnotemark{}
+    \footnotetext{Source: https://developer.android.com/guide/topics/permissions/overview (visited on 20.04.2021)} 
+    While the permission system helps identify blatant misuses of resources and data, e.g., a flashlight app that wants to access the location, it is far from eliminating the problem.
     For example, the internet permission is a normal permission meaning an app can access the whole internet without any explicit confirmation.
+    A user has no option to make finer-grained settings.
 
-    Researchers all around the world have identified the issue of .
+    Researchers all around the world have identified the issue of the insufficient auditing of published apps.
     One possible solution academia came up with is data flow analysis which tries to identify data flows through a program.
-    Several tools for the Android ecosystem have been proposed. 
-    Even though the research made huge progress over the years, the broad adoption is still pending, partly due to bad scalability of precise analyses.
+    Several tools for the Android ecosystem have been proposed \cite{Gibler2012, Zhao2012, Yang2012, Mann2012}, one of which is \textsc{FlowDroid} \cite{Arzt2014}.
 
-    Often data flow analyses work on some of graph.
-    IFDS is a theoretical framework for interprocedural data flow analyses which computes the solution by transforming it into a graph reachability problem.
-    Taking a glance at state space search, we notice that the direction has influence on the runtime of the search depending on the graph. 
-    Now, most data flow analyses have a fixed search direction.
-    \textsc{FlowDroid} is the most prominent data flow analysis for Android based on IFDS and is no exception to this only offering a forward analysis \cite{Arzt2014}.
+    \textsc{FlowDroid} is a precise static data flow analysis tool to detect privacy leaks in Android apps and is the de-facto standard for data flow analysis on Android apps \cite{Arzt2014}.
+    Like other data flow analyses \cite{Lerch2014,NguyenQuangDo2017,Allen2021}, it is based on the IFDS framework, a theoretical framework for interprocedural data flow analyses that computes the solution by transforming it into a graph reachability problem \cite{Reps1995}.
+    Because the algorithm works on a graph, we can now link between data flow analyses and graph search.
+    In graph search, the direction of the search influences the visited nodes and consequential also the runtime.
 
-    In this thesis, we extend \textsc{FlowDroid} to feature a backward-directed analysis.
-    Our main goal is to increase the scalability of \textsc{FlowDroid} by offering an alternative search direction.
-    To be an alternative, our analysis must be as precise and sound as the existing implementation is and offer similar performance real-world apps.
+    To this day, all data flow analyses based on IFDS either have one fixed search direction \cite{Arzt2014,Allen2021,NguyenQuangDo2017} or are adjusted for a narrow use case \cite{Lerch2014}. 
+    Thus, in this thesis, we extend \textsc{FlowDroid} with an alternative implementation to provide a backward-directed data flow analysis leveraging \textsc{FlowDroid}'s Android lifecycle modeling and library summaries.
+    The choice between both directions comes in handy when applying the data flow analysis to various applications. Lerch et al.\cite{Lerch2014} already identified that a backward data flow analysis is beneficial if there is a single goal but a magnificent amount of possible starting points.
+    A prime example is a search for a hardcoded key provided to a cryptographic implementation.
+    Currently, solving this task using \textsc{FlowDroid} is only possible by making a brute-force approach by marking all constants as a starting point.
+    With a backward analysis, it is as easy as using the variable containing the key as the starting point, which should yield much better performance.
+    Besides such natural cases, another analysis direction can also significantly reduce the runtime depending on the given graph.
+    % The choice of direction could significantly improve the scalability of \textsc{FlowDroid}.
 
-    \begin{itemize}
-        \item \textbf{Research Question 1}: How efficient is the backward analysis in terms of runtime and memory consumption in comparison to the forward analysis?
-        \item \textbf{Research Question 2}: Is there an apriori known parameter to decide which analysis is more efficient for a given app? 
+    Our backward analysis should be as sound and precise as the existing forward analysis.
+    Furthermore, we aim at least for a similar runtime performance on real-world apps.
+    On top, to fully utilize the potential of the direction choice, we investigate possible heuristics to predict the favorable direction. 
+    We define our research questions as follows:   
+    \begin{itemize}[leftmargin=*]
+        \item[] \textbf{RQ1}: How efficient is the backward analysis in terms of runtime and memory consumption compared to the forward analysis?
+        \item[] \textbf{RQ2}: Is there an apriori known parameter to decide which analysis is more efficient for a given app? 
     \end{itemize}
 
     \paragraph{Outline}
     First, we explain the background and the concepts used in static data flow analysis in \autoref{c:background}.
-    Next up, in \autoref{c:theory} we define the flow functions for the IFDS analysis and briefly discuss the impact of the direction on the runtime.
+    In \autoref{c:theory}, we define the flow functions for the IFDS analysis and briefly discuss the impact of the direction on the runtime.
     We document the extensions we made to \textsc{FlowDroid} in \autoref{c:implementation}.
     In \autoref{c:validation}, we validate that our implementation is as sound and precise as \textsc{FlowDroid}'s existing implementation.
-    Then in \autoref{c:evaluation}, we proceed to evaluate our implementation on 200 apps from the Google Play Store. Based on the evaluation, we answer the research questions.
-    We give an overview over the related work, especially focusing on other backward taint analyses, in \autoref{c:relatedwork} before coming to the conclusion of this thesis in \autoref{c:conclusion}.
-
+    Then in \autoref{c:evaluation}, we evaluate our implementation on 200 apps from the Google Play Store. Based on the evaluation, we answer the research questions.
+    We give an overview of the related work, primarily focusing on other backward-directed taint analyses, in \autoref{c:relatedwork} before coming to the conclusion of this thesis in \autoref{c:conclusion}.
 \end{document}

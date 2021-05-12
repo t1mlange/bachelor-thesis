@@ -1,6 +1,5 @@
 
-    Background
-    In this chapter, we introduce the necessary background.
+    Background    In this chapter, we introduce the necessary background.
     In s:dataflow, we explain the term static data flow analysis.
     We introduce concepts used to solve data flow problems precisely in s:bigifds and s:ap.
     We reason the need for a more manageable code representation in s:jimple.
