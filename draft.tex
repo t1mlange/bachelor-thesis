@@ -1,4 +1,3 @@
-
 \PassOptionsToPackage{table}{xcolor}
 \documentclass[
 	english,
@@ -117,6 +116,18 @@
 \newcommand{\smallcode}[1]{\lstinline[breaklines=true]{#1}}
 \newcommand{\jimple}[1]{\lstinline[language=Jimple,basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true]{#1}}
 \let\tbs\textbackslash
+
+
+% false positive
+\newcommand{\fp}{{\fontfamily{cmr}\selectfont\textcolor{white}{\textcircled{\textcolor{red}{$\star$}}}}}
+% false negative
+\newcommand{\fn}{{\fontfamily{cmr}\selectfont\textcolor{red}{\textcircled{ }}}}
+% true positive
+\newcommand{\tp}[0]{{\fontfamily{cmr}\selectfont\textcircled{$\star$}}}
+% table subheading
+\newcommand{\tsub}[1]{\multicolumn{3}{c}{#1}\\\hline}
+% large table subheading
+\newcommand{\tsubEight}[1]{\multicolumn{9}{c}{#1}\\\hline}
 
 \Metadata{
 	title=Implementation of a Static Backwards Data Flow Analysis in FlowDroid,
