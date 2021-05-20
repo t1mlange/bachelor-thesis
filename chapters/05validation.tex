@@ -5,21 +5,21 @@
     \chapter{Validation}\label{c:validation}
     \section{Unit Tests}
     \textsc{FlowDroid} already contains 519 unit tests for the core component.
-    We also validated the backward analysis with these tests.
-    In the following, we briefly explain why tests were left out or did not return the same results.
+    We validated the backward analysis with these tests.
+    As already stated earlier, we focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of \textsc{FlowDroid}. Thus, \code{HeapTestPtsAliasing} tests were not applicable.
 
-    \textbf{EasyTaintWrapperTests}
-    In \code{equalsTest} and \code{hashCodeTest} the analysis should not find a leak, but the backward analysis finds one leak.
-    This difference is related to the \code{EasyTaintWrapper} implementation.
-    \code{equals()} and \code{hashCode()} are exclusive in the \code{EasyTaintWrapper}, which means the analysis can skip these methods because the taint wrapper provides a summary for them.
-    The exclusive check happens in the Call Flow function.
-    In both tests, the source is in an exclusive method.
-    The IFDS solver behaves as already observed with \code{<clinit>} in \autoref{s:clinitrule} and creates a return flow for an unbalanced problem; while going backward, the exclusive check kills the taint in the Call Flow function and applies the summary unaware of the override.
-    We marked those two tests forward-specific and created two equivalent backward-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method with no expected leaks.
+    % \textbf{EasyTaintWrapperTests}
+    % In \code{equalsTest} and \code{hashCodeTest} the analysis should not find a leak, but the backward analysis finds one leak.
+    % This difference is related to the \code{EasyTaintWrapper} implementation.
+    % \code{equals()} and \code{hashCode()} are exclusive in the \code{EasyTaintWrapper}, which means the analysis can skip these methods because the taint wrapper provides a summary for them.
+    % The exclusive check happens in the Call Flow function.
+    % In both tests, the source is in an exclusive method.
+    % The IFDS solver behaves as already observed with \code{<clinit>} in \autoref{s:clinitrule} and creates a return flow for an unbalanced problem; while going backward, the exclusive check kills the taint in the Call Flow function and applies the summary unaware of the override.
+    % We marked those two tests forward-specific and created two equivalent backward-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method with no expected leaks.
 
-    \textbf{HeapTestPtsAliasing}
-    We focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of \textsc{FlowDroid}.
-    Other aliasing strategies are left for future work.
+    % \textbf{HeapTestPtsAliasing}
+    % We focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of \textsc{FlowDroid}.
+    % Other aliasing strategies are left for future work.
 
     \section{DroidBench}\label{s:droidbenchvalidation}
     \textsc{DroidBench} is a test suite to evaluate data flow analysis tools targeting the Android ecosystem.
