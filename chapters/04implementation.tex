@@ -6,8 +6,7 @@
 
     \section{Integration}
     First, we needed a backward interprocedural control-flow graph.
-    \textsc{FlowDroid} already contained one for the on-demand aliasing and it just needed some small extensions.
-    For example, implementing the \code{notifyMethodChanged()} method for the use inside StubDroid.
+    \textsc{FlowDroid} already contained one for the on-demand aliasing, which suited our needs.
     Next, we need to introduce unconditional taints at sinks and check for the matching access paths at sources.
     The methods for retrieving sources and sinks from a Source Sink Manager have different signatures because, in a forward analysis, access paths only have to match at sinks.
     We added the interface \code{IReversibleSourceSinkManager} extending the \code{ISourceSinkManager}.
@@ -73,14 +72,14 @@
             \centering
             \begin{adjustbox}{max width=\columnwidth}
                 \begin{lstlisting}[gobble=20]
-                    void aliasRule3() {
+                    void aliasDefaultRule() {
                         A a = b;
                         a.str = source();
                         sink(b.str);
                     }
                 \end{lstlisting}
             \end{adjustbox}
-            \caption{Example for alias analysis initiated by rule 3}
+            \caption{Example for alias analysis initiated by the default case}
             \label{lst:aliasex_b}
         \end{subfigure}
         \caption{Normal flow Aliasing examples}
@@ -92,11 +91,11 @@
     Consider \autoref{lst:aliasex} where two different cases are displayed.
     On the left is a normal flow according to rule 1.
     In line 2, the in taint \code{a.str} produces the outcoming taint \code{b.str}.
-    Because the assignment type is a heap type, the backward analysis now recognizes that it possibly missed updates to \code{b.str} below of line 2.
+    Because the assignment type is a reference type, the backward analysis now recognizes that it possibly missed updates to \code{b.str} below of line 2.
     It invokes the alias analysis with \code{b.str}.
-    On the right is a normal flow according to rule 3.
-    This time the assignment in line 2 is swapped.
-    The main analysis leaves the incoming taint \code{b.str} untouched but notices \code{a} aliases \code{b} below line 2, hence invoking the alias analysis with \code{a.str}.
+    On the right is a normal flow according to default case.
+    In comparison to the left side, this time the assignment in line 2 is swapped.
+    At line 2, the main analysis leaves the incoming taint \code{b.str} untouched but notices \code{a} aliases \code{b} below line 2, hence invoking the alias analysis with \code{a.str}.
 
     The alias analysis searches for missed updates.
     If the analysis found an update, e.g., the taint is on the left side of the assignment, the analysis injects the edge to the statement with the taint into the main analysis' worklist.
@@ -125,10 +124,10 @@
     This statement marks the update at which the alias gets tainted and can leak at sinks \cite{Arzt2017PhD}.
     This concept does not work for our backward implementation as our alias analysis traverses forward where the taint is already valid.
     Thus we introduce the turn unit.
-    The turn unit holds the last non-aliasing assignment.
+    The turn unit holds the last observed non-aliasing assignment in the backward analysis.
     When a taint reaches its turn unit in the aliasing analysis, the analysis kills the taint.
     Consider \autoref{lst:turnunit}.
-    The introduced taint \code{str} in line 6 also initially has line 6 as a turn unit.
+    The newly introduced taint \code{str} at the sink in line 5 also initially has line 5 as a turn unit.
     In line 3, a non-aliasing assignment happens, hence the turn unit is updated.
     In line 2, \code{b.str} is tainted and the alias analysis is invoked with \code{a.str}.
     Without the turn unit, the taint would pass line 3.
@@ -140,26 +139,29 @@
         \centering
         \begin{adjustbox}{max width=\columnwidth}
             \begin{lstlisting}[gobble=16]
-                void foo() {
-                    // In: {o1.str}
-                    bar(o1);
+                void foo(MyObject o1, MyObject o2) {
+                    b1 = bar(o1);
 
-                    // In: {o2.str}
-                    bar(o2);
+                    b2 = bar(o2);
+                    // [...]
+                }
+
+                boolean bar(MyObject o) {
+                    return o.str == "bar";
                 }
             \end{lstlisting}
         \end{adjustbox}
         \caption{Summaries And Turn Units}
         \label{lst:turnunitsum}
     \end{figure}
-
+    \todo{Better example}
     The turn unit is a new field in the \code{Abstraction} class, which is representing a taint.
     A possible drawback of the backward analysis could be the reusability of the IFDS summaries.
     Because the turn unit is part of the taint, IFDS treats equal taints with different turn units as if they have a different context.
     Consider \autoref{lst:turnunitsum} within the alias analysis.
-    Let us assume IFDS already returned from the call \code{bar(o1)} and created the summary for this context.
+    Let us assume IFDS already returned from the call \code{bar(o1);} and created the summary for this context.
     Later, the analysis observes the same access path with the same context but a different turn unit.
-    Now, IDFS can not apply the summary from \code{bar(o1)}.
+    Now, IDFS can not apply the summary from \code{bar(o1);}.
     If turn unit of \code{o1} is inside the callee or one of the transitive callees but the turn unit of \code{o2} is not, we would effectively lose the flow sensitivity as the taint is wrongfully killed.
     In the reverse case, we would also lose the flow sensitivity because, this time, the turn unit is ignored.
 
@@ -173,13 +175,14 @@
     In backward analysis, sources act like sinks and vice versa.
     Thus, the Source Propagation Rule records taints flowing into sources and the Sink Propagation Rule unconditionally introduces taints at sinks requiring an \code{IReversibleSourceSinkManager}.
 
-    Notably, the default handling of sources assumes the return value to be tainted.
+    Notably, the default Source Sink Manager assumes the return value to be tainted.
     Only if the return value is ignored or the method has no return value, the base object is assumed to be tainted.
     While at sinks the base object and parameters are leaked by default \cite{Arzt2017PhD}.
     Thus, starting at sinks might result in more taints per statement.
     We did not notice an impact on the performance in the development phase but the test cases are fairly simple, so the base object creation is often right before the sink call.
     Also, we do not think this impacts the real-world performance of the backward analysis because Arzt evaluation of the forward implementation showed no correlation between runtime and source count \cite{Arzt2017PhD}.
     Whether this is true is sorted out in the evaluation in \autoref{s:realworld}.
+    Otherwise, there are more precise Source Sink Managers like the \code{AccessPathBasedSourceSinkManager} where such a problem is not present at all.
 
     \subsection{Backwards Array Propagation Rule}
     In \textsc{FlowDroid}, array taints are overapproximated by only distinguishing contents and length but not elements. Meaning if one element of an array is tainted, \textsc{FlowDroid} considers all elements tainted.
@@ -209,36 +212,6 @@
     A tainted returned value also needs to be passed into the taint wrapper because of the backward direction.
     The rule calls \code{getInverseTaints()} and thus requires the taint wrapper to implement the \code{IReversibleTaintWrapper} interface.
 
-    Additionally, we added an optimization to the taint wrapper rule.
-    Recall \autoref{s:complexity} where we explained our backward implementation benefits from a right-to-left order.
-    The \code{StringBuilder} however can alias and the alias search offsets the advantage.
-    We use the observation that Jimple does not reuse the local variables when compiled from Java bytecode and all locals pointing to the same \code{StringBuilder} instance except one are not reused either.
-    Thus, we apply a live variables analysis for the base object between the current statement and the turn unit as a preanalysis.
-    Only if the preanalysis finds an use, the alias analysis is used.
-    The preanalysis needs around 100$\mu s$ runtime per query.
-    Based on our observations, it should rarely find an use.
-    We reviewed the optimization using the well-known \code{org.json}\footnotemark{} library.
-    \footnotetext{https://mvnrepository.com/artifact/org.json/json/20210307 (visited 17.04.2021)}
-    The library makes use of \code{StringWriter}, which internally uses \code{StringBuffer}. A \code{StringBuffer} has the same chaining in place for the \code{append()} and \code{insert()} methods.
-    For the test case shown in \autoref{lst:json}, we observed 58 misses and 0 hits while spending 0.0337 seconds in the preanalysis until the analysis found the first flow.
-
-    \begin{figure}[tbp]
-        \centering
-        \begin{adjustbox}{max width=\columnwidth}   
-            \begin{lstlisting}[gobble=20]
-                public void JSONTest() {
-                    String tainted = TelephonyManager.getDeviceId();
-                    JSONObject jsonO = new JSONObject();
-                    jsonO.put("str", tainted);
-                    ConnectionManager cm = new ConnectionManager();
-                    cm.publish(jsonO.toString());
-                }
-            \end{lstlisting}
-        \end{adjustbox}
-        \caption{JSON Test Code}
-        \label{lst:json}
-    \end{figure}
-
     \subsection{Backwards Implicit Propagation Rule}
     Flows which are influenced by a condition are called implicit flows.
     A common example is a password check.
@@ -267,12 +240,13 @@
     We extended the backward interprocedural control-flow graph with two methods:
     \begin{itemize}
         \item \code{List<Unit> getConditionalBranchesInterprocedural(Unit unit)}
-        \item \code{Unit getConditionalBranchIntraprocedural(Unit unit)}
+        \item \code{List<Unit> getConditionalBranchesIntraprocedural(Unit unit)}
     \end{itemize}
     The first one is used for sink calls.
     It traverses the interprocedural graph using a worklist algorithm to find all possibly reachable conditional statements.
     We then use those found conditionals to derive sink taints with the correct conditional dominator.
-    The second one is used at return edges and returns the conditional statement if the call site is inside a conditional else \code{null}.
+    The second one only returns the conditional statements in the above the unit but does not follow transitive call sites.
+    For example, the second method is used to reconstruct 
 
     \begin{figure}[tbp]
         \centering
@@ -282,7 +256,7 @@
                 void foo() {
                     int tainted = source();
                     if (tainted == 42) {
-                        x = 0;
+                        int x = 0;
                         transitiveSink();
                     }
                 }
@@ -355,7 +329,7 @@
     The Backwards Clinit Rule manually injects an edge to the \code{<clinit>} method in the infoflow solver when appropriate during the analysis.
     Also, it lessens the overapproximation of SPARK by carefully choosing whether to inject the edge. The rule works as follows:
     \begin{itemize}
-        \item \textbf{Clinit Rule 1}: If the tainted static variable is a field of the methods class, do not inject because we will at least encounter a \code{NewExpr} of the same class further in the call graph.
+        \item \textbf{Clinit Rule 1}: If the tainted static variable is a field of the class where the current statement is located in, do not inject because we will at least encounter a \code{NewExpr} of the same class further in the call graph.
         \item \textbf{Clinit Rule 2}: Else if the tainted static variable matches the \code{StaticFieldRef} on the right hand side: Inject the edge because we can not be sure whether we see another edge to \code{<clinit>}.
         \item \textbf{Clinit Rule 3}: Else if the class of the tainted static variable matches the class of the \code{NewExpr}: Inject the edge because we can not be sure whether we see another edge to \code{<clinit>}.
     \end{itemize}
@@ -365,7 +339,10 @@
     In the existing implementation, there is no such explicit modelling.
     As taints are introduced at sources, if the source statement is inside a static initialization like in \autoref{lst:clinit_examples_a}, the propagation starts inside the \code{<clinit>} method.
     Then unbalanced problem handling of the solver propagates the taint into the callers of \code{ClinitClass1 <clinit>}.
-    This behavior allows the forward analysis to detect leaks originating from static variable initializations but misses leaks inside static blocks as shown in \autoref{lst:clinit_examples_b}.
+    This behavior allows the forward analysis to detect leaks originating from static variable initializations.
+    Leaks from inside a static blocks as shown in \autoref{lst:clinit_examples_b} can be missed by the forward analysis because it might no call statement with an edge to \code{<clinit>}.
+    The Clinit Rule could also be ported to the forward analysis but with a larger overapproximation. Unlike backward, there is no guarantee that there will be another edge to \code{<clinit>} if the statement is in the same class as the \code{<clinit>} method. Thus, it would inherit the entire overapproximation from the SPARK call-graph algorithm.
+
 
     \subsection{Other Rules}
     Skip System Class Rule and Stop After First K Flows Rule are not direction-dependent.
@@ -405,6 +382,8 @@
     Forwards, \code{tainted} is the incoming taint and the \code{EasyTaintWrapper} produces the taint set \code{\{tainted, sb\}}.
     Backward, the incoming taint is \code{sb} and the taint wrapper produces four taints \code{\{sb, tainted, offset, len\}}.
     Luckily, most methods supported by the \code{EasyTaintWrapper} have less than three arguments.
+    Alternatively, using the more precise \code{SummaryTaintWrapper} eliminates this problem. 
+    We compare both taint wrappers in \autoref{s:droidbenchevaluation}.
 
     \subsection{Native Call Handler}
     The native call handler of \textsc{FlowDroid} handles two methods: \code{System#arraycopy} and \code{reflect.Array#newArray}.
@@ -466,4 +445,34 @@
         \caption{static2Test Code}
         \label{lst:static2TestJava}
     \end{figure}
+
+    \subsection{Omit Aliasing Optimization}
+    \begin{figure}[tbp]
+        \centering
+        \begin{adjustbox}{max width=\columnwidth}   
+            \begin{lstlisting}[gobble=16]
+                public void JSONTest() {
+                    String tainted = TelephonyManager.getDeviceId();
+                    JSONObject jsonO = new JSONObject();
+                    jsonO.put("str", tainted);
+                    ConnectionManager cm = new ConnectionManager();
+                    cm.publish(jsonO.toString());
+                }
+            \end{lstlisting}
+        \end{adjustbox}
+        \caption{JSON Test Code}
+        \label{lst:json}
+    \end{figure}
+
+    Recall \autoref{s:complexity} where we explained our backward implementation benefits from a right-to-left order.
+    The \code{StringBuilder} however can alias and the alias search offsets the advantage.
+    We use the observation that Jimple does not reuse the local variables when compiled from Java bytecode and all locals pointing to the same \code{StringBuilder} instance except one are not reused either.
+    Thus, we apply a live variables analysis for the base object between the current statement and the turn unit as a preanalysis.
+    Only if the preanalysis finds an use, the alias analysis is used.
+    The preanalysis needs around 100$\mu s$ runtime per query.
+    Based on our observations, it should rarely find an use.
+    We reviewed the optimization using the well-known \code{org.json}\footnotemark{} library.
+    \footnotetext{https://mvnrepository.com/artifact/org.json/json/20210307 (visited 17.04.2021)}
+    The library makes use of \code{StringWriter}, which internally uses \code{StringBuffer}. A \code{StringBuffer} has the same chaining in place for the \code{append()} and \code{insert()} methods.
+    For the test case shown in \autoref{lst:json}, we observed 58 misses and 0 hits while spending 0.0337 seconds in the preanalysis until the analysis found the first flow.
 \end{document}

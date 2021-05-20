@@ -24,7 +24,7 @@
     The most common way to distribute third-party apps is through app stores \cite{Kotzias2021}.
     Google Play, Android's default app store, allows developers to publish their apps for a small fee.
     The Play Store currently offers nearly three million apps of all kinds from hundred of thousands of developers \cite{Statista2020}.
-    The issue, however, is that every third-party app is a threat to the privacy of the user.
+    The issue, however, is that a third-party app can be a possible threat to the privacy of the user.
     The mobile ecosystem is known for tracking where apps send identifying information to an advertiser for individually tailored ads to the user or even sell the user's data \cite{Binns2018, Enck2011}.
     Third-party apps developed by unaware or careless developers might include vulnerabilities that allow compromising the user's data \cite{Backes2016}.
     Moreover, some malicious players try to sneak potentially unwanted programs into the app stores trusted by millions \cite{Rahman2016}.
@@ -37,7 +37,7 @@
     \footnotetext{Source: https://developer.android.com/guide/topics/permissions/overview (visited on 20.04.2021)} 
     While the permission system helps identify blatant misuses of resources and data, e.g., a flashlight app that wants to access the location, it is far from eliminating the problem.
     For example, the internet permission is a normal permission meaning an app can access the whole internet without any explicit confirmation.
-    A user has no option to make finer-grained settings.
+    A user can only remove the internet access from an app but has no option to make finer-grained settings.
 
     Researchers all around the world have identified the issue of the insufficient auditing of published apps.
     One possible solution academia came up with is data flow analysis which tries to identify data flows through a program.
@@ -50,11 +50,12 @@
 
     To this day, all data flow analyses based on IFDS either have one fixed search direction \cite{Arzt2014,Allen2021,NguyenQuangDo2017} or are adjusted for a narrow use case \cite{Lerch2014}. 
     Thus, in this thesis, we extend \textsc{FlowDroid} with an alternative implementation to provide a backward-directed data flow analysis leveraging \textsc{FlowDroid}'s Android lifecycle modeling and library summaries.
-    The choice between both directions comes in handy when applying the data flow analysis to various applications. Lerch et al.\cite{Lerch2014} already identified that a backward data flow analysis is beneficial if there is a single goal but a magnificent amount of possible starting points.
-    A prime example is a search for a hardcoded key provided to a cryptographic implementation.
-    Currently, solving this task using \textsc{FlowDroid} is only possible by making a brute-force approach by marking all constants as a starting point.
+    The choice between both directions comes in handy when applying the data flow analysis to various applications. Lerch et al.\cite{Lerch2014} already identified that a backward data flow analysis is beneficial if there is a single end point but a magnificent amount of possible starting points.
+    A prime example is a search for the source of a key provided to a cryptographic implementation.
+    Currently, solving this task using \textsc{FlowDroid} is only possible by making a brute-force approach by marking all user inputs and methods with access to resources as a starting point.
     With a backward analysis, it is as easy as using the variable containing the key as the starting point, which should yield much better performance.
     Besides such natural cases, another analysis direction can also significantly reduce the runtime depending on the given graph.
+    Predicting 
     % The choice of direction could significantly improve the scalability of \textsc{FlowDroid}.
 
     Our backward analysis should be as sound and precise as the existing forward analysis.

@@ -9,13 +9,13 @@
     In the following, we briefly explain why tests were left out or did not return the same results.
 
     \textbf{EasyTaintWrapperTests}
-    \code{equalsTest} and \code{hashCodeTest} are expected to return one leak, but the backward analysis does report no leaks.
+    In \code{equalsTest} and \code{hashCodeTest} the analysis should not find a leak, but the backward analysis finds one leak.
     This difference is related to the \code{EasyTaintWrapper} implementation.
     \code{equals()} and \code{hashCode()} are exclusive in the \code{EasyTaintWrapper}, which means the analysis can skip these methods because the taint wrapper provides a summary for them.
     The exclusive check happens in the Call Flow function.
     In both tests, the source is in an exclusive method.
     The IFDS solver behaves as already observed with \code{<clinit>} in \autoref{s:clinitrule} and creates a return flow for an unbalanced problem; while going backward, the exclusive check kills the taint in the Call Flow function and applies the summary unaware of the override.
-    We marked those two tests forwards-specific and created two equivalent backward-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method with one expected leak.
+    We marked those two tests forward-specific and created two equivalent backward-specific tests with sinks inside the \code{equals()} or \code{hashCode()} method with no expected leaks.
 
     \textbf{HeapTestPtsAliasing}
     We focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of \textsc{FlowDroid}.
@@ -27,13 +27,19 @@
     The latest development version 3 includes 190 test cases\footnotemark{}.
     \footnotetext{Source: \url{https://github.com/secure-software-engineering/DroidBench/} (visited on 18.04.2021)}
     We used the newest commit on the develop branch at the time of writing\footnotemark{} to validate our implementation.
-    \footnote{Commit \texttt{ddbd50c}}
+    \footnotetext{Commit \texttt{ddbd50c68dde18e1f6b75bfa13c617f986ba9e46}}
     We aim to achieve similar results as \textsc{FlowDroid}'s existing forward implementation.
     % Still, there might be subtle differences due to the alias approximation.
 
     \subsection{Configuration}\label{s:droidbenchconfig}
     For the validation, we ran \textsc{FlowDroid} with the Android module's default configuration using the \code{EasyTaintWrapper} as the taint wrapper.
-    The configuration summary is in \autoref{t:droidbenchconfig}.
+    The original publication also used the \code{EasyTaintWrapper} for DroidBench \cite{Arzt2017PhD}. 
+    Doing the same has multiple advantages.
+    We know what ground truth results are, because all deviating results are explained in the original publication. 
+    Also, we can rely that all needed summaries are already present. 
+    And last, the complexity of the \code{EasyTaintWrapper} is managable, which made it easier to identify bugs in our flow function implementation and explain the results.
+    The configuration summary is in \autoref{t:droidbenchconfig}.\\
+    % The \code{SummaryTaintWrapper} is more sophisticated, but also more precise. We briefly cover the different results in comparison to the \code{EasyTaintWrapper} in \autoref{s:validationimprovement}.
 
     \begin{table}[ht]
         \centering
@@ -241,9 +247,9 @@
     Backward reports one leak due to the explicit modeling of \code{<clinit>} edges instead of relying on SPARK.
     Recall \autoref{s:clinitrule}, leaks inside static blocks are missed in the forward analysis.
     This test case is quite similar to \autoref{lst:clinit_examples_b}, and therefore, only the backward analysis reports the leak.
-    The Clinit Rule could also be ported to the forward analysis but a larger overapproximation.
-    Unlike backward, there is no guarantee that there will be another edge to \code{<clinit>} if the statement is in the same class as the \code{<clinit>} method.
-    Thus, it inherits the entire overapproximation from the SPARK call-graph algorithm.
+    % The Clinit Rule could also be ported to the forward analysis but a larger overapproximation.
+    % Unlike backward, there is no guarantee that there will be another edge to \code{<clinit>} if the statement is in the same class as the \code{<clinit>} method.
+    % Thus, it inherits the entire overapproximation from the SPARK call-graph algorithm.
 
     \textbf{StaticInitialization2} yields the same result but because of different reasons. The test assigns a tainted value to a static field in the static initializer. Again, recall \autoref{s:clinitrule}. Backward, the clinit rule takes care of visiting the \code{<clinit>} edge while forwards the followReturnsPastSeeds option of the IFDS solver is responsible.
 
@@ -282,7 +288,7 @@
         \label{lst:staticinit3}
     \end{figure}
 
-    \subsection{Improvements From The Summary Taint Wrapper}
+    \subsection{Improvements From The Summary Taint Wrapper}\label{s:validationimprovement}
     We briefly explained the simple but not always precise rules of the \code{EasyTaintWrapper} in \autoref{s:taintwrapper}. Using StubDroid's more precise summaries yields even better results for both directions. The false positives in the test cases \code{BroadcastReceiverLifecycle2} and \code{SharedPreferenceChanged1} are gone and the leak in \code{Serialization1} is found.
     % Otherwise, the results are unchanged.
 \end{document}

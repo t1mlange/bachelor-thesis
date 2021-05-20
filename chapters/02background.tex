@@ -26,8 +26,8 @@
     \end{quote}
     Data flow analyses are used in many different ways.
     Compilers use it to apply optimizations, others use it for software verification and it is also used for reverse-engineering \cite{Khedker2009}.
-    A special kind of data flow analysis is taint analysis, which concepts might be familiar from code reviews.
-    In taint analysis, the goal is to determine whether a particular variables' information contents flow through the program to another variable.
+    A special kind of data flow analysis is taint analysis.
+    In taint analysis, the goal is to determine whether a particular variables' contents flow through the program to another variable.
     Variables that contain valuable information are \textit{tainted}.
     This valuable information has to come from somewhere, the so-called \textit{sources}.
     Sources can be any expression but are often methods.
@@ -39,13 +39,13 @@
 
     There is also a categorization for data flow analyses.
     Sensitivities describe whether an analysis is capable of considering an aspect.
-    There are five common sensitivities \cite{Khedker2009,Arzt2017PhD}:
+    There are five common sensitivities \cite{Li2017}:
     \begin{itemize}
         \item \textbf{Flow Sensitivity}: A flow-sensitive analysis can determine if a fact holds at a particular statement.
         \item \textbf{Context Sensitivity}: An interprocedural analysis can distinguish the context of a called method, e.g., knows the original call site at a return statement.
         \item \textbf{Object Sensitivity}: An analysis can distinguish field accesses on different objects.
         \item \textbf{Field Sensitivity}: An analysis can distinguish different field accesses on the same object.
-        \item \textbf{Path Sensitivity}: An analysis takes conditional branches into account, e.g., the condition holds after the branch.
+        \item \textbf{Path Sensitivity}: An analysis distinguishes facts which took different conditional branches. E.g., after a branch two facts regarding the same variable are not merged and instead, treated differently because the condition provided additional type information.
     \end{itemize}
 
     We also need a representation for the information the analysis gathered: the data flow fact.
@@ -376,7 +376,7 @@
 
     \begin{figure}[tbp]
         \centering
-        \includegraphics[width=0.35\textwidth]{figs/activity_lifecycle.png}
+        \includegraphics[width=0.4\textwidth]{figs/activity_lifecycle.png}
         \caption{Activity Lifecycle\protect\footnotemark}
         \label{f:activity}
     \end{figure}

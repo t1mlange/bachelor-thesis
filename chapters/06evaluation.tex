@@ -5,7 +5,7 @@
     In the last chapter, we have shown that our implementation has the necessary soundness to be viable and yields the expected results.
     We now evaluate our implementation against the existing implementation in \textsc{FlowDroid}.
 
-    \section{DroidBench}
+    \section{DroidBench}\label{s:droidbenchevaluation}
     We already introduced \textsc{Droidbench} in \autoref{s:droidbenchvalidation} to validate the soundness of our backward-directed implementation.
     In this section, we focus on the performance in comparison to the existing forward-directed implementation in \textsc{FlowDroid}.
 
@@ -438,7 +438,7 @@
     Still, background services might influence the performance of a single run. To stamp out this factor, we ran each app three times with a distance of time\footnotemark.
     \footnotetext{The time distance between each run is at least the elapsed time from the analysis of the remaining 199 apps.}
     If there were outliers\footnotemark{}, we repeated the run.
-    \footnote{Outliers are runs with at least $25\%$ difference to the median run and a minimum of $5$ seconds absolute difference.}
+    \footnotetext{Outliers are runs with at least $25\%$ difference to the median run and a minimum of $5$ seconds absolute difference.}
     Some runs did not comply with our outlier norm even after we ran them multiple times, but this only concerns 9 out of 600 runs.
 
     We also measured the memory usage of both implementations.
@@ -649,7 +649,7 @@
     A knowledgeable reader might have noticed the results in \autoref{t:realworldresults} are worse than in previous publications where \textsc{FlowDroid} was evaluated \cite{Arzt2017PhD, Arzt2021}.
     We want to emphasize that none of our changes influenced the reference runs in a bad way as we used the upstream version without a single line changed to conduct the first run\footnotemark{}.
     \footnotetext{We found some exceptions in the upstream project while evaluating, so we switched to our version with the fixes included after the first run. This change did not yield the results any worse than before.}
-    The existing implementation suffers as ours, so we suspect it partly depends on an unfortunately drawn app set and further development in the call graph generation leading to more possible edges.
+    The existing implementation suffers as ours, so we suspect it partly depends on an unfortunately drawn app set, further development in the call graph generation and more summaries for the \code{SummaryTaintWrapper} leading to more possible edges.
 
     With that out of the way, let us look at the results in greater detail. We now compare the analysis on a per-app basis.
     The histogram is in \autoref{f:deltaHist}.
@@ -941,7 +941,7 @@
     Just as in the overview, there is a slight bias towards the backward analysis.
     We argue this bias is related to the faster backward analysis in the app set. 
     A faster analysis means fewer edges\footnotemark{} and the edges should correlate linearly with the memory usage of the exploded supergraph.
-    \footnotetext{This was at least true for apps without a timeout.} 
+    \footnotetext{This is at least true for apps without a timeout.} 
     We looked at this by comparing the sign of the delta data flow time with the sign of the delta memory consumption. 
     48 apps had different signs, with 23 being negligibly close to 0. 
     Hence, the claim is valid for 109 of 134 apps.
