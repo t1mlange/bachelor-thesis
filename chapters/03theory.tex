@@ -199,7 +199,7 @@
     Like in Call and Return Flow, we also kill taints that do not match any of these rules.
 
     \section{Runtime of the Data Flow Analysis}\label{s:complexity}
-    IFDS has a worst-case time complexity of $O(|E| \cdot |D|^3)$. $|E|$ is the number of observed edges in the control-flow graph and $|D|$ is the number of observed domain elements by the IFDS analysis.
+    IFDS has a worst-case time complexity of $O(|E| \cdot |D|^3)$ \cite{Reps1995}. $|E|$ is the number of observed edges in the control-flow graph and $|D|$ is the number of observed domain elements by the IFDS analysis.
     Consequently, the complexity highly depends on the analyzed app and the location of the sources or sinks, depending on the analysis direction.
     Therefore it is not possible to deduce a general advantage for any direction.
     Nevertheless, there are certain cases where one direction is favorable, which we discuss in the following paragraphs.

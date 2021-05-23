@@ -548,7 +548,7 @@
         \label{t:realworldsinks}
     \end{table}
 
-    We used \textsc{FlowDroid}'s forward implementation on the to that date latest upstream commit\footnote{The latest upstream commit was at that time \footnotecode{b436733fc4a5130dfe4ce8ddb3f76fd374e9a487}.} from the develop branch for the point of comparison.
+    We used \textsc{FlowDroid}'s forward implementation on the latest upstream commit\footnote{The latest upstream commit was at that time \footnotecode{b436733fc4a5130dfe4ce8ddb3f76fd374e9a487}.} from the develop branch for the point of comparison.
     The backward implementation ran on our latest commit\footnotemark{} at that time, with all changes from the upstream merged into.
     \footnotetext{Our latest commit was \footnotecode{87bf33ba40ef8b4fb25f33439d887ebc98c2c184}. Note that we found some bugs during the real-world evaluation and later on fixed some edge cases in the analysis. All fixes should not influence the runtime in a bad way.}
 
@@ -895,7 +895,8 @@
     We even found that it performed slightly better on our app set.
     Our evaluation shows that there is no correlation between an apriori known parameter and the runtime of \textsc{FlowDroid} - in both directions.
     Furthermore, we did not find any apriori known parameter to decide the favorable direction either.
-    The edge propagations have shown that our implementation can analyze roughly $10^7$ more edges than the existing implementation in ten minutes. Though the sample size of 200 apps is too small to generalize statements and our data was somewhat challenging to interpret with a significant standard deviation.
+    The edge propagations have shown that our implementation can analyze roughly $10^7$ more edges than the existing implementation in ten minutes. 
+    Though the sample size of 200 apps is too small to generalize statements and our data was somewhat challenging to interpret with a high standard deviation.
 
     \FloatBarrier
     \subsection{Memory Evaluation}\label{s:memex}

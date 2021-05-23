@@ -141,24 +141,27 @@
     %         \begin{lstlisting}[gobble=16]
     %             void foo(MyObject pObj) {
     %                 MyObject o = pObj;
-    %                 assign(o1, o2);
-    %                 assign(o1, o2);
+    %                 o1 = assign(o1);
+    %                 Object o = o1;
+    %                 o.str = o2;
+    %                 String str = o1.str;
     %                 sink(str);
     %             }
 
-    %             String assign(MyObject o1, MyObject o2) {
-    %                 o1.str = o2.str;
+    %             String assign(MyObject o) {
+    %                 MyObject oc = new MyObject();
+    %                 oc.str = o.str;
+    %                 return oc;
     %             }
     %         \end{lstlisting}
     %     \end{adjustbox}
     %     \caption{Summaries And Turn Units}
     %     \label{lst:turnunitsum}
     % \end{figure}
-    % \todo{Better example}
 
     The turn unit is a new field in the \code{Abstraction} class, which is representing a taint.
-    A possible drawback of the backward analysis could be the reusability of the IFDS summaries.
-    Because the turn unit is part of the taint, IFDS treats equal taints with different turn units as if they have a different context.
+    A drawback of this is the reduced reusability of the IFDS summaries.
+    As the turn unit is part of the taint, IFDS treats equal taints with different turn units as if they have a different context.
     % Consider \autoref{lst:turnunitsum} within the alias analysis.
     % Let us assume IFDS already returned from the call \code{bar(o1);} and created the summary for this context.
     % Later, the analysis observes the same access path with the same context but a different turn unit.
@@ -181,9 +184,9 @@
     While at sinks the base object and parameters are leaked by default \cite{Arzt2017PhD}.
     Thus, starting at sinks might result in more taints per statement.
     We did not notice an impact on the performance in the development phase but the test cases are fairly simple, so the base object creation is often right before the sink call.
-    Also, we do not think this impacts the real-world performance of the backward analysis because Arzt evaluation of the forward implementation showed no correlation between runtime and source count \cite{Arzt2017PhD}.
-    Whether this is true is sorted out in the evaluation in \autoref{s:realworld}.
-    Otherwise, there are more precise Source Sink Managers like the \code{AccessPathBasedSourceSinkManager} where such a problem is not present at all.
+    Also, we assume this does not impact the real-world performance of the backward analysis because Arzt evaluation of the forward implementation showed no correlation between runtime and source count \cite{Arzt2017PhD}.
+    We evaluate this assumption in \autoref{s:realworld}.
+    If the assumption does not hold, more precise Source Sink Managers like the \code{AccessPathBasedSourceSinkManager}, where the problem is not present, can be used.
 
     \subsection{Backwards Array Propagation Rule}
     In \textsc{FlowDroid}, array taints are overapproximated by only distinguishing contents and length but not elements. Meaning if one element of an array is tainted, \textsc{FlowDroid} considers all elements tainted.
