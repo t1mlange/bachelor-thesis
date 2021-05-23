@@ -29,25 +29,30 @@
     
         [] Rule 2: An incoming taint  with  produces the outflowing taint set .
     
-    Lastly, we could also observe a taint on the right side.
-    In this case, we apply the identity, so propagate the taint over the statement.
-    This case is necessary later when we consider aliasing in s:aliasing.
-    
-        [] Rule 3: An incoming taint  with  produces the outflowing taint set .
-        [] Rule 4: An incoming taint  produces the outflowing taint set .
-    
-    Whenever a taint neither matches on the left nor the right side, we also perform the identity as the statement does not touch the tainted variable's contents.
+    Whenever a taint does not match the left side, we perform the identity as the statement does not touch the tainted variable's contents.
+    Later on, when we consider aliasing, there is one special case inside the default case.
+    If the tainted variable is on the right side, an additional alias query is needed.
+    We reference this case in s:aliasing as special default case.
 
     Call Flow
     The Call Flow function and subsequently Return and Call To Return Flow function apply whenever a statement contains an InvokeExpr.
     For call statements without an assignment, we have statements of the structure  with .  denotes the -th argument,  the corresponding parameter to  and  the class instance of the callee's base object.
 
     When we encounter a tainted argument in the caller, the taint needs to go through the callee.
-    Java uses pass-by-value, so the arguments are copied into the callee.
+    Java uses pass-by-value.
+    
+        According to the Java specification, arguments are always values (Source: https://docs.oracle.com/javase/specs/jls/se11/html/jls-8.htmljls-8.4.1 (visited on 19.05.2021)).
+        Thus, many argue that Java is strictly pass-by-value.
+        Sometimes reference types are described as pass-by-reference because the behavior of those is similar to what pass-by-reference is.
+        The ambiguity is owed to the time when the term pass-by-reference was defined. 
+        Back then, 23 year before Java was invented, reference was used to describe an address in the memory.
+        A precise description of the semantics is given in the following lines.
+    
     Thus, for primitives, the value is copied and pushed on the stack.
-    For reference types, the pointer to the object is pushed on the stack.
-    In the second case, if only the base reference is tainted but nothing more ( and no wildcard), the callee can only access and overwrite the reference saved in the parameter on the stack but is not able to change the reference in the callee.
-    We know an update that tainted the primitive or reference without field dereferences can not be inside the callee due to the backward direction.
+    For reference types, the reference to the object is copied and pushed on the stack.
+    Resulting, the callee can change the field values on the reference and those changes are reflected in the caller but it can not alter the reference the caller operates on.
+    Now, if only the reference is tainted but nothing more ( and no wildcard), an update to the tainted reference in the callee has no effect on the tainted argument in the caller.
+    We know because of these semantics in combination with the backward direction that a tainted primitive or reference without field dereferences can not originate from inside the callee.
     This property becomes apparent when we get specific to Java's types.
     Primitives do not have fields and strings are immutable(The special handling of strings results in transparent fields, e.g. we can treat strings as if they were primitives in this case.).
     Consider the example in lst:primret.
@@ -190,7 +195,7 @@
                 
                             Call Flow Rule 6 Example
             
-    First, we take a look at the is the branching factor.
+    First, we take a look at the branching factor.
     The branching factor describes the number of outgoing edges from a node.
     A smaller branching factor is favorable.
     Consider a binary operator expression such as int c = a + b;.

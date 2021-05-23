@@ -21,8 +21,8 @@
         Data flow analysis is a process of deriving information about the run time behavior of a program.
         Data flow analyses are used in many different ways.
     Compilers use it to apply optimizations, others use it for software verification and it is also used for reverse-engineering.
-    A special kind of data flow analysis is taint analysis, which concepts might be familiar from code reviews.
-    In taint analysis, the goal is to determine whether a particular variables' information contents flow through the program to another variable.
+    A special kind of data flow analysis is taint analysis.
+    In taint analysis, the goal is to determine whether a particular variables' contents flow through the program to another variable.
     Variables that contain valuable information are tainted.
     This valuable information has to come from somewhere, the so-called sources.
     Sources can be any expression but are often methods.
@@ -40,7 +40,7 @@
         Context Sensitivity: An interprocedural analysis can distinguish the context of a called method, e.g., knows the original call site at a return statement.
         Object Sensitivity: An analysis can distinguish field accesses on different objects.
         Field Sensitivity: An analysis can distinguish different field accesses on the same object.
-        Path Sensitivity: An analysis takes conditional branches into account, e.g., the condition holds after the branch.
+        Path Sensitivity: An analysis distinguishes facts which took different conditional branches. E.g., after a branch two facts regarding the same variable are not merged and instead, treated differently because the condition provided additional type information.
     
     We also need a representation for the information the analysis gathered: the data flow fact.
     A data flow fact is a logical assertion that is either true or false at a statement.

@@ -36,22 +36,22 @@
     Android guarantees that an app only accesses resources and data for which it has permission to do so.\footnotemark{}
     \footnotetext{Source: https://developer.android.com/guide/topics/permissions/overview (visited on 20.04.2021)} 
     While the permission system helps identify blatant misuses of resources and data, e.g., a flashlight app that wants to access the location, it is far from eliminating the problem.
-    For example, the internet permission is a normal permission meaning an app can access the whole internet without any explicit confirmation.
+    For example, the internet permission is a normal permission meaning an app can access the whole internet with no explicit confirmation.
     A user can only remove the internet access from an app but has no option to make finer-grained settings.
 
-    Researchers all around the world have identified the issue of the insufficient auditing of published apps.
-    One possible solution academia came up with is data flow analysis which tries to identify data flows through a program.
+    Researchers all around the world have identified the insufficient auditing of published apps as an issue.
+    One solution academia came up with is data flow analysis which tries to identify data flows through a program.
     Several tools for the Android ecosystem have been proposed \cite{Gibler2012, Zhao2012, Yang2012, Mann2012}, one of which is \textsc{FlowDroid} \cite{Arzt2014}.
 
-    \textsc{FlowDroid} is a precise static data flow analysis tool to detect privacy leaks in Android apps and is the de-facto standard for taint analysis on Android apps \cite{Arzt2014}.
+    \textsc{FlowDroid} is a precise static data flow analysis tool to detect privacy leaks in Android apps and is the de facto standard for taint analysis on Android apps \cite{Arzt2014}.
     Like other data flow analyses \cite{Lerch2014,NguyenQuangDo2017,Allen2021}, it is based on the IFDS framework, a theoretical framework for interprocedural data flow analyses that computes the solution by transforming it into a graph reachability problem \cite{Reps1995}.
-    Data flow analyses are directed and most run either in forward or backward direction.
+    Data flow analyses are directed and most run either in the forward or backward direction.
     Often the direction is implied by the problem. In contrast, taint analyses can be implemented in both directions.
-    For such problems which are solvable in both directions, given a graph the search direction can have huge impact on the runtime of the search.    
+    For such problems which are solvable in both directions, given a graph, the search direction can have a huge impact on the runtime of the search.    
     But to this day, all taint analyses based on IFDS either have one fixed search direction \cite{Arzt2014,Allen2021,NguyenQuangDo2017} or are adjusted for a narrow use case \cite{Lerch2014}.
 
     Thus, in this thesis, we extend \textsc{FlowDroid} with an alternative implementation to provide a backward-directed data flow analysis leveraging \textsc{FlowDroid}'s Android lifecycle modeling and library summaries.
-    The choice between both directions comes in handy when applying the data flow analysis to various applications. Lerch et al.\cite{Lerch2014} already identified that a backward data flow analysis is beneficial if there is a single end point but a magnificent amount of possible starting points.
+    The choice between both directions comes in handy when applying the data flow analysis to various applications. Lerch et al.\cite{Lerch2014} already identified that a backward data flow analysis is beneficial if there is a single endpoint but a magnificent amount of possible starting points.
     A prime example is a search for the source of a key provided to a cryptographic implementation.
     Currently, solving this task using \textsc{FlowDroid} is only possible by making a brute-force approach by marking all user inputs and methods with access to resources as a starting point.
     With a backward analysis, it is as easy as starting with the argument containing the key as the starting point, which should yield much better performance.

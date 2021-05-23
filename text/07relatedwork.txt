@@ -5,7 +5,6 @@
     Andromeda was the first data flow analysis to incorporate an on-demand alias analysis.
     FlowDroid then ported this concept to IFDS and also introduced a novel approach for modeling the Android lifecycle.
 
-    All of the taint analyses we mentioned use forward-directed analyses.
     Some taint analyses also have a main backward pass similar to our approach. We take a more detailed look at them in the following paragraphs.
 
     Lerch et al. contributed FlowTwist, a static taint analysis tool based on IFDS to detect confused deputy problems in libraries.
@@ -40,7 +39,7 @@
     Generally speaking, we doubt their tool is precise enough to be useful in practice.
 
     FlowDroid, FlowTwist and also Allen et al.'s tool is based on IFDS.
-    Even though IFDS seems to be the most prominent choice for a taint analysis, taint analyses can also be formulated in other frameworks.
+    Even though IFDS seems to be a prominent choice for a taint analysis, taint analyses can also be formulated in other frameworks.
 
     Synchronized pushdown systems (SPDS) by Späth et al. are an alternative to IFDS with access paths for modeling a precise context-, flow- and field-sensitive data flow analysis.
     Similar to IFDS, a context-free grammar ensures the context sensitivity.

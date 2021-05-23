@@ -1,10 +1,8 @@
 
-
     Performance Evaluation    In the last chapter, we have shown that our implementation has the necessary soundness to be viable and yields the expected results.
     We now evaluate our implementation against the existing implementation in FlowDroid.
 
-    DroidBench
-    We already introduced Droidbench in s:droidbenchvalidation to validate the soundness of our backward-directed implementation.
+    DroidBench    We already introduced Droidbench in s:droidbenchvalidation to validate the soundness of our backward-directed implementation.
     In this section, we focus on the performance in comparison to the existing forward-directed implementation in FlowDroid.
 
     DroidBench has the advantage that all apps are crafted explicitly for benchmarking taint analysis.
@@ -110,7 +108,7 @@
     Still, background services might influence the performance of a single run. To stamp out this factor, we ran each app three times with a distance of time.
     The time distance between each run is at least the elapsed time from the analysis of the remaining 199 apps.
     If there were outliers, we repeated the run.
-    (Outliers are runs with at least  difference to the median run and a minimum of  seconds absolute difference.)
+    Outliers are runs with at least  difference to the median run and a minimum of  seconds absolute difference.
     Some runs did not comply with our outlier norm even after we ran them multiple times, but this only concerns 9 out of 600 runs.
 
     We also measured the memory usage of both implementations.
@@ -148,7 +146,7 @@
                 
         Sinks for Real World Apps Evaluation
             
-    We used FlowDroid's forward implementation on the to that date latest upstream commit(The latest upstream commit was at that time b436733fc4a5130dfe4ce8ddb3f76fd374e9a487.) from the develop branch for the point of comparison.
+    We used FlowDroid's forward implementation on the latest upstream commit(The latest upstream commit was at that time b436733fc4a5130dfe4ce8ddb3f76fd374e9a487.) from the develop branch for the point of comparison.
     The backward implementation ran on our latest commit at that time, with all changes from the upstream merged into.
     Our latest commit was 87bf33ba40ef8b4fb25f33439d887ebc98c2c184. Note that we found some bugs during the real-world evaluation and later on fixed some edge cases in the analysis. All fixes should not influence the runtime in a bad way.
 
@@ -200,7 +198,7 @@
     A knowledgeable reader might have noticed the results in t:realworldresults are worse than in previous publications where FlowDroid was evaluated.
     We want to emphasize that none of our changes influenced the reference runs in a bad way as we used the upstream version without a single line changed to conduct the first run.
     We found some exceptions in the upstream project while evaluating, so we switched to our version with the fixes included after the first run. This change did not yield the results any worse than before.
-    The existing implementation suffers as ours, so we suspect it partly depends on an unfortunately drawn app set and further development in the call graph generation leading to more possible edges.
+    The existing implementation suffers as ours, so we suspect it partly depends on an unfortunately drawn app set, further development in the call graph generation and more summaries for the SummaryTaintWrapper leading to more possible edges.
 
     With that out of the way, let us look at the results in greater detail. We now compare the analysis on a per-app basis.
     The histogram is in f:deltaHist.
@@ -62008,7 +62006,8 @@ textcolor
     We even found that it performed slightly better on our app set.
     Our evaluation shows that there is no correlation between an apriori known parameter and the runtime of FlowDroid - in both directions.
     Furthermore, we did not find any apriori known parameter to decide the favorable direction either.
-    The edge propagations have shown that our implementation can analyze roughly  more edges than the existing implementation in ten minutes. Though the sample size of 200 apps is too small to generalize statements and our data was somewhat challenging to interpret with a significant standard deviation.
+    The edge propagations have shown that our implementation can analyze roughly  more edges than the existing implementation in ten minutes. 
+    Though the sample size of 200 apps is too small to generalize statements and our data was somewhat challenging to interpret with a high standard deviation.
 
         Memory Evaluation
     
@@ -62033,7 +62032,7 @@ textcolor
     Just as in the overview, there is a slight bias towards the backward analysis.
     We argue this bias is related to the faster backward analysis in the app set. 
     A faster analysis means fewer edges and the edges should correlate linearly with the memory usage of the exploded supergraph.
-    This was at least true for apps without a timeout. 
+    This is at least true for apps without a timeout. 
     We looked at this by comparing the sign of the delta data flow time with the sign of the delta memory consumption. 
     48 apps had different signs, with 23 being negligibly close to 0. 
     Hence, the claim is valid for 109 of 134 apps.

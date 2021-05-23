@@ -15,56 +15,60 @@
 
     Introduction
     Smartphones are a companion in our daily lives.
-    We use them to keep track of our appointments, manage contact, navigation and much more.
-    To provide these convenient functionalities, smartphones need to process and store sensitive data.
-    In most mobile ecosystems, the users are not limitited to the default-shipped apps but also can install apps from third-parties.
-    Android is the market-leading operating system and mobile ecosystem for smartphones with a market share of over 71.
+    We use them to keep track of our appointments, manage contacts, navigation and much more.
+    Smartphones need to process and store sensitive data to provide these convenient functionalities.
+    In most mobile ecosystems, the users are not limited to the default-shipped apps but also can install apps from third parties.
+    Android is the market-leading operating system and mobile ecosystem for smartphones, with a market share of over 71.
     The most common way to distribute third-party apps is through app stores.
     Google Play, Android's default app store, allows developers to publish their apps for a small fee.
-    The Play Store currently offers nearly three million apps of all kinds from hundred thousands of developers.
-    The issue, however, is that every third-party app is a threat to the privacy of the user.
+    The Play Store currently offers nearly three million apps of all kinds from hundred of thousands of developers.
+    The issue, however, is that a third-party app can be a possible threat to the privacy of the user.
     The mobile ecosystem is known for tracking where apps send identifying information to an advertiser for individually tailored ads to the user or even sell the user's data.
-    Third-party apps developed by unaware or careless developers might include vulnerabilities which allow to compromise the user's data.
-    And last but not least, there are also malicious players which try to sneak potenitally unwanted programs into the app stores trusted by millions.
+    Third-party apps developed by unaware or careless developers might include vulnerabilities that allow compromising the user's data.
+    Moreover, some malicious players try to sneak potentially unwanted programs into the app stores trusted by millions.
     
-    As a counteract, Android offers a permission system allows the user to specify which data or resources an app can access. 
+    As a counteract, Android offers a permission system to specify which data or resources an app can access. 
     There are multiple categories for permission.
     Normal permissions are granted at installation automatically but are displayed in a submenu on the store page. 
-    Dangerous permissions need a confirmation from the user at runtime.
-    Android guarantees that an app only accesses resources and data it got permission for.
+    Dangerous permissions need confirmation from the user at runtime.
+    Android guarantees that an app only accesses resources and data for which it has permission to do so.
     Source: https://developer.android.com/guide/topics/permissions/overview (visited on 20.04.2021) 
-    While the permission system helps to identify blatant misuses of resources and data, e.g., a flashlight app wanting to access the location, it is far away from eliminating the problem.
-    For example, the internet permission is a normal permission meaning an app can access the whole internet without any explicit confirmation and a user has no option to make finer-grained settings.
+    While the permission system helps identify blatant misuses of resources and data, e.g., a flashlight app that wants to access the location, it is far from eliminating the problem.
+    For example, the internet permission is a normal permission meaning an app can access the whole internet with no explicit confirmation.
+    A user can only remove the internet access from an app but has no option to make finer-grained settings.
 
-    Researchers all around the world have identified the issue of the insufficient review of published apps.
-    One possible solution academia came up with is data flow analysis which tries to identify data flows through a program.
+    Researchers all around the world have identified the insufficient auditing of published apps as an issue.
+    One solution academia came up with is data flow analysis which tries to identify data flows through a program.
     Several tools for the Android ecosystem have been proposed, one of which is FlowDroid.
 
-    FlowDroid is a precise static data flow analysis tool to detect privacy leaks in Android apps and is the de-facto standard for data flow analysis on Android apps.
-    Like other data flow analyses, it is based on the IFDS framework, which is a theoretical framework for interprocedural data flow analyses which computes the solution by transforming it into a graph reachability problem.
-    Because the algorithm works on a graph, we can now make a link between data flow analyses and graph search.
-    In graph search, the direction of the search influences the visited nodes and consequential also the runtime.
+    FlowDroid is a precise static data flow analysis tool to detect privacy leaks in Android apps and is the de facto standard for taint analysis on Android apps.
+    Like other data flow analyses, it is based on the IFDS framework, a theoretical framework for interprocedural data flow analyses that computes the solution by transforming it into a graph reachability problem.
+    Data flow analyses are directed and most run either in forward or backward direction.
+    Often the direction is implied by the problem. In contrast, taint analyses can be implemented in both directions.
+    For such problems which are solvable in both directions, given a graph the search direction can have huge impact on the runtime of the search.    
+    But to this day, all taint analyses based on IFDS either have one fixed search direction or are adjusted for a narrow use case.
 
-    To this day, all data flow analyses based on IFDS either have one fixed search direction or are adjusted for a narrow use case. 
-    Thus, in this thesis, we extend FlowDroid with an alternative implementation to provide a backward-directed data flow analysis leveraging FlowDroid's Android lifecycle modelling and library summaries.
-    The choice between both directions comes in handy when applying the data flow analysis on a broad range of applications. Lerch et al. already identified that a backward data flow analysis is beneficial if there is a single goal but a magnificent amount of possible starting points.
-    A prime example is the search for a hardcoded key provided to a cryptographic implementation.
-    Currently, solving this task using FlowDroid is only possible doing a brute-force approach by marking constant as a starting point.
-    With a backward analysis, it is as easy as using the variable containing the key as the starting point, which should yield much better performance.
-    Besides such natural cases, another analysis direction can also significantly reduce the runtime depending on the given graph.
+    Thus, in this thesis, we extend FlowDroid with an alternative implementation to provide a backward-directed data flow analysis leveraging FlowDroid's Android lifecycle modeling and library summaries.
+    The choice between both directions comes in handy when applying the data flow analysis to various applications. Lerch et al. already identified that a backward data flow analysis is beneficial if there is a single end point but a magnificent amount of possible starting points.
+    A prime example is a search for the source of a key provided to a cryptographic implementation.
+    Currently, solving this task using FlowDroid is only possible by making a brute-force approach by marking all user inputs and methods with access to resources as a starting point.
+    With a backward analysis, it is as easy as starting with the argument containing the key as the starting point, which should yield much better performance.
+    
+    
     
 
     Our backward analysis should be as sound and precise as the existing forward analysis.
     Furthermore, we aim at least for a similar runtime performance on real-world apps.
-    On top, to fully utilize the potential of the direction choice, we investigate possible heuristics to predict the favorable direction.    
+    On top, to fully utilize the potential of the direction choice, we investigate possible heuristics to predict the favorable direction. 
+    We define our research questions as follows:   
     [leftmargin=*]
-        [] RQ1: How efficient is the backward analysis in terms of runtime and memory consumption in comparison to the forward analysis?
+        [] RQ1: How efficient is the backward analysis in terms of runtime and memory consumption compared to the forward analysis?
         [] RQ2: Is there an apriori known parameter to decide which analysis is more efficient for a given app? 
     
     Outline
     First, we explain the background and the concepts used in static data flow analysis in c:background.
-    Next up, in c:theory we define the flow functions for the IFDS analysis and briefly discuss the impact of the direction on the runtime.
+    In c:theory, we define the flow functions for the IFDS analysis and briefly discuss the impact of the direction on the runtime.
     We document the extensions we made to FlowDroid in c:implementation.
     In c:validation, we validate that our implementation is as sound and precise as FlowDroid's existing implementation.
-    Then in c:evaluation, we proceed to evaluate our implementation on 200 apps from the Google Play Store. Based on the evaluation, we answer the research questions.
-    We give an overview over the related work, especially focusing on other backward taint analyses, in c:relatedwork before coming to the conclusion of this thesis in c:conclusion.
+    Then in c:evaluation, we evaluate our implementation on 200 apps from the Google Play Store. Based on the evaluation, we answer the research questions.
+    We give an overview of the related work, primarily focusing on other backward-directed taint analyses, in c:relatedwork before coming to the conclusion of this thesis in c:conclusion.

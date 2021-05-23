@@ -1,38 +1,41 @@
 
 
-
-
-
-
     Validation    Unit Tests
     FlowDroid already contains 519 unit tests for the core component.
-    We also validated the backward analysis with these tests.
-    In the following, we briefly explain why tests were left out or did not return the same results.
+    We validated the backward analysis with these tests.
+    As already stated earlier, we focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of FlowDroid. Thus, HeapTestPtsAliasing tests were not applicable.
 
-    EasyTaintWrapperTests
-    equalsTest and hashCodeTest are expected to return one leak, but the backward analysis does report no leaks.
-    This difference is related to the EasyTaintWrapper implementation.
-    equals() and hashCode() are exclusive in the EasyTaintWrapper, which means the analysis can skip these methods because the taint wrapper provides a summary for them.
-    The exclusive check happens in the Call Flow function.
-    In both tests, the source is in an exclusive method.
-    The IFDS solver behaves as already observed with <clinit> in s:clinitrule and creates a return flow for an unbalanced problem; while going backward, the exclusive check kills the taint in the Call Flow function and applies the summary unaware of the override.
-    We marked those two tests forwards-specific and created two equivalent backward-specific tests with sinks inside the equals() or hashCode() method with one expected leak.
+    
+    
+    
+    
+    
+    
+    
+    
 
-    HeapTestPtsAliasing
-    We focused in this work on flow-sensitive aliasing, which is the default aliasing strategy of FlowDroid.
-    Other aliasing strategies are left for future work.
+    
+    
+    
 
     DroidBench    DroidBench is a test suite to evaluate data flow analysis tools targeting the Android ecosystem.
     It originated from the initial work on FlowDroid to assess it in comparison to other tools.
     The latest development version 3 includes 190 test cases.
     Source: https://github.com/secure-software-engineering/DroidBench/ (visited on 18.04.2021)
     We used the newest commit on the develop branch at the time of writing to validate our implementation.
-    (Commit ddbd50c)
+    Commit ddbd50c68dde18e1f6b75bfa13c617f986ba9e46
     We aim to achieve similar results as FlowDroid's existing forward implementation.
     
 
     Configuration    For the validation, we ran FlowDroid with the Android module's default configuration using the EasyTaintWrapper as the taint wrapper.
+    The original publication also used the EasyTaintWrapper for DroidBench. 
+    Doing the same has multiple advantages.
+    We know what ground truth results are, because all deviating results are explained in the original publication. 
+    Also, we can rely that all needed summaries are already present. 
+    And last, the complexity of the EasyTaintWrapper is managable, which made it easier to identify bugs in our flow function implementation and explain the results.
     The configuration summary is in t:droidbenchconfig.
+
+    
 
     
                 
@@ -60,9 +63,9 @@
     Backward reports one leak due to the explicit modeling of <clinit> edges instead of relying on SPARK.
     Recall s:clinitrule, leaks inside static blocks are missed in the forward analysis.
     This test case is quite similar to lst:clinit_examples_b, and therefore, only the backward analysis reports the leak.
-    The Clinit Rule could also be ported to the forward analysis but a larger overapproximation.
-    Unlike backward, there is no guarantee that there will be another edge to <clinit> if the statement is in the same class as the <clinit> method.
-    Thus, it inherits the entire overapproximation from the SPARK call-graph algorithm.
+    
+    
+    
 
     StaticInitialization2 yields the same result but because of different reasons. The test assigns a tainted value to a static field in the static initializer. Again, recall s:clinitrule. Backward, the clinit rule takes care of visiting the <clinit> edge while forwards the followReturnsPastSeeds option of the IFDS solver is responsible.
 
@@ -98,6 +101,5 @@
             
                 StaticInitialization3 code
             
-    Improvements From The Summary Taint Wrapper
-    We briefly explained the simple but not always precise rules of the EasyTaintWrapper in s:taintwrapper. Using StubDroid's more precise summaries yields even better results for both directions. The false positives in the test cases BroadcastReceiverLifecycle2 and SharedPreferenceChanged1 are gone and the leak in Serialization1 is found.
+    Improvements From The Summary Taint Wrapper    We briefly explained the simple but not always precise rules of the EasyTaintWrapper in s:taintwrapper. Using StubDroid's more precise summaries yields even better results for both directions. The false positives in the test cases BroadcastReceiverLifecycle2 and SharedPreferenceChanged1 are gone and the leak in Serialization1 is found.
     
