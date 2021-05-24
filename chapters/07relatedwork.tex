@@ -25,7 +25,7 @@
     They justify their direction choice with the use-case of detecting web vulnerabilities where sinks are less frequent based on their intuition.
     Also, they have had good experiences with a backward analysis in the Parfait\cite{Winter2013} project.
     Orthogonal to our work, they intentionally go without alias analysis and cut off the access paths at $k=5$ without appending a wildcard.
-    Both are trade-offs to recall in favor of scalability.
+    Both are trade-offs to accuracy in favor of scalability.
     The taint analysis is compared to another non-public tool at Oracle on three benchmarks\footnote{Securibench, WebGoat and OWASP.} and on a not further specified Oracle product.
     Also, the choice of sources and sinks remain unclear and they only provide a too-brief summary of the results.
     Because both tools in the comparison are not public and the results are not detailed, we neither can comprehend the weak points of their analysis besides the missing alias resolving nor score the given runtimes.
