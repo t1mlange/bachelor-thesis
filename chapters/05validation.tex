@@ -39,6 +39,7 @@
     Also, we can rely that all needed summaries are already present. 
     And last, the complexity of the \code{EasyTaintWrapper} is managable, which made it easier to identify bugs in our flow function implementation and explain the results.
     The configuration summary is in \autoref{t:droidbenchconfig}.\\
+    Nonetheless, we also describe the improvements from using the more sophisticated \code{SummaryTaintWrapper} later in \autoref{s:validationimprovement}.
     % The \code{SummaryTaintWrapper} is more sophisticated, but also more precise. We briefly cover the different results in comparison to the \code{EasyTaintWrapper} in \autoref{s:validationimprovement}.
 
     \begin{table}[ht]
@@ -58,16 +59,18 @@
         \label{t:droidbenchconfig}
     \end{table}
 
-    We only used a subset of DroidBench's tests to validate our results. Dynamic Code Loading, Self Modification, Unreachable Code and Native Code are all not supported by \textsc{FlowDroid}. The first three are all call-graph related and the latter is not supported because \textsc{FlowDroid} has no Android native call handler for now.
+    We only used a subset of DroidBench's tests to validate our results. Dynamic Code Loading, Self Modification, Unreachable Code and Native Code are all not fully supported by \textsc{FlowDroid}. 
+    The first three are all call-graph related and the latter is not supported because \textsc{FlowDroid} has no Android native call handler for now.
     Also, Inter Component Communication (ICC), Reflection Inter Component Communication and Inter App Communication were left out because the ICC module is - at the time of this work - not maintained anymore.
-    All of the tests stated above are flow function independent. If \textsc{FlowDroid} gets support for those features in the future, they should also work in backward analysis.
+    All of the tests stated above are flow function independent. 
+    If \textsc{FlowDroid} gets support for those features in the future, they should also work in the backward analysis.
 
     \subsection{Results}
     The complete overview of the results is in \autoref{t:droidbenchvalidation}.
     \tp\ denotes true positive, \fp\ false positive and \fn\ false negative.
     If a row is empty, the test expects no leaks and also none were found.
 
-    Our backward-directed implementation yields nearly the same result as the existing forward implementation, with one missed leak more than the baseline. We achieve a F1 measure of $0.89$ equally to the baseline.
+    Our backward-directed implementation yields nearly the same result as the existing forward implementation, with one missed leak less than the baseline. We achieve a F1 measure of $0.89$ equally to the baseline.
 
     \begin{longtable}{l | l | l}
         \textbf{Test Case} & \textbf{Forwards} & \textbf{Backwards}\\
@@ -254,7 +257,9 @@
     \textbf{StaticInitialization2} yields the same result but because of different reasons. The test assigns a tainted value to a static field in the static initializer. Again, recall \autoref{s:clinitrule}. Backward, the clinit rule takes care of visiting the \code{<clinit>} edge while forwards the followReturnsPastSeeds option of the IFDS solver is responsible.
 
     \textbf{StaticInitialization3}'s leak is missed despite the explicit modeling of clinit. The code is provided in \autoref{lst:staticinit3}. The \code{MainActivity} is using the singleton pattern and thus has a static field \code{v} referring to its instance. The source statement is inside the \code{Test} class's static block using the singleton to access the instance field \code{s}.
-    The taint is now introduced at the sink and refers to the field through the \code{this} instance. When we visit line 13, the \code{<clinit>} edge is not taken due to the taint being an instance field. Line 12 kills the taint and stops the analysis as there is no taint to propagate anymore. We never get to see the statement where the static field \code{v} aliases \code{this}.
+    The taint is now introduced at the sink and refers to the field through the \code{this} instance. When we visit line 13, the \code{<clinit>} edge is not taken because the taint is not used inside the callee. 
+    Line 12 kills the taint and stops the analysis as there is no taint to propagate anymore. 
+    We never get to see the statement where the static field \code{v} aliases \code{this}.
     The false negative is a limitation of the alias handling.
     % Tracking more aliases is too inefficient for the analysis to be applicable and also fully precise aliasing is still an unsolved problem \cite{Bodden2012}.
 

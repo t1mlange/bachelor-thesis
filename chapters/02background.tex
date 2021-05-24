@@ -363,7 +363,7 @@
     This groundwork dramatically reduces the possible cases the data flow analysis needs to consider and eases the analysis.
 
     \section{FlowDroid}\label{s:flowdroid}
-    \textsc{FlowDroid} is a precise context-, flow-, object- and field-sensitive static taint analysis tool for Android apps\cite{Arzt2014}.
+    \textsc{FlowDroid} is a precise context-, flow-, object- and field-sensitive static taint analysis tool for Android apps \cite{Arzt2014}.
     Since its initial release in 2014, it is actively maintained and gained traction in research and academia\footnotemark{}.
     It is based on Soot, a Java optimization framework, which later has been extended for static analysis \cite{Lam2011}.
     Soot provides the call graph and the conversion from Java and Dalvik bytecode to Jimple, the intermediate representation of choice for \textsc{FlowDroid} \cite{Arzt2017PhD}.
@@ -389,7 +389,7 @@
     As both Java and Android allow calling native methods, \textsc{FlowDroid} also needs to model those cases.
     It currently does not support the analysis of those methods but contains rules for essential methods.
     The second feature is taint wrappers.
-    They allow defining rules for methods, e.g., from a commonly used feature such as StringBuilder, which allows the taint analysis to skip the method and apply a summary \cite{Arzt2014}.
+    They allow defining rules for methods, e.g., from a commonly used feature such as \code{StringBuilder}, which allows the taint analysis to skip the method and apply a summary \cite{Arzt2014}.
     StubDroid, an extension to FlowDroid by Arzt et al., allows precomputing summaries using \textsc{FlowDroid} and serializes them in an XML format for tool-independent use.
     These summaries are handy for real-world applications where third-party libraries are often used \cite{Arzt2016}.
 \end{document}

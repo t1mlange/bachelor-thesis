@@ -109,6 +109,11 @@
     morestring=[b]"
 }
 
+% correct lower case
+\renewcommand{\figureautorefname}{\ifnum\spacefactor>1000 Figure\else figure\fi}
+\renewcommand{\tableautorefname}{\ifnum\spacefactor>1000 Table\else table\fi}
+\usepackage{cleveref}
+
 %Formatierungen für Beispiele in diesem Dokument. Im Allgemeinen nicht notwendig!
 \let\file\texttt
 \newcommand{\code}[1]{\lstinline[basicstyle=\fontsize{12}{14}\selectfont\ttfamily, breaklines=true, language=, postbreak={}]{#1}}

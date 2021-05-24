@@ -199,15 +199,16 @@
         \item  \textbf{Array Rule 2}: If the left side is tainted and the right side is a \code{LengthExpr}, the outcoming taint is the operand of the \code{LengthExpr} with only its length tainted.
         \item \textbf{Array Rule 3:} If the left side is tainted and the right side is an \code{ArrayRef}, the outcoming taint is the array base with only its content tainted.
     \end{itemize}
-    The overapproximation of arrays also implies that array taints can not be killed if the left side is an \code{ArrayRef}.
+    The overapproximation of arrays implies that array taints can not be killed if the left side is an \code{ArrayRef}. 
+    This restriction also holds outside the Array Rule, e.g., in the Normal Flow functions.
 
     \subsection{Backwards Exception Propagation Rule}
     The backwards analysis first finds a catch statement \code{\$someVar := @caughtexception}.
     If the left side matches, it sets an exception flag at the taint and propagates it onwards.
     The subsequent propagation then finds the corresponding throw statement.
     \begin{itemize}
-        \item \textbf{Exception Rule 1}: On a caught exception expression, derive a new taint with an exception flag set.
-        \item \textbf{Exception Rule 2}: If a taint with the exception flag set occurs at a \code{ThrowStmt}, derive taint the operand of the \code{ThrowStmt}.
+        \item \textbf{Exception Rule 1}: On a caught exception expression, derive a taint with an exception flag set.
+        \item \textbf{Exception Rule 2}: If a taint with the exception flag set occurs at a \code{ThrowStmt}, taint the operand of the \code{ThrowStmt}.
     \end{itemize}
     The second rule is present in Call and Normal Flow because the throw statement can be inside the same method or in a callee.
 
@@ -224,12 +225,12 @@
     The semantics of implicit flows in \textsc{FlowDroid} are that every update flowing into a sink or a sink call inside a conditional branch, even in transitive callees, is considered a leak.
 
     The existing forward-directed implementation derives a wildcard taint\footnotemark{} and propagates it until the conditional branch is left again at the immediate postdominator.
-    \footnotetext{A wildcard taint is an taint without an object or access path but a wildcard appended.}
+    \footnotetext{A wildcard taint is an taint without an object or access path but a wildcard appended. E.g., this taints all left operands of assignments inside a conditional branch.}
     This behavior does not scale well because the semantics demand tainting every update and following every call in conditionals leading to many unneccessary taints never reaching a sink.
     The bad scalability is not an issue specific to \textsc{FlowDroid} but is present for most analyses providing implicit flows \cite{King2008}.
 
     We also use the wildcard taint but with a different semantic.
-    Backward, the wildcard signifies a conditional update and is propagated further to find the corresponding condition.
+    Backward, the wildcard signifies that a conditional update happended and is propagated further to find the corresponding condition.
     Thus, the branching factor inside a conditional branch should be lower.
     To detect a conditonal, we push and pop the dominator on the taints.
     Whenever an update is conducted to a taint carrying a dominator, the wildcard taint is derived.
@@ -248,9 +249,9 @@
     \end{itemize}
     The first one is used for sink calls.
     It traverses the interprocedural graph using a worklist algorithm to find all possibly reachable conditional statements.
-    We then use those found conditionals to derive sink taints with the correct conditional dominator.
-    The second one only returns the conditional statements in the above the unit but does not follow transitive call sites.
-    For example, the second method is used to reconstruct 
+    We then use those found conditionals to derive wildcard taints with the correct conditional dominator.
+    The second one only returns the conditional statements above the unit but does not follow call sites.
+    For example, the second method is used to reconstruct whether a taint enters a conditional through a method return. 
 
     \begin{figure}[tbp]
         \centering
@@ -280,11 +281,11 @@
     A taint could not match the left side and, thus, is propagated over the statement according to the default rule of normal flow, but the taint is an alias of the left side and should have been killed.
     Also, we can not just link aliases to taints for such strong updates because that would violate the flow functions' distributiveness property.
 
-    In this case, \textsc{FlowDroid} falls back to Soot's must-aliasing analysis. However, the must-aliasing analysis is only intraprocedural. Thus, strong updates split over methods are not detected and produce a false positive.
+    In this case, \textsc{FlowDroid} falls back to Soot's must-aliasing analysis. However, the must-aliasing analysis is only intraprocedural. Thus, strong updates split over methods are not detected and may produce a false positive.
 
     Backward, the first observed update is the correct one. We treat a must-alias like a regular match:
     \begin{itemize}
-        \item \textbf{Strong Update Rule}: If the incoming taint must-aliases the left side, then apply the normal flow rules just as if the left side was tainted.
+        \item \textbf{Strong Update Rule}: If the incoming taint must-aliases the left side, then apply the Normal Flow rules just as if the left side was tainted.
     \end{itemize}
 
     \subsection{Backwards Clinit Rule}\label{s:clinitrule}
@@ -294,7 +295,7 @@
     \footnotetext{Source: \url{https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-2.html\#jvms-2.9} (visited on 17.04.2021)}
     SPARK, the default call graph algorithm of \textsc{FlowDroid}, overapproximates the \code{<clinit>} behavior.
     It adds an edge to \code{<clinit>} at each statement containing a \code{StaticFieldRef}, \code{StaticInvokeExpr} or \code{NewExpr}\footnotemark{}.
-    \footnote{\url{https://github.com/soot-oss/soot/blob/59931576784b910a7d38f81910b7313aa2feafea/src/main/java/soot/jimple/toolkits/callgraph/OnFlyCallGraphBuilder.java\#L969} (visited on 17.04.2021)}
+    \footnotetext{Source: \url{https://github.com/soot-oss/soot/blob/59931576784b910a7d38f81910b7313aa2feafea/src/main/java/soot/jimple/toolkits/callgraph/OnFlyCallGraphBuilder.java\#L969} (visited on 17.04.2021)}
 
     \begin{figure}[tbp]
         \centering
@@ -344,7 +345,7 @@
     As taints are introduced at sources, if the source statement is inside a static initialization like in \autoref{lst:clinit_examples_a}, the propagation starts inside the \code{<clinit>} method.
     Then unbalanced problem handling of the solver propagates the taint into the callers of \code{ClinitClass1 <clinit>}.
     This behavior allows the forward analysis to detect leaks originating from static variable initializations.
-    Leaks from inside a static blocks as shown in \autoref{lst:clinit_examples_b} can be missed by the forward analysis because it might no call statement with an edge to \code{<clinit>}.
+    Leaks from inside a static blocks as shown in \autoref{lst:clinit_examples_b} can be missed by the forward analysis because it might not see any call statement with an edge to \code{<clinit>}.
     The Clinit Rule could also be ported to the forward analysis but with a larger overapproximation. Unlike backward, there is no guarantee that there will be another edge to \code{<clinit>} if the statement is in the same class as the \code{<clinit>} method. Thus, it would inherit the entire overapproximation from the SPARK call-graph algorithm.
 
 
@@ -479,4 +480,6 @@
     \footnotetext{https://mvnrepository.com/artifact/org.json/json/20210307 (visited 17.04.2021)}
     The library makes use of \code{StringWriter}, which internally uses \code{StringBuffer}. A \code{StringBuffer} has the same chaining in place for the \code{append()} and \code{insert()} methods.
     For the test case shown in \autoref{lst:json}, we observed 58 misses and 0 hits while spending 0.0337 seconds in the preanalysis until the analysis found the first flow.
+
+    Note that this optimization is part of the Backwards Wrapper Rule and, thus, only works with taint wrappers that provide summaries for \code{StringBuilder} and \code{StringBuffer}.
 \end{document}

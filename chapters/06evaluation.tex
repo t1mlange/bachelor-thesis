@@ -564,7 +564,7 @@
     We had many apps with a single-digit analysis time and on the other side, we also found many apps that triggered a timeout or were close to triggering one.
     In between those extrema are only a few apps.
     Recall that we set a soft limit on the runtime at 600 seconds.
-    The reference forward runs have a standard deviation of $209$ seconds and the runs of our implementation has $277$ seconds standard deviation.
+    The reference forward runs have a standard deviation of 209 seconds and the runs of our implementation has 277 seconds standard deviation.
     It is essential to keep this in mind when interpreting the results.
 
     We first begin with an overview of the results.
@@ -696,7 +696,7 @@
                     \input{figs/fw_dataflow-sources.pgf}
                 }
             \end{subfigure}
-            \caption{Source Count}
+            \caption{Forward Analysis Data Flow Time to Source Count}
             \label{f:dfsources}
         \end{subfigure}
         \qquad
@@ -708,7 +708,7 @@
                     \input{figs/bw_dataflow-sinks.pgf}
                 }
             \end{subfigure}
-            \caption{Sink Count}
+            \caption{Backward Analysis Data Flow Time to Sink Count}
             \label{f:dfsinks}
         \end{subfigure}
         \bigbreak
@@ -827,8 +827,9 @@
     Interestingly, all curves have a similar steep curve except for the backward alias analysis, which curve is more shallow.
     This gives a possible explanation linked to the ratio of infoflow and alias edges.
     The alias flow functions are way simpler and, thus, should also cost less to compute.
-    The backward analysis has a ratio biased toward the alias edges, explaining the higher edge count possible in ten minutes.
-    Why the structural break happens could not be conclusively clarified in this work, so it is also hard to finally reason whether this also holds without such a structural break.
+    The backward analysis has a ratio biased toward the alias edges, possibly explaining the higher edge count possible in ten minutes.
+    Why the structural break happens could not be conclusively clarified in this work\footnotemark{}, so it is also hard to finally reason whether this also holds without such a structural break.
+    \footnotetext{If others are interested in finding the cause, \footnotecode{com.Slack} is a good starting point. It has the least edge propagations per ten minutes in our set.}
 
     \begin{figure}[tbp]
         \begin{subfigure}[b]{\textwidth}
@@ -893,6 +894,7 @@
 
     To conclude, our backward analysis is efficient enough to be an alternative to the existing implementation.
     We even found that it performed slightly better on our app set.
+    This also confirmes that the default handling of sources and sinks does not bias the outcome.
     Our evaluation shows that there is no correlation between an apriori known parameter and the runtime of \textsc{FlowDroid} - in both directions.
     Furthermore, we did not find any apriori known parameter to decide the favorable direction either.
     The edge propagations have shown that our implementation can analyze roughly $10^7$ more edges than the existing implementation in ten minutes. 
@@ -924,7 +926,7 @@
         \label{t:memres}
     \end{table}
 
-    \autoref{t:memres} shows an overview of the results from the memory evaluation.
+    \Cref{t:memres} shows an overview of the results from the memory evaluation.
     Note that we only measured the memory usage of the edges in the exploded supergraph and not of the full program.
     Also, unlike the time measurements, the memory consumption is much more distributed across the range.
     The measurements with timeouts show similar values for both directions with a bias toward our implementation.
@@ -932,6 +934,7 @@
     Without timeouts, the gap gets a bit bigger.
     The average maximum memory consumption of our implementation is around $\SI{65}{\mega\byte}$ lower than the existing one. 
     Especially in the 85\textsuperscript{th} percentile, our implementation shines where it needs $\SI{3.3}{\giga\byte}$ less memory.
+    This result is a consequence of the fewer edge propagations in the backward direction as already seen in the time evaluation.
 
     Next, we look at the memory consumption difference per app in \autoref{f:memHist}.
     The x-axis shows the delta maximum memory consumption in megabytes and the y-axis the frequency.

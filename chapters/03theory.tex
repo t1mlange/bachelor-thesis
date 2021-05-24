@@ -39,7 +39,7 @@
     Whenever a taint does not match the left side, we perform the identity as the statement does not touch the tainted variable's contents.
     Later on, when we consider aliasing, there is one special case inside the default case.
     If the tainted variable is on the right side, an additional alias query is needed.
-    We reference this case in \autoref{s:aliasing} as special default case.
+    We reference this case in \autoref{s:aliasing}.
 
     \subsection{Call Flow}
     The Call Flow function and subsequently Return and Call To Return Flow function apply whenever a statement contains an \code{InvokeExpr}.
@@ -66,7 +66,7 @@
     On the left, we use the built-in String type.
     In line 2, \code{str} is copied into \code{callee}.
     After this statement, both \code{str} hold the value \code{42} but point to another memory location\footnotemark{}.
-    \footnote{%
+    \footnotetext{%
         The JVM might only set a copy-on-write flag on \footnotecode{str} in \footnotecode{callee} and point it to the identical location as \footnotecode{str} in \footnotecode{main} to save memory.
         At least right before the update happens, it is guaranteed that the variable points to a different location.
     }
@@ -138,12 +138,12 @@
 
     In Jimple, \code{AssignStmt}s can also consist of an \code{InvokeExpr} on the right side.
     The structure of the statement is in this case $x \leftarrow o.m(a_0,...,a_n)$. $r_i$ denotes a return value.
-    $m$ is the number of return statements in the callee.
+    $n_r$ is the number of return statements in the callee.
     If we observe such a statement and the left side is tainted, we need to map the left-hand side of the \code{AssignStmt} back into the callee.
     Now, methods can have multiple return statements and as we traverse the reversed interprocedural control-flow graph, there are multiple outgoing edges.
     We can not reason which return statement is the right one, so we need to taint every return statement's operand in the callee.
     \begin{itemize}
-        \item[] \textbf{Rule 6:} An incoming taint $T = x.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{r_i.h^k \mid 0 \leq i < m \right\}$.
+        \item[] \textbf{Rule 6:} An incoming taint $T = x.h^k$ with $k \geq 0$ produces the outflowing taint set $\left\{r_i.h^k \mid 0 \leq i < n_r \right\}$.
     \end{itemize}
 
     Unlike at normal flows, we kill all taints not matching any of the rules.
@@ -170,7 +170,7 @@
         \item[] \textbf{Rule 3:} An incoming taint $T = \mathit{this}_c.*$ with $k \geq 0$ produces the outflowing taint set $\{o.*\}$.
     \end{itemize}
 
-    Tainted static fields are also mapped back. As already written in the corresponding rule 5 of Call flow, the taints is untouched.
+    Tainted static fields are also mapped back. As already written in the corresponding rule 5 of Call flow, the taint is untouched.
     \begin{itemize}
         \item[] \textbf{Rule 4:} An incoming taint $T = S.h^k$ with $k \geq 0$ produces the outflowing taint set $\{T\}$.
     \end{itemize}
