@@ -391,9 +391,11 @@
     We compare both taint wrappers in \autoref{s:droidbenchevaluation}.
 
     \subsection{Native Call Handler}
-    The native call handler of \textsc{FlowDroid} handles two methods: \code{System#arraycopy} and \code{reflect.Array#newArray}.
-    The handling of \code{System#arraycopy} is direction-dependent.
-    Thus, we adapted the existing implementation and reversed the logic of \code{System#arraycopy} to reflect the analysis direction.
+    \begin{sloppypar}
+        The native call handler of \textsc{FlowDroid} handles two methods: \code{System#arraycopy} and \code{reflect.Array#newArray}.
+        The handling of \code{System#arraycopy} is direction-dependent.
+        Thus, we adapted the existing implementation and reversed the logic of \code{System#arraycopy} to reflect the analysis direction.
+    \end{sloppypar}
 
     \subsection{Code Optimizer: AddNOPStmts}
     Before starting the analysis, \textsc{FlowDroid} applies code optimization to the interprocedural call graph.

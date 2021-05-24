@@ -82,6 +82,21 @@
         SimpleAliasing1 & \tp & \tp\\
         StrongUpdate1 & &\\
         \hline
+        \tsub{Android-Specific}
+        ApplicationModeling1 & \tp & \tp\\
+        DirectLeak1 & \tp & \tp\\
+        InactiveActivity &  & \\
+        Library2 & \tp & \tp\\
+        LogNoLeak & & \\
+        Obfuscation1 & \tp & \tp\\
+        Parcel1 & \tp & \tp\\
+        PrivateDataLeak1 & \tp & \tp\\
+        PrivateDataLeak2 & \tp & \tp\\
+        PrivateDataLeak3 & \tp \fn & \tp \fn\\
+        PublicAPIField1 & \tp & \tp\\
+        PublicAPIField2 & \tp & \tp\\
+        View1 & \tp & \tp\\
+        \hline
         \tsub{Arrays and Lists}
         ArrayAccess1 & \fp & \fp\\
         ArrayAccess2 & \fp & \fp\\
@@ -137,32 +152,6 @@
         ObjectSensitivity1 & & \\
         ObjectSensitivity2 & & \\
         \hline
-        \tsub{Lifecycle}
-        ActivityEventSequence1 & \tp & \tp\\
-        ActivityEventSequence2 & \fn & \fn\\
-        ActivityEventSequence3 & \fn & \fn\\
-        ActivityLifecycle1 & \tp & \tp\\
-        ActivityLifecycle2 & \tp & \tp\\
-        ActivityLifecycle3 & \tp & \tp\\
-        ActivityLifecycle4 & \tp & \tp\\
-        ActivitySavedState1 & \tp & \tp\\
-        ApplicationLifecycle1 & \tp & \tp\\
-        ApplicationLifecycle2 & \tp & \tp\\
-        ApplicationLifecycle3 & \tp & \tp\\
-        AsynchronousEventOrdering1 & \tp & \tp\\
-        BroadcastReceiverLifecycle1 & \tp & \tp\\
-        BroadcastReceiverLifecycle2 & \tp \fp & \tp \fp\\
-        BroadcastReceiverLifecycle3 & \tp & \tp\\
-        EventOrdering1 & \tp & \tp\\
-        FragmentLifecycle1 & \tp & \tp\\
-        FragmentLifecycle2 & \fn & \fn\\
-        ServiceEventSequence1 & \fn & \fn\\
-        ServiceEventSequence2 & \fn & \fn\\
-        ServiceEventSequence3 & \fn & \fn\\
-        ServiceLifecycle1 & \tp & \tp\\
-        ServiceLifecycle2 & \tp & \tp\\
-        SharedPreferenceChanged1 & \tp \fp & \tp \fp\\
-        \hline
         \tsub{General Java}
         Clone1 & \tp & \tp\\
         Exceptions1 & \tp & \tp \\
@@ -198,20 +187,31 @@
         ImplicitFlow4 & \fn & \fn\\
         ImplicitFlow5 & & \\
         \hline
-        \tsub{Miscellaneous Android-Specific}
-        ApplicationModeling1 & \tp & \tp\\
-        DirectLeak1 & \tp & \tp\\
-        InactiveActivity &  & \\
-        Library2 & \tp & \tp\\
-        LogNoLeak & & \\
-        Obfuscation1 & \tp & \tp\\
-        Parcel1 & \tp & \tp\\
-        PrivateDataLeak1 & \tp & \tp\\
-        PrivateDataLeak2 & \tp & \tp\\
-        PrivateDataLeak3 & \tp \fn & \tp \fn\\
-        PublicAPIField1 & \tp & \tp\\
-        PublicAPIField2 & \tp & \tp\\
-        View1 & \tp & \tp\\
+        \tsub{Lifecycle}
+        ActivityEventSequence1 & \tp & \tp\\
+        ActivityEventSequence2 & \fn & \fn\\
+        ActivityEventSequence3 & \fn & \fn\\
+        ActivityLifecycle1 & \tp & \tp\\
+        ActivityLifecycle2 & \tp & \tp\\
+        ActivityLifecycle3 & \tp & \tp\\
+        ActivityLifecycle4 & \tp & \tp\\
+        ActivitySavedState1 & \tp & \tp\\
+        ApplicationLifecycle1 & \tp & \tp\\
+        ApplicationLifecycle2 & \tp & \tp\\
+        ApplicationLifecycle3 & \tp & \tp\\
+        AsynchronousEventOrdering1 & \tp & \tp\\
+        BroadcastReceiverLifecycle1 & \tp & \tp\\
+        BroadcastReceiverLifecycle2 & \tp \fp & \tp \fp\\
+        BroadcastReceiverLifecycle3 & \tp & \tp\\
+        EventOrdering1 & \tp & \tp\\
+        FragmentLifecycle1 & \tp & \tp\\
+        FragmentLifecycle2 & \fn & \fn\\
+        ServiceEventSequence1 & \fn & \fn\\
+        ServiceEventSequence2 & \fn & \fn\\
+        ServiceEventSequence3 & \fn & \fn\\
+        ServiceLifecycle1 & \tp & \tp\\
+        ServiceLifecycle2 & \tp & \tp\\
+        SharedPreferenceChanged1 & \tp \fp & \tp \fp\\
         \hline
         \tsub{Reflection}
         Reflection1 & \tp & \tp\\
